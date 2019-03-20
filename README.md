@@ -11,8 +11,13 @@ Scaffold is a Selenium WebDriver abstraction built in Java 11 with Spring Boot 2
 * Configures Junit Jupiter's parallel testing when running the testing through an automated framework like Sauce or Grid
 * Provides all dependencies to implementing projects
 
+# Current Version
+1.0.0-beta
+
 # Links
-- [GitHub Project](https://github.com/RetailMeNot/scaffold)
+- [Contributing Guide](https://github.com/RetailMeNot/scaffold/blob/master/CONTRIBUTING.md)
+- [Code of Conduct](https://github.com/RetailMeNot/scaffold/blob/master/CODE_OF_CONDUCT.md)
+- [License](https://github.com/RetailMeNot/scaffold/blob/master/LICENSE.txt)
     
 # Required Tools for Dev
 * Java 11
