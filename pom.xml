@@ -18,21 +18,22 @@
         <java.version>11</java.version>
 
         <!--Spring-->
-        <org.springframework.version>5.1.2.RELEASE</org.springframework.version>
-        <org.springframework.boot.version>2.1.0.RELEASE</org.springframework.boot.version>
+        <org.springframework.boot.version>2.1.3.RELEASE</org.springframework.boot.version>
 
         <!--Core Requirements-->
-        <com.jackson.version>2.9.7</com.jackson.version>
+        <com.jackson.version>2.9.8</com.jackson.version>
         <org.apache.httpclient.version>4.5.6</org.apache.httpclient.version>
+        <org.apache.commons.lang3.version>3.8.1</org.apache.commons.lang3.version>
 
         <!--Selenium and Testing related-->
-        <org.selenium-java.version>3.14.0</org.selenium-java.version>
-        <org.junit.jupiter.api.version>5.3.1</org.junit.jupiter.api.version>
-        <org.junit.jupiter.platform.version>1.3.1</org.junit.jupiter.platform.version>
+        <org.selenium-java.version>3.141.59</org.selenium-java.version>
+        <org.junit.jupiter.api.version>5.4.1</org.junit.jupiter.api.version>
+        <org.junit.jupiter.platform.version>1.4.1</org.junit.jupiter.platform.version>
+        <org.junit.platform.surefire-provider.version>1.3.2</org.junit.platform.surefire-provider.version>
 
         <!--Plugins-->
         <org.apache.maven-scm-plugin.version>1.11.1</org.apache.maven-scm-plugin.version>
-        <org.apache.maven-surefire-plugin.version>2.22.0</org.apache.maven-surefire-plugin.version>
+        <org.apache.maven-surefire-plugin.version>2.22.1</org.apache.maven-surefire-plugin.version>
         <org.apache.maven-compiler-plugin.veresion>3.8.0</org.apache.maven-compiler-plugin.veresion>
     </properties>
 
@@ -211,6 +212,12 @@
             </dependency>
 
             <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${org.apache.commons.lang3.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>javax.validation</groupId>
                 <artifactId>validation-api</artifactId>
                 <version>2.0.1.Final</version>
@@ -268,7 +275,7 @@
             <dependency>
                 <groupId>org.junit.platform</groupId>
                 <artifactId>junit-platform-surefire-provider</artifactId>
-                <version>${org.junit.jupiter.platform.version}</version>
+                <version>${org.junit.platform.surefire-provider.version}</version>
             </dependency>
 
             <dependency>
