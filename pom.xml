@@ -5,7 +5,7 @@
     <description>A Simple Java Selenium Framework</description>
     <groupId>com.retailmenot.scaffold</groupId>
     <artifactId>scaffold</artifactId>
-    <version>1.1.0-beta-SNAPSHOT</version>
+    <version>1.0.0-beta</version>
     <modules>
         <module>environment</module>
         <module>framework</module>
@@ -70,26 +70,15 @@
     </scm>
 
     <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
         <repository>
-            <id>RetailMeNot</id>
-            <url>https://github.com/RetailMeNot/scaffold</url>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
-
-
-    <repositories>
-        <repository>
-            <id>spring-releases</id>
-            <url>https://repo.spring.io/libs-release</url>
-        </repository>
-    </repositories>
-
-    <pluginRepositories>
-        <pluginRepository>
-            <id>spring-releases</id>
-            <url>https://repo.spring.io/libs-release</url>
-        </pluginRepository>
-    </pluginRepositories>
 
     <dependencyManagement>
         <dependencies>
