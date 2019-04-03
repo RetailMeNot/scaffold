@@ -7,7 +7,7 @@ public interface DisplayWaitCondition {
     /**
      * Waits for the custom condition set here before proceeding
      *
-     * @param driver
+     * @param driver the instance of the {@link WebDriverWrapper}
      */
     void waitUntilLoaded(WebDriverWrapper driver);
 }

@@ -3,10 +3,11 @@
     <parent>
         <artifactId>scaffold</artifactId>
         <groupId>com.retailmenot.scaffold</groupId>
-        <version>1.1.0-beta-SNAPSHOT</version>
+        <version>1.0.0-beta</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <description>Environment components for Scaffold</description>
     <artifactId>environment</artifactId>
 
     <dependencies>
@@ -36,4 +37,17 @@
             <artifactId>httpclient</artifactId>
         </dependency>
     </dependencies>
+
+    <scm>
+        <connection>${parent.scm.connection}</connection>
+        <developerConnection>${parent.scm.developerConnection}</developerConnection>
+    </scm>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-scm-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 </project>

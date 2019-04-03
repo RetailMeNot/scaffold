@@ -18,10 +18,10 @@ import org.springframework.web.client.RestTemplate;
  * <p>
  * The project specific BaseTest file should include the following annotations at the class level:
  *
- * @Execution(ExecutionMode.CONCURRENT)
- * @ExtendWith(SpringExtension.class)
- * @SpringBootTest( webEnvironment = SpringBootTest.WebEnvironment.NONE,
- * classes = { YourProjectConfiguration.class, ScaffoldConfig.class })
+ * {@literal @Execution(ExecutionMode.CONCURRENT)}
+ * {@literal @ExtendWith(SpringExtension.class)}
+ * {@literal @SpringBootTest( webEnvironment = SpringBootTest.WebEnvironment.NONE,}
+ * {@literal classes = { YourProjectConfiguration.class, ScaffoldConfig.class })}
  * <p>
  * Execution is required for parallel testing.
  * ExtendWith is required for running the testing with Junit5

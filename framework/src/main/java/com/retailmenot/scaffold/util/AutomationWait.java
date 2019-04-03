@@ -32,6 +32,9 @@ public class AutomationWait {
     /**
      * Uses {@link #setCustomTimeout(Long, boolean)} to set a custom timeout with the @param useCustomTimeoutIndefinitely
      * set to false.
+     *
+     * @param timeoutInSeconds the time to set in seconds
+     * @return as an {@link AutomationWait}
      */
     public AutomationWait setCustomTimeout(Long timeoutInSeconds) {
         setCustomTimeout(timeoutInSeconds, false);
@@ -40,6 +43,9 @@ public class AutomationWait {
 
     /**
      * Sets the custom timeout with user specified parameters of the timeout, in seconds, and indefinite timeout.
+     *
+     * @param timeoutInSeconds the time to set in seconds
+     * @param useCustomTimeoutIndefinitely a boolean for setting indefinite timeout
      */
     public void setCustomTimeout(Long timeoutInSeconds, boolean useCustomTimeoutIndefinitely) {
         customTimeout = timeoutInSeconds;
@@ -49,6 +55,10 @@ public class AutomationWait {
     /**
      * First get the default wait, represented by {@link WebDriverWait}, and wait until the expected condition is met before
      * proceeding.
+     *
+     * @param expectedCondition the expected condition to wait for
+     * @param <T> the type reference
+     * @return the custom wait condition as the Type Reference T
      */
     public <T> T waitForCustomCondition(ExpectedCondition<T> expectedCondition) {
         return getDefaultWait().until(expectedCondition);
@@ -60,6 +70,9 @@ public class AutomationWait {
      *
      * First, ensure the driver is not null. Then, find the element on the page using {@link By}. Ensure the element
      * found contains the text expected.
+     *
+     * @param by the method in which the text is being located
+     * @param text the text to wait for
      */
     public void waitForTextPresent(By by, String text) {
         waitForCustomCondition(driver -> {
