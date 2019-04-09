@@ -102,33 +102,17 @@ public abstract class AbstractWebElement implements BaseWebElement {
         return webElementWait;
     }
 
-    /**
-     * @param name
-     * @return
-     * @see WebElement#getAttribute(String)
-     */
     @Override
     public String getAttribute(String name) {
         return getWebElement().getAttribute(name);
     }
 
-    /**
-     * Checks for null, then determines whether the element is enabled on the page or not (if the element is null, it's considered "disabled", and will
-     * return false, rather than just throw an exception
-     *
-     * @return
-     */
     @Override
     public boolean isEnabled() {
         var element = this.getWebElement(false);
         return element != null && element.isEnabled();
     }
 
-    /**
-     * Indicates whether or not an element is displayed. This method will swallow a NoSuchElementException and return false if the element doesn't exist
-     *
-     * @return
-     */
     @Override
     public boolean isDisplayed() {
         try {
@@ -140,10 +124,6 @@ public abstract class AbstractWebElement implements BaseWebElement {
         }
     }
 
-    /**
-     * @return A Dimension object
-     * @see WebElement#getSize()
-     */
     @Override
     public Dimension getSize() {
         return getWebElement().getSize();
@@ -175,15 +155,12 @@ public abstract class AbstractWebElement implements BaseWebElement {
         return toString.isEmpty() ? "This element was not properly initialized with a By locator or a base element. Please check your code" : toString;
     }
 
-    /**
-     * @return
-     * @see WebElement#getText()
-     */
     @Override
     public String getText() {
         return this.getWebElement().getText();
     }
 
+    @Override
     public <T extends AbstractWebElement> T findElement(Class<T> elementClass, By by) {
         By combinedBy = null;
         var parentBy = getBy();
@@ -209,6 +186,7 @@ public abstract class AbstractWebElement implements BaseWebElement {
         return returnElement;
     }
 
+    @Override
     public <T extends AbstractWebElement> List<T> findElements(Class<T> elementClass, By by) {
         By parentBy = getBy();
         List<WebElement> elements;
@@ -232,33 +210,16 @@ public abstract class AbstractWebElement implements BaseWebElement {
         return newElements;
     }
 
-    /**
-     * Returns the By locator for this webelement. This will not work when the element was initialized by supplying a Selenium webelement in the constructor
-     *
-     * @return The locator used by this element
-     */
     @Override
     public By getBy() {
         return this.by;
     }
 
-    /**
-     * Retrieves the backing element instance.
-     *
-     * @return The backing element.
-     */
     @Override
     public WebElement getBackingElement() {
         return backingElement;
     }
 
-    /**
-     * You can set this, but you'll never get it back with an accessor. This gives you the ability to base a Rich webelement on an existing webelement, but you get no
-     * locator information, no parent element, etc., and this could lead to trouble. It's intended for when you can't get that other information, you only
-     * have a webelement and you want to give it a particular type (LinkWebElement, etc)
-     *
-     * @param baseElement
-     */
     @Override
     public void setBaseElement(WebElement baseElement) {
         if (this.by != null) {
@@ -267,23 +228,12 @@ public abstract class AbstractWebElement implements BaseWebElement {
         this.baseElement = baseElement;
     }
 
-    /**
-     * Returns true if the element exists in the DOM, false otherwise (irrespective of whether or not it's displayed)
-     *
-     * @return
-     */
     @Override
     public boolean exists() {
         var element = getWebElement(false);
         return element != null;
     }
 
-    /**
-     * Returns the underlying webelement.  If an raw underlying webelement exists rather than a By locator,
-     * that is what will be returned instead of a "fresh" lookup
-     *
-     * @return
-     */
     @Override
     public WebElement getWebElement() {
         // Wait for the element to be displayed if configured
@@ -293,10 +243,6 @@ public abstract class AbstractWebElement implements BaseWebElement {
         return getWebElement(true);
     }
 
-    /**
-     * Forces WebDriver to scroll the webelement into view so that it can be clicked without
-     * running into a ElementNotVisibleException:
-     */
     @Override
     public void scrollIntoView() {
         try {
@@ -306,21 +252,11 @@ public abstract class AbstractWebElement implements BaseWebElement {
         }
     }
 
-    /**
-     * Set the By locator used to identify the parent element
-     *
-     * @param parentBy
-     */
     @Override
     public void setParentBy(By parentBy) {
         this.parentBy = parentBy;
     }
 
-    /**
-     * Set the parent element
-     *
-     * @param parentElement
-     */
     @Override
     public void setParentElement(WebElement parentElement) {
         if (parentElement != null) {
@@ -328,29 +264,16 @@ public abstract class AbstractWebElement implements BaseWebElement {
         }
     }
 
-    /**
-     * @return
-     * @see WebElement#getTagName()
-     */
     @Override
     public String getTagName() {
         return getWebElement().getTagName();
     }
 
-    /**
-     * @return A Point object
-     * @see WebElement#getLocation()
-     */
     @Override
     public Point getLocation() {
         return getWebElement().getLocation();
     }
 
-    /**
-     * @param propertyName The name of the CSS property you need to look up
-     * @return The CSS Value for the indicated property
-     * @see WebElement#getCssValue(String)
-     */
     @Override
     public String getCssValue(String propertyName) {
         return getWebElement().getCssValue(propertyName);
@@ -359,7 +282,8 @@ public abstract class AbstractWebElement implements BaseWebElement {
     /**
      * If the element was defined with a baseElement, return it--though there's a risk it could be "stale"
      *
-     * @return
+     * @param throwExceptionIfNotFound a boolean value for throwing an exception
+     * @return the {@link WebElement}
      */
     protected WebElement getWebElement(boolean throwExceptionIfNotFound) {
         try {
@@ -384,8 +308,8 @@ public abstract class AbstractWebElement implements BaseWebElement {
     /**
      * Returns the underlying locator used to locate this element on the page
      *
-     * @param by
-     * @return
+     * @param by the method in which the element is being located
+     * @return the locator as a {@link String}
      */
     protected String getUnderlyingLocator(By by) {
         var string = by.toString();
@@ -396,9 +320,9 @@ public abstract class AbstractWebElement implements BaseWebElement {
     /**
      * Returns the "full" By locator used for this element. If the element has a "parent" defined, it will return the locator used
      *
-     * @param parentBy
-     * @param childBy
-     * @return
+     * @param parentBy the method in which the parent element is being located
+     * @param childBy the method in which the child element is being located
+     * @return the locator as a {@link By}
      */
     protected By getCombinedByLocator(By parentBy, By childBy) {
         if (!(parentBy instanceof By.ByCssSelector) || !(childBy instanceof By.ByCssSelector)) {
@@ -411,7 +335,7 @@ public abstract class AbstractWebElement implements BaseWebElement {
     /**
      * Returns null if there is no parent element or parent By defined
      *
-     * @return
+     * @return the parent element as {@link WebElement}
      */
     protected WebElement getParentElement() {
         if (null != parentBy) {
@@ -423,7 +347,7 @@ public abstract class AbstractWebElement implements BaseWebElement {
     /**
      * Get the By locator used to identify the parent element
      *
-     * @return
+     * @return the parent element as a {@link By}
      */
     public By getParentBy() {
         return parentBy;
@@ -432,7 +356,7 @@ public abstract class AbstractWebElement implements BaseWebElement {
     /**
      * Returns true if a parent element has been defined, and is not null
      *
-     * @return
+     * @return the result of the parent element as true or false
      */
     private boolean hasParentElement() {
         //If the parentElement is null, this element has no parent element, so return false

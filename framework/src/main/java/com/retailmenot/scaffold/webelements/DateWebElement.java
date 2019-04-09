@@ -53,6 +53,7 @@ public class DateWebElement extends AbstractWebElement {
      * Sets a DateFormat which will be used by this DateWebElement only.
      *
      * @param dateFormat the {@link DateFormat} to use
+     * @return the date as {@link DateWebElement}
      */
     public DateWebElement setDateFormat(DateFormat dateFormat) {
         this.localDateFormat = dateFormat;

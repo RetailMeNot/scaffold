@@ -51,6 +51,8 @@ public class BaseTestContext {
      * Returns the setting for the specified key.
      *
      * @param key the key to return
+     * @param clazz the Class of the Type Reference that the setting is being pulled from
+     * @param <S> the type reference
      * @return the setting as provided by the Type Reference
      */
     public <S> S getSetting(Class<S> clazz, String key) {
@@ -106,6 +108,9 @@ public class BaseTestContext {
 
     /**
      * Adds the specified driver to the webdrivercontext.
+     *
+     * @param webDriverManager the {@link WebDriverManager} that is being set
+     * @param testName the test name that is being set
      */
     public void setContext(WebDriverManager webDriverManager, String testName) {
         // We want to make sure the caller is removing this before trying to add a new one so that we do not have leftover windows

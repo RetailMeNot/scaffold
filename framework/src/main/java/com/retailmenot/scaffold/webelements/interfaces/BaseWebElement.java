@@ -44,6 +44,8 @@ public interface BaseWebElement {
     /**
      * Returns the text of the element.
      *
+     * @see WebElement#getText()
+     *
      * @return the text as {@link String}.
      */
     String getText();
@@ -57,19 +59,21 @@ public interface BaseWebElement {
      *
      * @param elementClass the class of the element that is being found
      * @param by the mechanism of searching for the element
+     * @param <T> The type reference that extends off of {@link AbstractWebElement}
      * @return the element as the specified Type Reference {@link AbstractWebElement}
      */
     <T extends AbstractWebElement> T findElement(Class<T> elementClass, By by);
 
     /**
      * Finds a list of elements of the given class, using the current webelement as the "anchor" point. Similar to the Selenium webelement.findElements() method,
-     * this allows you to ask for a List<LinkWebElement> or List<ButtonWebElement> based on the same criteria.
+     * this allows you to ask for a {@literal List<LinkWebElement>} or {@literal List<ButtonWebElement>} based on the same criteria.
      *
      * Note that this method has the advantage of only calling Selenium's findElements() method ONE time, even if there's a parent element--normally you'd call parent.findElement(), then
      * child.findElement(), resulting in multiple calls to WebDriver. This will consolidate all locators into one
      *
      * @param elementClass the class of the element that is being found
      * @param by the mechanism of searching for the element
+     * @param <T> the type reference that extends {@link AbstractWebElement}
      * @return the list of elements as the specified Type Reference {@link AbstractWebElement}
      */
     <T extends AbstractWebElement> List<T> findElements(Class<T> elementClass, By by);
@@ -85,6 +89,8 @@ public interface BaseWebElement {
     /**
      * Returns the specified attribute of the element.
      *
+     * @see WebElement#getAttribute(String)
+     *
      * @param attribute the attribute to search for.
      * @return the attribute as {@link String}.
      */
@@ -92,6 +98,8 @@ public interface BaseWebElement {
 
     /**
      * Returns the Dimension object for this element.
+     *
+     * @see WebElement#getSize()
      *
      * @return the size as {@link Dimension}.
      */

@@ -14,6 +14,26 @@ Scaffold is a Selenium WebDriver abstraction built in Java 11 with Spring Boot 2
 # Current Version
 1.0.0-beta
 
+```
+<dependency>
+  <groupId>com.retailmenot.scaffold</groupId>
+  <artifactId>scaffold</artifactId>
+  <version>1.0.0-beta</version>
+</dependency>
+
+<dependency>
+  <groupId>com.retailmenot.scaffold</groupId>
+  <artifactId>framework</artifactId>
+  <version>1.0.0-beta</version>
+</dependency>
+
+<dependency>
+  <groupId>com.retailmenot.scaffold</groupId>
+  <artifactId>environment</artifactId>
+  <version>1.0.0-beta</version>
+</dependency>
+```
+
 # Links
 - [Contributing Guide](https://github.com/RetailMeNot/scaffold/blob/master/CONTRIBUTING.md)
 - [Code of Conduct](https://github.com/RetailMeNot/scaffold/blob/master/CODE_OF_CONDUCT.md)

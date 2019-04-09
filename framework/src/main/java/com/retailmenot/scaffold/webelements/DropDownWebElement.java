@@ -60,7 +60,7 @@ public class DropDownWebElement extends AbstractWebElement {
     }
 
     /**
-     * Sets the drop-down to the value contained in the visible of the <option> tag. If @value is blank, it will just
+     * Sets the drop-down to the value contained in the visible of the {@literal <option>} tag. If @value is blank, it will just
      * leave the field alone--If someone is doing data-driven tests that contain many variables, we don't want to require
      * them to surround every instance of this method with the same if block.
      *

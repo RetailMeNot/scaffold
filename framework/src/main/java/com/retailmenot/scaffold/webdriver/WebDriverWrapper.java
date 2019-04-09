@@ -133,7 +133,9 @@ public class WebDriverWrapper {
      *
      * @param elementClass The class of the element that is being found
      * @param by           the means in which the element is being found using {@link By}
+     * @param elementInterface the interface of the element
      * @param <T>          the reference to the {@link AbstractWebElement}
+     * @param <I>          the reference to the {@link AbstractWebElement}
      * @return the elements as a {@link List} of {@link WebElement}
      */
     public <T extends AbstractWebElement, I extends BaseWebElement> List<I> findElements(Class<T> elementClass, Class<I> elementInterface, By by) {
@@ -230,7 +232,7 @@ public class WebDriverWrapper {
      *
      * @param cookieName the name of the cookie
      * @return as a {@link Cookie}
-     * @throws WebDriverWrapperException
+     * @throws WebDriverWrapperException the exception to throw if the cookie cannot be found
      */
     public Cookie getCookie(String cookieName)
             throws WebDriverWrapperException {
@@ -393,6 +395,8 @@ public class WebDriverWrapper {
 
     /**
      * Returns the Selenium timeout for this WebDriver instance
+     *
+     * @return the {@link #seleniumObjectTimeout}
      */
     public long getSeleniumObjectTimeout() {
         return seleniumObjectTimeout;
@@ -400,6 +404,8 @@ public class WebDriverWrapper {
 
     /**
      * Sets the Selenium timeout for this WebDriver instance
+     *
+     * @param seleniumObjectTimeout the amount of time to set the selenium object timeout
      */
     public void setSeleniumObjectTimeout(long seleniumObjectTimeout) {
         this.seleniumObjectTimeout = seleniumObjectTimeout;
@@ -441,6 +447,8 @@ public class WebDriverWrapper {
 
     /**
      * Returns the registered windows
+     *
+     * @return the {@link #registeredWindows}
      */
     public LinkedList<String> getRegisteredWindows() {
         return registeredWindows;
