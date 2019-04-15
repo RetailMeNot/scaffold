@@ -1,12 +1,19 @@
 package com.retailmenot.scaffold.models.unittests;
 
-import org.openqa.selenium.*;
+import lombok.extern.slf4j.Slf4j;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class MockWebDriver implements WebDriver, JavascriptExecutor {
+@Slf4j
+public class MockWebDriver extends RemoteWebDriver implements WebDriver, JavascriptExecutor {
 
     private WebElement elementToFind;
     private List<WebElement> elementsToFind;

@@ -80,6 +80,6 @@ public class MockOptions implements Options {
     @Override
     @Beta
     public Logs logs() {
-        return null;
+        return new MockLogs();
     }
 }

@@ -1,6 +1,8 @@
 package com.retailmenot.scaffold.webelement;
 
 import com.retailmenot.scaffold.BaseUnitTest;
+import com.retailmenot.scaffold.models.unittests.MockLogs;
+import com.retailmenot.scaffold.models.unittests.MockWebDriver;
 import com.retailmenot.scaffold.models.unittests.MockWebElement;
 import com.retailmenot.scaffold.util.AutomationUtils;
 import com.retailmenot.scaffold.webelements.DivWebElement;
@@ -8,6 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.logging.LogEntry;
+import org.openqa.selenium.logging.LogType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -136,6 +140,23 @@ public class AbstractWebElementTests extends BaseUnitTest {
     @Test
     public void testExistsFalse() {
         assertFalse("The element should not exist", testAbstractWebElement.exists());
+    }
+
+    /**
+     * Test the mock log error created from {@link MockLogs}
+     *
+     * This test does not utilized the retrieval of logs from the {@link MockWebDriver} and instead tests only the creation
+     * and usage of an independent {@link MockLogs} object.
+     */
+    @Test
+    public void testGetErrorLog() {
+        // Get the entries and ensure they are correct
+        var mockBrowserLogs = mockLogs.get(LogType.BROWSER);
+        for (LogEntry entry : mockBrowserLogs) {
+            assertEquals(LOG_LEVEL, entry.getLevel());
+            assertEquals(TIME_STAMP, entry.getTimestamp());
+            assertEquals(MESSAGE, entry.getMessage());
+        }
     }
 
     @Test

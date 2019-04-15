@@ -5,20 +5,23 @@ import com.retailmenot.scaffold.webdriver.WebDriverWrapper;
 import com.retailmenot.scaffold.webdriver.interfaces.TestContextSetting;
 import com.retailmenot.scaffold.webelements.interfaces.BaseWebElement;
 import lombok.extern.slf4j.Slf4j;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Dimension;
-import org.openqa.selenium.WebDriverException;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.Point;
-import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.*;
+import org.openqa.selenium.logging.LogEntries;
+import org.openqa.selenium.logging.LogEntry;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+
 
 /**
  * This will serve as the "base" web element for everything you want to do on a page.
+ *
+ * TODO This class uses the {@link BaseWebElement} interface which is supposed to be a clone of {@link WebElement} but
+ *   using our strongly typed elements. We are missing some functionality provided by {@link WebElement} and should update
+ *   this class and interface accordingly. The ticket to represent this work can be found here: https://github.com/RetailMeNot/scaffold/issues/16
  */
 @Slf4j
 public abstract class AbstractWebElement implements BaseWebElement {
@@ -161,6 +164,8 @@ public abstract class AbstractWebElement implements BaseWebElement {
     }
 
     @Override
+    // TODO this is duplicate from WebDriverWrapper. Can we just provide the wrapper instead of re-writing? Or, should
+    //   we move finding elements to this class?
     public <T extends AbstractWebElement> T findElement(Class<T> elementClass, By by) {
         By combinedBy = null;
         var parentBy = getBy();
@@ -187,6 +192,8 @@ public abstract class AbstractWebElement implements BaseWebElement {
     }
 
     @Override
+    // TODO this is duplicate from WebDriverWrapper. Can we just provide the wrapper instead of re-writing? Or, should
+    //   we move finding elements to this class?
     public <T extends AbstractWebElement> List<T> findElements(Class<T> elementClass, By by) {
         By parentBy = getBy();
         List<WebElement> elements;
@@ -298,6 +305,17 @@ public abstract class AbstractWebElement implements BaseWebElement {
             log.debug("Locating element on page: [%s]", by);
             return getWebDriverWrapper().findElement(by);
         } catch (NoSuchElementException e) {
+            // Try to pull the console error logs and report them. If none exist, add a debug log that none exist
+            try {
+                LogEntries logEntries = getWebDriverWrapper().manage().logs().get("browser");
+
+                for (LogEntry entry : logEntries) {
+                    log.error(new Date(entry.getTimestamp()) + " " + entry.getLevel() + " " + entry.getMessage());
+                }
+            } catch (NullPointerException n) {
+                log.debug("No Errors reported in Console Logs during failure.");
+            }
+
             if (throwExceptionIfNotFound) {
                 throw e;
             }

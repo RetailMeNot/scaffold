@@ -6,7 +6,7 @@
     <url>https://github.com/RetailMeNot/scaffold</url>
     <groupId>com.retailmenot.scaffold</groupId>
     <artifactId>scaffold</artifactId>
-    <version>1.0.0-beta</version>
+    <version>1.1.0-beta-SNAPSHOT</version>
     <modules>
         <module>environment</module>
         <module>framework</module>

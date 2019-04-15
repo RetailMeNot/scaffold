@@ -1,7 +1,8 @@
 package com.retailmenot.scaffold;
 
-import com.retailmenot.scaffold.environment.config.ScaffoldConfiguration;
 import com.retailmenot.scaffold.environment.config.DesiredCapabilitiesConfigurationProperties;
+import com.retailmenot.scaffold.environment.config.ScaffoldConfiguration;
+import com.retailmenot.scaffold.models.unittests.MockLogs;
 import com.retailmenot.scaffold.models.unittests.MockWebDriver;
 import com.retailmenot.scaffold.models.unittests.MockWebElement;
 import com.retailmenot.scaffold.webdriver.TestContext;
@@ -16,10 +17,16 @@ import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.logging.LogEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.logging.Level;
 
 import static com.retailmenot.scaffold.util.AutomationUtils.getUniqueString;
 
@@ -36,6 +43,9 @@ public abstract class BaseUnitTest {
     protected static final String TAG_NAME_2 = "test element 2";
     protected static final String TEXT_NAME_1 = "element 1";
     protected static final String TEXT_NAME_2 = "element 2";
+    protected static final Level LOG_LEVEL = Level.SEVERE;
+    protected static final long TIME_STAMP = new Date().getTime();
+    protected static final String MESSAGE = "Mock Log Entry";
     private static String MOCK_UNIT_TEST;
 
     protected WebDriverManager webDriverContextImpl;
@@ -44,6 +54,7 @@ public abstract class BaseUnitTest {
     protected TestableAbstractWebElement testAbstractWebElement;
     protected MockWebElement mockElement1;
     protected MockWebElement mockElement2;
+    protected MockLogs mockLogs = new MockLogs();
 
     @Autowired
     protected RestTemplate seleniumGridRestTemplate;
@@ -95,6 +106,11 @@ public abstract class BaseUnitTest {
         mockElement2 = new MockWebElement()
                 .text(TEXT_NAME_2)
                 .tagName(TAG_NAME_2);
+
+        // Create a new error log entry
+        List<LogEntry> logEntryList = new ArrayList<>();
+        logEntryList.add(new LogEntry(LOG_LEVEL, TIME_STAMP, MESSAGE));
+        mockLogs.set(logEntryList);
     }
 
     /**
