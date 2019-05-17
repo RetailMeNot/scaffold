@@ -7,6 +7,7 @@ branches:
   - master
 before_install:
   - openssl aes-256-cbc -K $encrypted_87dcc7e0deb7_key -iv $encrypted_87dcc7e0deb7_iv -in all.gpg.enc -out all.gpg -d
+  - gpg --import all.gpg
 before_script:
   # Before updating versioning and pushing artifacts, overwrite settings xml with ossrh and gpg credentials
   - echo "<settings><profiles><profile><id>ossrh</id><activation><activeByDefault>true</activeByDefault></activation><properties><gpg.executable>gpg</gpg.executable><gpg.passphrase>$GPG_PASSWORD</gpg.passphrase></properties></profile></profiles><servers><server><id>ossrh</id><username>$OSSRH_USERNAME</username><password>$OSSRH_PASSWORD</password></server></servers></settings>" > $HOME/.m2/settings.xml
