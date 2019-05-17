@@ -6,8 +6,8 @@ branches:
   # Since we're using conventional commit paradigm, we only want a master merge commit to trigger a build: https://www.conventionalcommits.org/en/v1.0.0-beta.4/
   - master
 before_script:
-  # Before updating versioning and pushing artifacts, copy over the maven settings file with ossrh and gpg credentials
-  - cp .travis.settings.xml $HOME/.m2/settings.xml
+  # Before updating versioning and pushing artifacts, overwrite settings xml with ossrh and gpg credentials
+  - echo "<settings><profiles><profile><id>ossrh</id><activation><activeByDefault>true</activeByDefault></activation><properties><gpg.executable>gpg</gpg.executable><gpg.passphrase>$GPG_PASSWORD</gpg.passphrase></properties></profile></profiles><servers><server><id>ossrh</id><username>$OSSRH_USERNAME</username><password>$OSSRH_PASSWORD</password></server></servers></settings>" > $HOME/.m2/settings.xml
 script:
   # Find the most recent version via git tags
   - OLD_VERSION=$(npx git-semver-tags | head -n 1)
@@ -26,4 +26,4 @@ script:
   # Add a message to console with the next version number
   - echo "Versioning artifacts with version $NEXT_VERSION"
   # Sets the new version for the release and deploys using the maven release profile
-  - mvn --settings $HOME/.m2/settings.xml -Prelease -Dtag=scaffold-"${NEXT_VERSION}" versions:set --define newVersion="${NEXT_VERSION}" clean deploy scm:tag
+  - mvn -Prelease -Dtag=scaffold-"${NEXT_VERSION}" versions:set --define newVersion="${NEXT_VERSION}" clean deploy scm:tag
