@@ -25,7 +25,5 @@ script:
     fi
   # Add a message to console with the next version number
   - echo "Versioning artifacts with version $NEXT_VERSION"
-  # Sets the new version for the release
-  - mvn versions:set --define newVersion="${NEXT_VERSION}"
-  # Creates the new scm tag for GitHub and then performs the release to Maven Central using the maven release profile
-  - mvn deploy scm:"${NEXT_VERSION}" -Prelease
+  # Sets the new version for the release and deploys using the maven release profile
+  - mvn -Prelease versions:set --define newVersion="${NEXT_VERSION}" deploy scm:scaffold-"${NEXT_VERSION}"
