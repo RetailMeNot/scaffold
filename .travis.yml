@@ -1,0 +1,31 @@
+language: java
+jdk:
+- openjdk11
+branches:
+  only:
+  # Since we're using conventional commit paradigm, we only want a master merge commit to trigger a build: https://www.conventionalcommits.org/en/v1.0.0-beta.4/
+  - master
+before_script:
+  # Before updating versioning and pushing artifacts, copy over the maven settings file with ossrh and gpg credentials
+  - cp .travis.settings.xml $HOME/.m2/settings.xml
+script:
+  # Find the most recent version via git tags
+  - OLD_VERSION=$(npx git-semver-tags | head -n 1)
+  # Using conventional commits paradigm, check the merge commit message on master to set up a new version deployment
+  - if [ -n "$OLD_VERSION" ]; then
+      BUMP_TYPE=$(
+        npx
+        -p conventional-changelog-angular
+        -p conventional-recommended-bump
+        conventional-recommended-bump --preset angular
+      );
+      NEXT_VERSION=$(npx semver -i $BUMP_TYPE ${OLD_VERSION});
+    else
+      NEXT_VERSION=1.0.0;
+    fi
+  # Add a message to console with the next version number
+  - echo "Versioning artifacts with version $NEXT_VERSION"
+  # Sets the new version for the release
+  - mvn versions:set --define newVersion="${NEXT_VERSION}"
+  # Creates the new scm tag for GitHub and then performs the release to Maven Central using the maven release profile
+  - mvn deploy scm:"${NEXT_VERSION}" -Prelease
