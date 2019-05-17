@@ -25,5 +25,7 @@ script:
     fi
   # Add a message to console with the next version number
   - echo "Versioning artifacts with version $NEXT_VERSION"
+  # Configure the signing
+  - git config --global user.signingkey 9CDAE6CF322DC1C9
   # Sets the new version for the release and deploys using the maven release profile
-  - mvn -Prelease -Dtag=scaffold-"${NEXT_VERSION}" versions:set --define newVersion="${NEXT_VERSION}" clean deploy scm:tag
+  - mvn --settings $HOME/.m2/settings.xml -Prelease -Dtag=scaffold-"${NEXT_VERSION}" versions:set --define newVersion="${NEXT_VERSION}" clean deploy scm:tag
