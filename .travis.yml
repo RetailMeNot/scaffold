@@ -5,6 +5,11 @@ jdk:
 #  only:
 #    # Since we're using conventional commit paradigm, we only want a master merge commit to trigger a build: https://www.conventionalcommits.org/en/v1.0.0-beta.4/
 #    - master
+addons:
+  apt:
+    packages:
+      - sshpass
+install: skip
 env:
   global:
   - secure: MEL/fse4IwgsR+Kxws8znyk4Zz+F/pBWibrOBV93xSL7oImXRPIildatX3kpk0nIDHdDreWlzeXHQzmse6S50HpFvseZd0XWWVbQGIQVRda13R3zYbsHluI/Y5Rsh5UZysd3KV0MXyfbvR7xMNF70/IasmOCYtncTxztL5Garrn9jDlNnbkSj7HCbozv+IaarL9q9GOwHO5uWbDvOQLxax9VOOF50A34EBkmrV3xKpU2Iaa5+MZBWLIQ0tov5lzEcBN2fLKoblko96JMd2jk3dQQ+CLkfZPG3LaKc+XYsmeGa4ZhWpOTnbukT43I+ZmKu0rGyqvUvMYPPJElq9ttINloxkgDFU6Qkgb8je6U1kVQ8Tj9ZeN5JiMfEHthvXeCRmZFlgk1i94XyF16L5QScpXBZu0olaobvm3QDhITOzeH8ytcZ/Pgwr1cHwcjujiNK/1qQZuZGdUk6heuCHwt7FBocH66Xugf1BEs67F0H1btvGDXkAbAnMpO1/HvrQlnQYhi/m0fACALAPEWRyOe3rAVWsM70/36BhMQ4ylZYl/U8H/7MCw+XZh4MwrYByCLtvm0fTPPHpq9VyuoLlU7vHvsa7Any5gNB8qsWDdhfzZdqYstH438hd7yYIMNT1AH4UgHEi8bk+Scp8Jht9ZiI230i/VGOwAdEMskUvv5kPc=
@@ -26,8 +31,7 @@ before_script:
   # Add ssh key
   - eval "$(ssh-agent -s)"
   - chmod 600 deploy/deploy_rsa
-  - ssh-add deploy/deploy_rsa
-  - echo $SSH_PASSPHRASE
+  - sshpass -p $SSH_PASSPHRASE ssh-add deploy/deploy_rsa
 #script:
 #  # Find the most recent version via git tags
 #  - OLD_VERSION=$(npx git-semver-tags | head -n 1)
