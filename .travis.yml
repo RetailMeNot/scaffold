@@ -29,7 +29,7 @@ before_script:
   # Find the most recent version via git tags
   - OLD_VERSION=$(npx git-semver-tags | head -n 1)
   # Using conventional commits paradigm, check the merge commit message on master to set up a new version deployment
-  NEXT_VERSION=1.0.1
+  - NEXT_VERSION=1.0.1
 #  - if [ -n "$OLD_VERSION" ]; then
 #      BUMP_TYPE=$(
 #        npx
