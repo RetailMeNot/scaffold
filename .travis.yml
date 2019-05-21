@@ -5,11 +5,7 @@ jdk:
 #  only:
 #    # Since we're using conventional commit paradigm, we only want a master merge commit to trigger a build: https://www.conventionalcommits.org/en/v1.0.0-beta.4/
 #    - master
-addons:
-  apt:
-    packages:
-      - sshpass
-install: skip
+install: skip # Skip the install here since we have custom maven goals
 env:
   global:
   - secure: MEL/fse4IwgsR+Kxws8znyk4Zz+F/pBWibrOBV93xSL7oImXRPIildatX3kpk0nIDHdDreWlzeXHQzmse6S50HpFvseZd0XWWVbQGIQVRda13R3zYbsHluI/Y5Rsh5UZysd3KV0MXyfbvR7xMNF70/IasmOCYtncTxztL5Garrn9jDlNnbkSj7HCbozv+IaarL9q9GOwHO5uWbDvOQLxax9VOOF50A34EBkmrV3xKpU2Iaa5+MZBWLIQ0tov5lzEcBN2fLKoblko96JMd2jk3dQQ+CLkfZPG3LaKc+XYsmeGa4ZhWpOTnbukT43I+ZmKu0rGyqvUvMYPPJElq9ttINloxkgDFU6Qkgb8je6U1kVQ8Tj9ZeN5JiMfEHthvXeCRmZFlgk1i94XyF16L5QScpXBZu0olaobvm3QDhITOzeH8ytcZ/Pgwr1cHwcjujiNK/1qQZuZGdUk6heuCHwt7FBocH66Xugf1BEs67F0H1btvGDXkAbAnMpO1/HvrQlnQYhi/m0fACALAPEWRyOe3rAVWsM70/36BhMQ4ylZYl/U8H/7MCw+XZh4MwrYByCLtvm0fTPPHpq9VyuoLlU7vHvsa7Any5gNB8qsWDdhfzZdqYstH438hd7yYIMNT1AH4UgHEi8bk+Scp8Jht9ZiI230i/VGOwAdEMskUvv5kPc=
@@ -18,8 +14,7 @@ env:
   - secure: hw9IKh419UicjaMzoJuD/Lu8zaXBqHl2B277pc27ja+GaicZ6ruttQajV8Vxnqre+lRGDp8TPnTiGbuRSjB+UEAiVHGXF8ox5Ewsu33HC40YtBBudJZPAfdSijC1yA+tBAw3cuR3NDnB4mDu/t6/LyXmBZCanTZVF2Lw4vtCKxjfHndVZUadtml/d2+Ym98daKmZUI1Qnqnrkp5N5qlqPpE/LlH7SvxlcG37KwoFy16TKYYpMxt9GJ3T/vy4eytcwXUawYJBMnJA7uyiC4J9gWUluGk0EByuCzs/wuKZP+tXhHxdjfPWpFVf6yuwHS10DZQbqSAs5DVqb0nsM39BKnL6A5Vkq7yuB+qAeaWSDu1w2KPpyxfnlwYCsfq+Kf7U0AM43QSw1GEfeR949YMLjGfDTO/DOZivqzkZvBdREiNFf8AHPdWFYsgZPBGhVeQ4uQbWc3kLlcgNzjsyTSns8aqB5sEy238JgZrMke0mB6UMQNa14cmiypCnB94VsBED8QvVCbSvN3C29cQPcVUlb5QJdYPDXPLXWT64VZMlDypVifx9MC44FMYScqfEF35x4btitTJDdFx70f9RNdLPiac/wwl/5TBBmMDWU84LEqBIkdU+Rf2ubc9YLux+OIfnA+TE9X1Ynm/iyEq/su6RQt7RlKKDmRUJRywiMs0l+Pk=
   - secure: AeljpiqnrBvLKmFP9VXx952jsqN7jwPUqN7Miut8tdQWGOMoAp7C5cucq0Iaexuc33Me5bxkft9q4pUmEAeUwli3iJbWMTE0gxNtIh/MopQLTVKLfg2n6y8CjYXIuwvm38HC4yMuGkfam7y1KnAEPrzM3BC5qSkdj1K6ID0DIMHIUPcR/ROQqcrtu6ZFlQGcVB7sysAssujxtsO+v8cCnjpoaATqLtE8Isrw6SWeI7lAfTsDynar2NdQSBQbUMPcqx+RL4tZE8hwCuvFiJcVFUBPDYzSnKYx4ZtL4rAc0VZVUDsQ5jVMHnmWpSHo7Sdxv0uhhqEbIF2+hOnSHvJKUcw+vVW0Jy2K7GmOpaNqS20fqLX0Go89LTaEJWQEuuafG1+3j74YtsBKh7JCgdKY/COCeFVK2ujXY3j7PNhTGag4FxfMrzBNzndJ9Gnss7txG1XzZZ6Ov+SV7WyFvsW5B8TFxgbSVNFSFEOgaVpUNDgaroslTn3Jt/5KJRovclijwqt3U+1IpVjiNKnnBFE2kn1IJw+UfzWZj1+lfn4PKh5LZtRRmoDN4yTp8SO7DIqR00hb/S3tZ+j3dSRxHOZ3HYf4FJaQHgJ8nF/9mYgB3QTJig3dCqrr/XWff1c/OMJDbYTZY30lbo8R4Y3v2zbOxWRn6CMErvpIkYScAOxzuyY=
 before_install:
-  - openssl aes-256-cbc -K $encrypted_87dcc7e0deb7_key -iv $encrypted_87dcc7e0deb7_iv
-    -in secrets.tar.enc -out secrets.tar -d
+  - openssl aes-256-cbc -K $encrypted_87dcc7e0deb7_key -iv $encrypted_87dcc7e0deb7_iv -in secrets.tar.enc -out secrets.tar -d
   - tar xvf secrets.tar
 before_script:
   # Update GPG creds
@@ -31,7 +26,6 @@ before_script:
   # Add ssh key
   - eval "$(ssh-agent -s)"
   - chmod 600 deploy/deploy_rsa
-  - sshpass -p $SSH_PASSPHRASE ssh-add deploy/deploy_rsa
 #script:
 #  # Find the most recent version via git tags
 #  - OLD_VERSION=$(npx git-semver-tags | head -n 1)
