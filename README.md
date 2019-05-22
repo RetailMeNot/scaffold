@@ -12,27 +12,7 @@ Scaffold is a Selenium WebDriver abstraction built in Java 11 with Spring Boot 2
 * Provides all dependencies to implementing projects
 
 # Current Version
-1.0.0-beta
-
-```
-<dependency>
-  <groupId>com.retailmenot.scaffold</groupId>
-  <artifactId>scaffold</artifactId>
-  <version>1.0.0-beta</version>
-</dependency>
-
-<dependency>
-  <groupId>com.retailmenot.scaffold</groupId>
-  <artifactId>framework</artifactId>
-  <version>1.0.0-beta</version>
-</dependency>
-
-<dependency>
-  <groupId>com.retailmenot.scaffold</groupId>
-  <artifactId>environment</artifactId>
-  <version>1.0.0-beta</version>
-</dependency>
-```
+To view the most current version, [visit the Central Repository](https://search.maven.org/search?q=g:com.retailmenot.scaffold).
 
 # Links
 - [Contributing Guide](https://github.com/RetailMeNot/scaffold/blob/master/CONTRIBUTING.md)
@@ -42,6 +22,9 @@ Scaffold is a Selenium WebDriver abstraction built in Java 11 with Spring Boot 2
 # Required Tools for Dev
 * Java 11
 * Maven 3.x
+
+# CI
+The build can be found [on Travis CI](https://travis-ci.org/RetailMeNot/scaffold).
 
 # Setting Up Your Project
 Use this section for setting up a new project using Scaffold. Setup follows a fairly standard Spring Boot application design by using modules for the code base's environment and main testing.
@@ -60,19 +43,19 @@ Add the following dependency to your parent POM's DependencyManagement section:
 <dependency>
     <groupId>com.retailmenot.scaffold</groupId>
     <artifactId>scaffold</artifactId>
-    <version>1.0.0-beta</version>
+    <version>current_version</version>
 </dependency>
 
 <dependency>
     <groupId>com.retailmenot.scaffold</groupId>
     <artifactId>framework</artifactId>
-    <version>1.0.0-beta</version>
+    <version>current_version</version>
 </dependency>
 
 <dependency>
     <groupId>com.retailmenot.scaffold</groupId>
     <artifactId>environment</artifactId>
-    <version>1.0.0-beta</version>
+    <version>current_version</version>
 </dependency>
 ``` 
 
