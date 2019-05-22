@@ -1,49 +1,62 @@
 language: java
 jdk:
 - openjdk11
-# Skips the default install step since we have custom maven goals
-install: true
-branches:
-  only:
-    # Since we're using conventional commit paradigm, we only want a master merge commit to trigger a build: https://www.conventionalcommits.org/en/v1.0.0-beta.4/
-    - master
+
 env:
   global:
   - secure: MEL/fse4IwgsR+Kxws8znyk4Zz+F/pBWibrOBV93xSL7oImXRPIildatX3kpk0nIDHdDreWlzeXHQzmse6S50HpFvseZd0XWWVbQGIQVRda13R3zYbsHluI/Y5Rsh5UZysd3KV0MXyfbvR7xMNF70/IasmOCYtncTxztL5Garrn9jDlNnbkSj7HCbozv+IaarL9q9GOwHO5uWbDvOQLxax9VOOF50A34EBkmrV3xKpU2Iaa5+MZBWLIQ0tov5lzEcBN2fLKoblko96JMd2jk3dQQ+CLkfZPG3LaKc+XYsmeGa4ZhWpOTnbukT43I+ZmKu0rGyqvUvMYPPJElq9ttINloxkgDFU6Qkgb8je6U1kVQ8Tj9ZeN5JiMfEHthvXeCRmZFlgk1i94XyF16L5QScpXBZu0olaobvm3QDhITOzeH8ytcZ/Pgwr1cHwcjujiNK/1qQZuZGdUk6heuCHwt7FBocH66Xugf1BEs67F0H1btvGDXkAbAnMpO1/HvrQlnQYhi/m0fACALAPEWRyOe3rAVWsM70/36BhMQ4ylZYl/U8H/7MCw+XZh4MwrYByCLtvm0fTPPHpq9VyuoLlU7vHvsa7Any5gNB8qsWDdhfzZdqYstH438hd7yYIMNT1AH4UgHEi8bk+Scp8Jht9ZiI230i/VGOwAdEMskUvv5kPc=
   - secure: YOOuOXd7osj7GE2RvK8WZhF5eobJzrgjVnf1jSI6wgVYB8RwnN+EP1+aKfqAglDtou5q3I80QlKAln2x6QomIrdJW1GF5elVGFBxBO1L/Xk/jb3D9an9GLPHKZyO+hfJo8HDzkLaiBHNI8YYeqrEXQU4wpzv5uaNT7Rer1Dyy4DuTdZ/N4iFmX8w36kPoPXcSWyu71hNZ54btnb7cvl4XkwX5/qAXyIarGzRK+x0V6rAM1PC1fcam1udivsN1py+PVuxbgv3VCt/6kd2HrJ88y9/ZOIjE35av9/b0EEkVJb7LX/FPxpiXVjyKtDgQtdGvLKrcbL+6KZrxCv71Qbkrd36kR19LTLPFuy40y2sL+NN4bQWkI+dFCg/tQyQWNFNpnuTw/+g8/kHaMqutyFIIN79j1KGRY0wm6eVG6E4YA+hUuAkdXdaN0U9cD89Hf+mIn+EGEWTySwLcH3wWxkqtqAn6D3n81J4kfsv1jObuPtbHbM5ONCbkSCLqvW/djx1PblVT5sSLbnpXGfp4KlEYbTTJ/fyp7QR/68RftwadgipAPMJDvWxZISMZxrgHTg+bhQgByGR0rpJl1/BDo3OLbW27B7WW3dn/FBZF8a4amq1zn2Lg34w+M5xjRqOOUv44QToN5CC3tWoVgccPjbq3sdEpWYGa48j8Vh6LHGc1zM=
   - secure: FPmvf0t+h0/RE+10bERX8gatJpxSbf62T3LTH8omy6WRWlPZL9VgO0dfX0ZZzmkfAHH//zTB5YEdwE7ntwdzWaIx1ti7RjanRlznlrOLOwP55CDIu9/nvl1spMC4vP2sGz6l7iHJCbiJfXYT5xfkk6DezaWijsolsE6DWoFXge/Q3Q2BkPrlUoBcdZvl8cPQ+Mv003XSzX+3GdCrCkz9Eb4j16goFLLlAkQEFlFgTOVYv4JtcCgVxBzSDqmvITKCLQXJ3QlSHy1ZtRYnZCt2qO8UMJZQA7t7hGXrlcR59arboWUiMfNRZ3A3N5kKLyDUi+4AaaxglCwkSBFwRSuMy8rEul0VFPob0iOHt42rYGmcqGS8CTaRwZFqgJEZBIGgjLbh7onXaRTPlIYPz/+dHs3Msi56lO7ZBqHdxtxlgRL5mC/ENAnCk6WLYgXWOO1MlLFWy0KKlYe/weoSUbBgPux58zQl7sglVE2B37Se+c4gjW/VC3+kmw36j0nr5GedFUZse4rtkPt+OP8aCUo+lTUgBGBbOQgeipWGJNFm9hnTWSyod/GUeF3bUJLUPkx95hF+8/apmKONuXKG9X6XJ7aeCzVo1pmAwJ4hAw378AXdscuaTfZaxsHy4IdqbrnMdPR4p50rZFGk3ojYQR/HQKwWajlYX8mUuDToVLrSzgg=
   - secure: hw9IKh419UicjaMzoJuD/Lu8zaXBqHl2B277pc27ja+GaicZ6ruttQajV8Vxnqre+lRGDp8TPnTiGbuRSjB+UEAiVHGXF8ox5Ewsu33HC40YtBBudJZPAfdSijC1yA+tBAw3cuR3NDnB4mDu/t6/LyXmBZCanTZVF2Lw4vtCKxjfHndVZUadtml/d2+Ym98daKmZUI1Qnqnrkp5N5qlqPpE/LlH7SvxlcG37KwoFy16TKYYpMxt9GJ3T/vy4eytcwXUawYJBMnJA7uyiC4J9gWUluGk0EByuCzs/wuKZP+tXhHxdjfPWpFVf6yuwHS10DZQbqSAs5DVqb0nsM39BKnL6A5Vkq7yuB+qAeaWSDu1w2KPpyxfnlwYCsfq+Kf7U0AM43QSw1GEfeR949YMLjGfDTO/DOZivqzkZvBdREiNFf8AHPdWFYsgZPBGhVeQ4uQbWc3kLlcgNzjsyTSns8aqB5sEy238JgZrMke0mB6UMQNa14cmiypCnB94VsBED8QvVCbSvN3C29cQPcVUlb5QJdYPDXPLXWT64VZMlDypVifx9MC44FMYScqfEF35x4btitTJDdFx70f9RNdLPiac/wwl/5TBBmMDWU84LEqBIkdU+Rf2ubc9YLux+OIfnA+TE9X1Ynm/iyEq/su6RQt7RlKKDmRUJRywiMs0l+Pk=
-before_install:
-  - openssl aes-256-cbc -K $encrypted_87dcc7e0deb7_key -iv $encrypted_87dcc7e0deb7_iv -in secrets.tar.enc -out secrets.tar -d
-  - tar xvf secrets.tar
-before_script:
-  # Update GPG creds
-  - gpg --allow-secret-key-import --import deploy/seckey.key
-  - gpg --import deploy/pubkey.key
-  - echo "default-key $GPG_KEYNAME" > $HOME/.gnupg/gpg.conf
-  - git config --global user.signingkey $GPG_KEYNAME
-  - cp .travis.settings.xml $HOME/.m2/settings.xml
-  # Add ssh key
-  - eval "$(ssh-agent -s)"
-  - chmod 600 deploy/deploy_rsa
-  - ssh-add deploy/deploy_rsa
-#script:
-  # Find the most recent version via git tags
-  - OLD_VERSION=$(npx git-semver-tags | head -n 1)
-  # Using conventional commits paradigm, check the merge commit message on master to set up a new version deployment
-  - if [ -n "$OLD_VERSION" ]; then
-      BUMP_TYPE=$(
-        npx
-        -p conventional-changelog-angular
-        -p conventional-recommended-bump
-        conventional-recommended-bump --preset angular
-      );
-      NEXT_VERSION=$(npx semver -i $BUMP_TYPE ${OLD_VERSION});
-    else
-      NEXT_VERSION=1.0.0;
-    fi
-  # Add a message to console with the next version number
-  - echo "Versioning artifacts with version $NEXT_VERSION"
-  # Sets the new version for the release and deploys using the maven release profile
-  - mvn versions:set --define newVersion=${NEXT_VERSION}
-  - mvn -Prelease -Dtag=scaffold-${NEXT_VERSION} deploy scm:tag
+
+jobs:
+  include:
+    # This job is for running testing against feature pull requests to ensure tests are passing. It also serves as a pre req to deploying.
+    - stage: test
+      script:
+        - mvn test
+
+    - stage: deploy
+      name: 'Deploy to Maven Central'
+      if: branch = master AND type = push AND fork = false
+
+      before_install:
+        - openssl aes-256-cbc -K $encrypted_87dcc7e0deb7_key -iv $encrypted_87dcc7e0deb7_iv -in secrets.tar.enc -out secrets.tar -d
+        - tar xvf secrets.tar
+
+      before_script:
+        # Update GPG creds
+        - gpg --allow-secret-key-import --import deploy/seckey.key
+        - gpg --import deploy/pubkey.key
+        - echo "default-key $GPG_KEYNAME" > $HOME/.gnupg/gpg.conf
+        - git config --global user.signingkey $GPG_KEYNAME
+        - cp .travis.settings.xml $HOME/.m2/settings.xml
+        # Add ssh key
+        - eval "$(ssh-agent -s)"
+        - chmod 600 deploy/deploy_rsa
+        - ssh-add deploy/deploy_rsa
+
+      # Only push a release out if the merge commit adheres to the conventional commits paradigm.
+      script:
+        # Find the most recent version via git tags
+        - OLD_VERSION=$(npx git-semver-tags | head -n 1)
+        # Using conventional commits paradigm, check the merge commit message on master to set up a new version deployment
+        - if [ -n "$OLD_VERSION" ]; then
+            BUMP_TYPE=$(
+              npx
+              -p conventional-changelog-angular
+              -p conventional-recommended-bump
+              conventional-recommended-bump --preset angular
+            );
+            NEXT_VERSION=$(npx semver -i $BUMP_TYPE ${OLD_VERSION});
+          else
+            NEXT_VERSION=1.0.0;
+          fi
+        - if [ $NEXT_VERSION != 1.0.0 ]; then
+            # Add a message to console with the next version number
+            echo "Versioning artifacts with version $NEXT_VERSION"
+            # Sets the new version for the release and deploys using the maven release profile
+            mvn versions:set --define newVersion=${NEXT_VERSION} -Prelease -Dtag=scaffold-${NEXT_VERSION} deploy scm:tag;
+          else
+            echo "Merge to master does not adhere to conventional commit paradigm. Please merge a new feature branch with conventional commit to release changes."
+          fi
