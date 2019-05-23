@@ -19,7 +19,7 @@ jobs:
     # This job is for deploys to maven central using conventional commits. This job should only run against the master branch when it detects a merge. It should also not execute against forked repos.
     - stage: deploy
       name: 'Deploy to Maven Central'
-      if: branch = master AND type = push AND fork = false
+      if: branch = master AND fork = false
 
       before_install:
         - openssl aes-256-cbc -K $encrypted_87dcc7e0deb7_key -iv $encrypted_87dcc7e0deb7_iv -in secrets.tar.enc -out secrets.tar -d
