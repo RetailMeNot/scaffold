@@ -20,5 +20,5 @@ if [ -n "$OLD_VERSION" ]; then BUMP_TYPE=$(npx -p conventional-changelog-angular
     mvn versions:set --define newVersion=${NEXT_VERSION};
     mvn -Prelease -Dtag=${NEXT_VERSION} deploy scm:tag;
   else
-    echo "Merge to master does not adhere to conventional commit paradigm. Please merge a new feature branch with conventional commit to release changes.";
+    echo "Could not detect a previous version with git-semver-tags";
   fi
