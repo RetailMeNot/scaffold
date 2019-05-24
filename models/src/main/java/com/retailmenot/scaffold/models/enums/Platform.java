@@ -11,7 +11,8 @@ public enum Platform {
     Mac("MAC"),
     Linux("LINUX"),
     Unix("UNIX"),
-    Android("ANDROID");
+    Android("ANDROID"),
+    iOS("IOS");
 
     private final String platform;
 
