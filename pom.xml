@@ -3,8 +3,8 @@
 
     <name>Scaffold</name>
     <description>A Simple Java Selenium Framework</description>
-    <url>https://github.com/RetailMeNot/scaffold</url>
-    <groupId>com.retailmenot.scaffold</groupId>
+    <url>https://github.com/kgress/scaffold</url>
+    <groupId>org.scaffold</groupId>
     <artifactId>scaffold</artifactId>
     <version>DEV</version>
     <modules>

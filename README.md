@@ -12,7 +12,7 @@ Scaffold is a Selenium WebDriver abstraction built in Java 11 with Spring Boot 2
 * Provides all dependencies to implementing projects
 
 # Current Version
-To view the most current version, [visit the Central Repository](https://search.maven.org/search?q=g:com.retailmenot.scaffold).
+To view the most current version, [visit the Central Repository](https://search.maven.org/search?q=g:org.scaffold).
 
 # Links
 - [Contributing Guide](https://github.com/RetailMeNot/scaffold/blob/master/CONTRIBUTING.md)
@@ -41,19 +41,19 @@ Add the following dependency to your parent POM's DependencyManagement section:
 
 ```
 <dependency>
-    <groupId>com.retailmenot.scaffold</groupId>
+    <groupId>org.scaffold</groupId>
     <artifactId>scaffold</artifactId>
     <version>current_version</version>
 </dependency>
 
 <dependency>
-    <groupId>com.retailmenot.scaffold</groupId>
+    <groupId>org.scaffold</groupId>
     <artifactId>framework</artifactId>
     <version>current_version</version>
 </dependency>
 
 <dependency>
-    <groupId>com.retailmenot.scaffold</groupId>
+    <groupId>org.scaffold</groupId>
     <artifactId>environment</artifactId>
     <version>current_version</version>
 </dependency>
@@ -68,7 +68,7 @@ Create two new maven modules in your project.
 The environment module's POM should contain Scaffold's environment dependency. 
 ```
 <dependency>
-    <groupId>com.retailmenot.scaffold</groupId>
+    <groupId>org.scaffold</groupId>
     <artifactId>environment</artifactId>
 </dependency>
 ```
@@ -76,7 +76,7 @@ The environment module's POM should contain Scaffold's environment dependency.
 The core module's POM should contain Scaffold's framework dependency.
 ```
 <dependency>
-    <groupId>com.retailmenot.scaffold</groupId>
+    <groupId>org.scaffold</groupId>
     <artifactId>framework</artifactId>
 </dependency>
 ```
