@@ -10,7 +10,7 @@ public class ImageWebElementTests extends BaseUnitTest {
 
     @Test
     public void testGetImageSource() {
-        var srcTxt = "http://retailmenot.com";
+        var srcTxt = "http://coolwebsite.com";
 
         mockElement1.setAttribute("src", srcTxt);
         var image = new ImageWebElement(mockElement1);

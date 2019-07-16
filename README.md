@@ -15,16 +15,16 @@ Scaffold is a Selenium WebDriver abstraction built in Java 11 with Spring Boot 2
 To view the most current version, [visit the Central Repository](https://search.maven.org/search?q=g:org.scaffold).
 
 # Links
-- [Contributing Guide](https://github.com/RetailMeNot/scaffold/blob/master/CONTRIBUTING.md)
-- [Code of Conduct](https://github.com/RetailMeNot/scaffold/blob/master/CODE_OF_CONDUCT.md)
-- [License](https://github.com/RetailMeNot/scaffold/blob/master/LICENSE.txt)
+- [Contributing Guide](https://github.com/kgress/scaffold/blob/master/CONTRIBUTING.md)
+- [Code of Conduct](https://github.com/kgress/scaffold/blob/master/CODE_OF_CONDUCT.md)
+- [License](https://github.com/kgress/scaffold/blob/master/LICENSE.txt)
     
 # Required Tools for Dev
 * Java 11
 * Maven 3.x
 
 # CI
-The build can be found [on Travis CI](https://travis-ci.org/RetailMeNot/scaffold).
+The build can be found [on Travis CI](https://travis-ci.org/kgress/scaffold).
 
 # Setting Up Your Project
 Use this section for setting up a new project using Scaffold. Setup follows a fairly standard Spring Boot application design by using modules for the code base's environment and main testing.
@@ -285,7 +285,7 @@ configure Sauce credentials. During a test run, you specify the spring profile t
 The spring profiles should live under the resources package in the environment module that was set up earlier in this guide. E.G: `environment > src > main > resources > application-chrome_sauce.properties`. For more information on spring profiles, [check out this link here](https://www.springboottutorial.com/spring-boot-profiles).
 
 #### Desired Capabilities
-To set the `DesiredCapabilites`, include pre configured properties from the `DesiredCapabilitiesConfigurationProperties` file. A full list of these properties [can be found at the following link](https://github.com/RetailMeNot/scaffold/blob/master/environment/src/main/java/com/retailmenot/scaffold/environment/config/DesiredCapabilitiesConfigurationProperties.java).
+To set the `DesiredCapabilites`, include pre configured properties from the `DesiredCapabilitiesConfigurationProperties` file. A full list of these properties [can be found at the following link](https://github.com/kgress/scaffold/blob/master/environment/src/main/java/com/kgress/scaffold/environment/config/DesiredCapabilitiesConfigurationProperties.java).
 All of these properties are preceded by the prefix of `desired-capabilities`. So, for example, if you wish to define the run type of sauce, you'd enter `desired-capabilities.run-type=sauce`. Because Scaffold includes an
 auto configuration for these properties, you gain the benefit of auto complete, as well. Simply type the first few letters of the word `desired` will show you a list of capabilities that can be set.
 

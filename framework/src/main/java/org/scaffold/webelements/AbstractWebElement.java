@@ -21,7 +21,7 @@ import java.util.List;
  *
  * TODO This class uses the {@link BaseWebElement} interface which is supposed to be a clone of {@link WebElement} but
  *   using our strongly typed elements. We are missing some functionality provided by {@link WebElement} and should update
- *   this class and interface accordingly. The ticket to represent this work can be found here: https://github.com/RetailMeNot/scaffold/issues/16
+ *   this class and interface accordingly. The ticket to represent this work can be found here: https://github.com/kgress/scaffold/issues/16
  */
 @Slf4j
 public abstract class AbstractWebElement implements BaseWebElement {

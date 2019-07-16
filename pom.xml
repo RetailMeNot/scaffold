@@ -50,7 +50,6 @@
         <developer>
             <name>Kyle Gress</name>
             <email>kgress@rmn.com</email>
-            <organization>RetailMeNot, inc</organization>
             <organizationUrl>https://github.com/kgress</organizationUrl>
         </developer>
         <developer>
@@ -65,9 +64,9 @@
     </developers>
 
     <scm>
-        <connection>scm:git:git@github.com:RetailMeNot/scaffold.git</connection>
-        <url>scm:git:git@github.com:RetailMeNot/scaffold.git</url>
-        <developerConnection>scm:git:git@github.com:RetailMeNot/scaffold.git</developerConnection>
+        <connection>scm:git:git@github.com:kgress/scaffold.git</connection>
+        <url>scm:git:git@github.com:kgress/scaffold.git</url>
+        <developerConnection>scm:git:git@github.com:kgress/scaffold.git</developerConnection>
     </scm>
 
     <distributionManagement>
