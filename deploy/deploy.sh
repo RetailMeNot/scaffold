@@ -18,6 +18,7 @@ if [ -n "$OLD_VERSION" ]; then BUMP_TYPE=$(npx -p conventional-changelog-angular
     echo "Versioning artifacts with version $NEXT_VERSION";
     # Sets the new version for the release and deploys using the maven release profile
     mvn versions:set --define newVersion=${NEXT_VERSION};
+    echo "Performing release for version $NEXT_VERSION";
     mvn -Prelease -Dtag=${NEXT_VERSION} deploy scm:tag;
   else
     echo "Could not detect a previous version with git-semver-tags";
