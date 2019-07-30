@@ -2,10 +2,10 @@
 The development of Scaffold is intended to be a community driven effort; because of this, all contributions from the community are important! Regardless of a bug or a major feature addition/change, please file an issue for it. Ticket tracking allows everyone to ensure we're not duplicating efforts and obtaining the highest quality of work prior to merging.
 
 ## Code of Conduct
-Be sure to view our [Code of Conduct](https://github.com/RetailMeNot/scaffold/CODE_OF_CONDUCT.md) before contributing.
+Be sure to view our [Code of Conduct](https://github.com/kgress/scaffold/CODE_OF_CONDUCT.md) before contributing.
 
 ## Check Configuration
-If you're having troubles with DesiredCapabilities or see Spring application context issues, it's more than likely a misconfiguration. Check out the project [README](https://github.com/RetailMeNot/scaffold/README.md) with steps on creating the configurations. If you're confident that the configuration is not a problem and you've narrowed it down to a bug in the framework, please follow the bug filing procedure detailed in this document.   
+If you're having troubles with DesiredCapabilities or see Spring application context issues, it's more than likely a misconfiguration. Check out the project [README](https://github.com/kgress/scaffold/README.md) with steps on creating the configurations. If you're confident that the configuration is not a problem and you've narrowed it down to a bug in the framework, please follow the bug filing procedure detailed in this document.
 
 ## Filing Bugs
 * First ensure the bug has not been filed yet under our Issues.
@@ -90,4 +90,4 @@ Interested in fixing a bug or adding/updating a feature? Thank you! Your contrib
 9. +100 points to awesomeness for contributing!
 
 ## License
-By contributing to Scaffold, you agree that your contributions will be licensed. For more information regarding our open source licensing, please view the [license](https://github.com/RetailMeNot/scaffold/LICENSE.txt) document.
+By contributing to Scaffold, you agree that your contributions will be licensed. For more information regarding our open source licensing, please view the [license](https://github.com/kgress/scaffold/LICENSE.txt) document.

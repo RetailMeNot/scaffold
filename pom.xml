@@ -3,8 +3,8 @@
 
     <name>Scaffold</name>
     <description>A Simple Java Selenium Framework</description>
-    <url>https://github.com/RetailMeNot/scaffold</url>
-    <groupId>com.retailmenot.scaffold</groupId>
+    <url>https://github.com/kgress/scaffold</url>
+    <groupId>io.github.kgress.scaffold</groupId>
     <artifactId>scaffold</artifactId>
     <version>DEV</version>
     <modules>
@@ -49,8 +49,7 @@
     <developers>
         <developer>
             <name>Kyle Gress</name>
-            <email>kgress@rmn.com</email>
-            <organization>RetailMeNot, inc</organization>
+            <email>kgress88@gmail.copm</email>
             <organizationUrl>https://github.com/kgress</organizationUrl>
         </developer>
         <developer>
@@ -65,9 +64,9 @@
     </developers>
 
     <scm>
-        <connection>scm:git:git@github.com:RetailMeNot/scaffold.git</connection>
-        <url>scm:git:git@github.com:RetailMeNot/scaffold.git</url>
-        <developerConnection>scm:git:git@github.com:RetailMeNot/scaffold.git</developerConnection>
+        <connection>scm:git:git@github.com:kgress/scaffold.git</connection>
+        <url>scm:git:git@github.com:kgress/scaffold.git</url>
+        <developerConnection>scm:git:git@github.com:kgress/scaffold.git</developerConnection>
     </scm>
 
     <distributionManagement>
