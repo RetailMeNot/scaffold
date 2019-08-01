@@ -2,8 +2,10 @@
 # Update GPG creds
 gpg --allow-secret-key-import --import deploy/seckey.key
 gpg --import deploy/pubkey.key
+# Update the git config with the gpg key
 echo "default-key $GPG_KEYNAME" > $HOME/.gnupg/gpg.conf
 git config --global user.signingkey $GPG_KEYNAME
+# Copy over the settings.xml file
 cp .travis.settings.xml $HOME/.m2/settings.xml
 # Add ssh key
 eval "$(ssh-agent -s)"
