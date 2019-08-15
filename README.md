@@ -14,6 +14,9 @@ Scaffold is a Selenium WebDriver abstraction built in Java 11 with Spring Boot 2
 # Current Version
 To view the most current version, [visit the Central Repository](https://search.maven.org/search?q=g:io.github.kgress.scaffold).
 
+# Archetype
+For a quick start on creating a new Scaffold project, [check out the Scaffold-Archetype codebase](https://github.com/kgress/scaffold-archetype).
+
 # Links
 - [Contributing Guide](https://github.com/kgress/scaffold/blob/master/CONTRIBUTING.md)
 - [Code of Conduct](https://github.com/kgress/scaffold/blob/master/CODE_OF_CONDUCT.md)
