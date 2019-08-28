@@ -43,7 +43,7 @@ public class BaseTestContext {
      * @param key the key to add
      * @param value the value to add
      */
-    private void addSetting(String key, Object value) {
+    public void addSetting(String key, Object value) {
         settings.put(key, value);
     }
 
