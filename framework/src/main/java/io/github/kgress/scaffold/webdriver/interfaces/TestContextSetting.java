@@ -10,6 +10,7 @@ public interface TestContextSetting {
     String QUEUE_HOST = "queue_host";
     String QUEUE_NAME = "queue_name";
     String TEST_RUN_ID = "test_run_id";
+    String SESSION_ID = "SESSION_ID";
     String TEST_APPLICATION_CONTEXT = "test_application_context";
     String WAIT_CONDITION = "wait_condition";
     String WAIT_FOR_DISPLAY_ENABLED = "wait_for_display_enabled";

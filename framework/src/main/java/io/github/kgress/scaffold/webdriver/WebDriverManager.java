@@ -66,6 +66,7 @@ public class WebDriverManager {
     private Set<Cookie> cookieJar = new TreeSet<>();
     private RunType runType;
     private BrowserType browserType;
+    private String sessionId;
 
     @Autowired
     public WebDriverManager(DesiredCapabilitiesConfigurationProperties desiredCapabilities,
@@ -124,6 +125,10 @@ public class WebDriverManager {
      */
     public WebDriverWrapper getWebDriverWrapper() {
         return webDriverWrapper;
+    }
+
+    public String getSessionId() {
+        return sessionId;
     }
 
     /**
@@ -296,7 +301,7 @@ public class WebDriverManager {
     private WebDriver configureRemoteBrowser(MutableCapabilities browserOptions, String testName) {
         var browserVersion = desiredCapabilities.getBrowserVersion();
         var runPlatform = desiredCapabilities.getRunPlatform();
-        RemoteWebDriver remoteWebriver;
+        RemoteWebDriver remoteWebDriver;
 
         // If the test is using GRID but the browserOptions are null, throw an error. We must have DesiredCapabilitiesConfigurationProperties configured.
         if (browserOptions == null) {
@@ -313,9 +318,11 @@ public class WebDriverManager {
             browserOptions.setCapability("platform", runPlatform);
         }
 
-        remoteWebriver = createRemoteWebDriver(browserOptions, testName);
-        checkIfGridAndSendGridRequest(remoteWebriver);
-        return remoteWebriver;
+        remoteWebDriver = createRemoteWebDriver(browserOptions, testName);
+        sessionId = remoteWebDriver.getSessionId().toString();
+        TestContext.baseContext().addSetting("SESSION_ID", sessionId);
+        checkIfGridAndSendGridRequest(remoteWebDriver);
+        return remoteWebDriver;
     }
 
     /**
