@@ -20,6 +20,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.logging.LogEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.client.RestTemplate;
 
@@ -30,6 +31,7 @@ import java.util.logging.Level;
 
 import static io.github.kgress.scaffold.util.AutomationUtils.getUniqueString;
 
+@ActiveProfiles("unit_testing")
 @Slf4j
 @Execution(ExecutionMode.CONCURRENT)
 @ExtendWith(SpringExtension.class)

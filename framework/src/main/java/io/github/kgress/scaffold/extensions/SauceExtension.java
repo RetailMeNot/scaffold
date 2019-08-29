@@ -2,7 +2,6 @@ package io.github.kgress.scaffold.extensions;
 
 import com.saucelabs.saucerest.SauceREST;
 import io.github.kgress.scaffold.webdriver.TestContext;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -16,7 +15,7 @@ public class SauceExtension implements BeforeAllCallback, TestWatcher {
 
     private SauceREST sauce;
 
-    @BeforeEach
+    @Override
     public void beforeAll(ExtensionContext context) throws Exception {
         try {
             var environment = SpringExtension.getApplicationContext(context).getEnvironment();
@@ -24,7 +23,7 @@ public class SauceExtension implements BeforeAllCallback, TestWatcher {
             var sauceAccessKey = environment.getProperty("desired-capabilities.sauce.access-key");
             sauce = new SauceREST(sauceUsername, sauceAccessKey);
         } catch (Exception e) {
-            throw new Exception("Error initializing the Sauce Labs API: Please check your configuration to ensure the username and password are not null.");
+            throw new Exception("Error initializing the Sauce Labs API: Please check your configuration.");
         }
     }
 

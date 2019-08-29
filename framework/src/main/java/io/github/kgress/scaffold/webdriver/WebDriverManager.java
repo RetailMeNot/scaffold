@@ -418,20 +418,23 @@ public class WebDriverManager {
      */
     private RemoteWebDriver configureSauceRemoteBrowser(MutableCapabilities browserOptions, String testName) {
         String remoteUrl;
+        var sauce = desiredCapabilities.getSauce();
 
-        var username = desiredCapabilities.getSauce().getUserName();
-        var accessKey = desiredCapabilities.getSauce().getAccessKey();
-        var sauceUrl = desiredCapabilities.getSauce().getUrl();
-        var tunnelIdentifier = desiredCapabilities.getSauce().getTunnelIdentifier();
-        browserOptions.setCapability("tunnelIdentifier", tunnelIdentifier);
-        browserOptions.setCapability("name", testName);
-        remoteUrl = URI.create("http://" + username + ":" + accessKey + sauceUrl).toString();
+        // In order to build the URi correctly, pull the username and access key from the desired capabilities bean.
+        var username = sauce.getUserName();
+        var accessKey = sauce.getAccessKey();
+        var sauceUrl = "@ondemand.saucelabs.com/wd/hub";
+        var tunnelIdentifier = sauce.getTunnelIdentifier();
 
         try {
+            if (sauce.getTunnelIdentifier() != null) {
+                browserOptions.setCapability("tunnelIdentifier", tunnelIdentifier);
+            }
+            browserOptions.setCapability("name", testName);
+            remoteUrl = URI.create("http://" + username + ":" + accessKey + sauceUrl).toString();
             return startScreenshotRemoteDriver(remoteUrl, browserOptions);
         } catch (Exception e) {
-            throw new WebDriverContextException("Error initializing remote session against " + runType.getRunType() +
-                    ". Check to ensure your Sauce TunnelIdentifier has been initialized prior to running your tests.", e);
+            throw new WebDriverContextException("Unable to start new remote session against saucelabs.", e);
         }
     }
 
