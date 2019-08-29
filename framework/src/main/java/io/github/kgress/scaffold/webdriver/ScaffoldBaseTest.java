@@ -1,7 +1,6 @@
 package io.github.kgress.scaffold.webdriver;
 
 import io.github.kgress.scaffold.environment.config.DesiredCapabilitiesConfigurationProperties;
-import io.github.kgress.scaffold.util.AutomationUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,7 +47,6 @@ public class ScaffoldBaseTest {
     @BeforeEach
     public void setup(TestInfo testInfo) {
         String testName = testInfo.getDisplayName();
-        baseSetup(testName);
         setupWebdriver(testName);
         startWebBrowser(testName);
     }
@@ -87,43 +85,6 @@ public class ScaffoldBaseTest {
     }
 
     /**
-     * Grabs the webdrivercontext for the current thread. This allows us to get the {@link WebDriverWrapper} for that specific thread.
-     *
-     * @return the {@link TestContext}
-     */
-    private TestContext getTestContext() {
-        return TestContext.baseContext();
-    }
-
-    private WebDriverContext getWebDriverContext() {
-        return TestContext.baseContext().getWebDriverContext();
-    }
-
-    /**
-     * Helper method for {@link #setup(TestInfo)}.
-     * <p>
-     * This checks to ensure that the desiredCapabilities bean is not null. If so, return an error.
-     *
-     * @param testName the information on the test that is being ran. This plugs in with Junit Jupiter annotations.
-     */
-    private void baseSetup(String testName) {
-        try {
-            if (desiredCapabilities == null) {
-                var msg = String.format("Spring webdrivercontext has not been initialized for test [%s]. Please ensure desiredCapabilities bean is configured.", testName);
-                log.error(msg);
-                var exception = new RuntimeException(msg);
-                // Associate the exception with the test so we can report on it later
-                getTestContext().addExceptionForTest(testName, exception);
-                throw exception;
-            }
-        } catch (Throwable t) {
-            // The exception was associated with this test in the underlying try/catch block so we don't need to re-associate it here
-            log.error(String.format("Error with baseSetup for Test [%s]: %s", testName, AutomationUtils.getStackTrace(t)));
-            throw new RuntimeException(t);
-        }
-    }
-
-    /**
      * Helper method for {@link #setup(TestInfo)}.
      * <p>
      * This will create a new {@link WebDriverContext} by creating a new instance of {@link io.github.kgress.scaffold.webdriver.WebDriverManager} and creating
@@ -132,19 +93,9 @@ public class ScaffoldBaseTest {
      * @param testName the information on the test that is being ran. This plugs in with Junit Jupiter annotations.
      */
     private void setupWebdriver(String testName) {
-        try {
-            log.debug(String.format("WebDriver setup executing for test %s", testName));
-            var webDriverManager = new WebDriverManager(desiredCapabilities, seleniumGridRestTemplate);
-            getTestContext().setContext(webDriverManager, testName);
-        } catch (Throwable e) {
-            // If a test fails to start, we want to make sure and remove the driver from this thread
-            getTestContext().removeContext();
-
-            // Associate the exception with the test so we can report on it later
-            getTestContext().addExceptionForTest(testName, e);
-            log.error(String.format("Error with webDriverSetup for Test [%s]: %s", testName, AutomationUtils.getStackTrace(e)));
-            throw new RuntimeException(e);
-        }
+        log.debug(String.format("WebDriver setup executing for test %s", testName));
+        var webDriverManager = new WebDriverManager(desiredCapabilities, seleniumGridRestTemplate);
+        getTestContext().setContext(webDriverManager, testName);
     }
 
     /**
@@ -155,17 +106,25 @@ public class ScaffoldBaseTest {
      * @param testName the information on the test that is being ran. This plugs in with Junit Jupiter annotations.
      */
     private void startWebBrowser(String testName) {
-        try {
-            log.debug(String.format("Starting browser for test: %s", testName));
-            getWebDriverContext().getWebDriverManager().initDriver(testName);
-        } catch (Throwable e) {
-            // If a test fails to start, we want to make sure and remove the driver from this thread
-            getTestContext().removeContext();
+        log.debug(String.format("Starting browser for test: %s", testName));
+        getWebDriverContext().getWebDriverManager().initDriver(testName);
+    }
 
-            // Associate the exception with the test so we can report on it later
-            getTestContext().addExceptionForTest(testName, e);
-            log.error(String.format("Error with startBrowser for Test [%s]: %s", testName, AutomationUtils.getStackTrace(e)));
-            throw new RuntimeException(e);
-        }
+    /**
+     * Grabs the webdrivercontext for the current thread. This allows us to get the {@link WebDriverWrapper} for that specific thread.
+     *
+     * @return the {@link TestContext}
+     */
+    private TestContext getTestContext() {
+        return TestContext.baseContext();
+    }
+
+    /**
+     * Gets the {@link WebDriverContext} for the current thread.
+     *
+     * @return the {@link WebDriverContext}
+     */
+    private WebDriverContext getWebDriverContext() {
+        return getTestContext().getWebDriverContext();
     }
 }
