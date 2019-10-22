@@ -79,7 +79,7 @@ public class WebDriverManager {
 
     /**
      * Creates a new instance of a {@link WebDriver}, wraps it into a {@link WebDriverWrapper}, and sets an implicit timeout.
-     *
+     * <p>
      * 1. Check if the {@link WebDriverWrapper} is null from the {@link WebDriverContext}. If it's null, the driver already exists and
      * we've encountered a threading issue.
      * 2. Configure the new browser driver.
@@ -150,7 +150,7 @@ public class WebDriverManager {
 
     /**
      * Opens the URL.
-     *
+     * <p>
      * TODO We should add cookie jar init during the start of the web driver.
      *
      * @param webDriver the instance of the webdriver to be used
@@ -181,11 +181,20 @@ public class WebDriverManager {
      */
     private MutableCapabilities getDesiredCapabilities() {
         MutableCapabilities browserOptions;
-
+        boolean headless = false;
+        if (runType == HEADLESS) {
+            headless = true;
+        }
         if (runType != UNIT) {
             switch (browserType) {
                 case Chrome:
-                    browserOptions = new ChromeOptions().setAcceptInsecureCerts(true);
+                    if (headless) {
+                        log.info("Setting up headless browser with maximized screen.");
+                        browserOptions = new ChromeOptions().setAcceptInsecureCerts(true)
+                                .addArguments("--headless").addArguments("--window-size=1440x5000");
+                    } else {
+                        browserOptions = new ChromeOptions().setAcceptInsecureCerts(true);
+                    }
                     break;
                 case Safari:
                     browserOptions = new SafariOptions();
@@ -228,7 +237,7 @@ public class WebDriverManager {
         log.info("Starting driver for test: " + testName);
         if (runType == UNIT) {
             webDriver = new MockWebDriver();
-        } else if (runType == LOCAL) {
+        } else if (runType == LOCAL || runType == HEADLESS) {
             webDriver = configureLocalBrowser(browserOptions);
         } else if (runType == SAUCE || runType == GRID) {
             webDriver = configureRemoteBrowser(browserOptions, testName);
@@ -331,6 +340,7 @@ public class WebDriverManager {
      * Checks if the run type from the desiredCapabilities bean is GRID. If it is, it'll pull the session id and send
      * a new grid request using the {@link RestTemplate} set up from {@link SeleniumGridServiceConfiguration}.
      * <p>
+     *
      * @param remoteWebDriver the {@link RemoteWebDriver} that was setup from the configuration method.
      */
     private void checkIfGridAndSendGridRequest(RemoteWebDriver remoteWebDriver) {
@@ -407,9 +417,9 @@ public class WebDriverManager {
      * <p>
      * If any issue is discovered during the starting of this browser, we will throw a {@link WebDriverException} with a
      * custom message.
-     *
+     * <p>
      * TODO Let's switch this to W3 standard: https://saucelabs.com/products/open-source-frameworks/selenium/w3c-webdriver-protocol
-     *
+     * <p>
      * TODO We also need to update report test pass/fail to sauce so it shows up as pass/fail on the sauce UI
      *
      * @param browserOptions the desired capabilities we're adding on to
