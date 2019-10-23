@@ -43,6 +43,15 @@ public class InputWebElement extends AbstractClickable {
     }
 
     /**
+     * @param keys the text or keyboard action to send to the input
+     *
+     * @see WebElement#sendKeys(CharSequence...)
+     */
+    public void sendKeys(CharSequence ...keys) {
+        getWebElement().sendKeys(keys);
+    }
+
+    /**
      * Clears the text from the input.
      *
      * @see WebElement#clear()
