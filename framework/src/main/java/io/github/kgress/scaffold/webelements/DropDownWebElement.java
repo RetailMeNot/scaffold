@@ -74,6 +74,15 @@ public class DropDownWebElement extends AbstractWebElement {
     }
 
     /**
+     * @param keys the text or keyboard action to send to the input
+     *
+     * @see WebElement#sendKeys(CharSequence...)
+     */
+    public void sendKeys(CharSequence ...keys) {
+        getWebElement().sendKeys(keys);
+    }
+
+    /**
      * Return a Selenium Select object (a combo box) based on the underlying {@link WebElement}
      *
      * @return the {@link Select} object
