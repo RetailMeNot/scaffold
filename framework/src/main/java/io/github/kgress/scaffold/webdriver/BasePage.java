@@ -1,7 +1,5 @@
 package io.github.kgress.scaffold.webdriver;
 
-import io.github.kgress.scaffold.webelements.DivWebElement;
-
 /**
  * The purpose of this object is to provide a set of common functionality that can be shared across page objects in
  * an implementing project.
@@ -17,18 +15,8 @@ import io.github.kgress.scaffold.webelements.DivWebElement;
 public abstract class BasePage {
 
     /**
-     * A method to be overridden by the implementing project. Typically, this will look something like:
-     *
-     * <pre>{@code
-     *     @Override
-     *     public boolean isOnPage() {
-     *         return getHeader.isDisplayed();
-     *     }
-     *}</pre>
-     *
-     * In this above example, we assume there is already a new {@link DivWebElement} created as a property named "header."
-     * The isOnPage() method will then get that header and ensure that it is displayed. Typically, it's best to ues elements
-     * that are unique to the page object that is being navigated to.
+     * A method to be overridden by the implementing project. Typically, it's best to use elements that are unique to
+     * the page object that is being navigated to.
      *
      * @return the {@link Boolean} value to determine if the page is correctly loaded
      */
