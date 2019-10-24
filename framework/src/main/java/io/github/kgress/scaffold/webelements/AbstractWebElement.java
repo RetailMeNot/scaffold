@@ -164,6 +164,16 @@ public abstract class AbstractWebElement implements BaseWebElement {
     }
 
     @Override
+    public boolean hasClass(String text) {
+        return getWebElement().getAttribute("class").contains(text);
+    }
+
+    @Override
+    public boolean isActive() {
+        return getWebElement().getAttribute("class").contains("active");
+    }
+
+    @Override
     // TODO this is duplicate from WebDriverWrapper. Can we just provide the wrapper instead of re-writing? Or, should
     //   we move finding elements to this class?
     public <T extends AbstractWebElement> T findElement(Class<T> elementClass, By by) {

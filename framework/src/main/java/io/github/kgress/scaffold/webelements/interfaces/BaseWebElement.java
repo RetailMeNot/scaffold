@@ -51,6 +51,21 @@ public interface BaseWebElement {
     String getText();
 
     /**
+     * Returns a boolean response on if the html class contains a string specified by the text parameter
+     *
+     * @param text the string being searched for in the html class
+     * @return the response as true or false
+     */
+    boolean hasClass(String text);
+
+    /**
+     * Returns a boolean response on if the html class is currently active
+     *
+     * @return the response as true or false
+     */
+    boolean isActive();
+
+    /**
      * Finds an element of the given class, using the current webelement as the "anchor" point. Similar to the Selenium webelement.findElement() method,
      * this allows you to ask for a LinkWebElement or ButtonWebElement based on the same criteria
      *
