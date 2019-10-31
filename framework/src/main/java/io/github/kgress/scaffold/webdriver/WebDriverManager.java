@@ -7,6 +7,7 @@ import io.github.kgress.scaffold.models.GridSessionRequest;
 import io.github.kgress.scaffold.models.GridSessionResponse;
 import io.github.kgress.scaffold.models.enums.BrowserType;
 import io.github.kgress.scaffold.models.enums.RunType;
+import io.github.kgress.scaffold.models.enums.ScreenResolution;
 import io.github.kgress.scaffold.models.unittests.MockWebDriver;
 import io.github.kgress.scaffold.webdriver.interfaces.TestContextSetting;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +40,8 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import static io.github.kgress.scaffold.models.enums.RunType.*;
+import static io.github.kgress.scaffold.models.enums.ScreenResolution.ScreenResolutionType.SAUCELABS;
+import static io.github.kgress.scaffold.models.enums.ScreenResolution.ScreenResolutionType.SELENIUM;
 import static io.github.kgress.scaffold.util.AutomationUtils.getStackTrace;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
@@ -56,6 +59,7 @@ public class WebDriverManager {
 
     private static final String GRID_TEST_SESSION_URI = "/grid/api/testsession";
     private static final Long TEN_SECONDS = 10L;
+    private static final String SCREEN_RESOLUTION_CAPABILITY = "screenResolution"; //conforms to selenium capability standard
 
     private final RestTemplate seleniumGridRestTemplate;
     private final DesiredCapabilitiesConfigurationProperties desiredCapabilities;
@@ -66,6 +70,7 @@ public class WebDriverManager {
     private Set<Cookie> cookieJar = new TreeSet<>();
     private RunType runType;
     private BrowserType browserType;
+    private ScreenResolution screenResolution;
     private String sessionId;
 
     @Autowired
@@ -75,6 +80,7 @@ public class WebDriverManager {
         this.seleniumGridRestTemplate = seleniumGridRestTemplate;
         this.runType = desiredCapabilities.getRunType();
         this.browserType = desiredCapabilities.getBrowserType();
+        this.screenResolution = desiredCapabilities.getScreenResolution();
     }
 
     /**
@@ -179,19 +185,22 @@ public class WebDriverManager {
      *
      * @return as a browser options object like {@link ChromeOptions}. It must be an object that extends off of {@link MutableCapabilities}
      */
-    private MutableCapabilities getDesiredCapabilities() {
+    private MutableCapabilities configureBrowserOptions() {
         MutableCapabilities browserOptions;
 
         if (runType != UNIT) {
             switch (browserType) {
                 case Chrome:
-                    browserOptions = new ChromeOptions().setAcceptInsecureCerts(true);
+                    browserOptions = new ChromeOptions()
+                            .setAcceptInsecureCerts(true)
+                            .addArguments("--window-size=" + screenResolution.getScreenShotResolutionAsString(SELENIUM));
                     break;
                 case Safari:
                     browserOptions = new SafariOptions();
                     break;
                 case Firefox:
-                    browserOptions = new FirefoxOptions().setAcceptInsecureCerts(true);
+                    browserOptions = new FirefoxOptions().setAcceptInsecureCerts(true)
+                            .addArguments("--window-size=" + screenResolution.getScreenShotResolutionAsString(SELENIUM));
                     break;
                 case InternetExplorer:
                     browserOptions = new InternetExplorerOptions();
@@ -200,7 +209,8 @@ public class WebDriverManager {
                     browserOptions = new EdgeOptions();
                     break;
                 case Opera:
-                    browserOptions = new OperaOptions();
+                    browserOptions = new OperaOptions()
+                            .addArguments("--window-size=" + screenResolution.getScreenShotResolutionAsString(SELENIUM));
                     break;
                 default:
                     throw new WebDriverContextException("No browser or invalid browser type called for: " + browserType.toString());
@@ -222,7 +232,7 @@ public class WebDriverManager {
      * @return as {@link WebDriver}
      */
     private WebDriver configureBrowserDriver(String testName) {
-        var browserOptions = getDesiredCapabilities();
+        var browserOptions = configureBrowserOptions();
         WebDriver webDriver;
 
         log.info("Starting driver for test: " + testName);
@@ -231,6 +241,7 @@ public class WebDriverManager {
         } else if (runType == LOCAL) {
             webDriver = configureLocalBrowser(browserOptions);
         } else if (runType == SAUCE || runType == GRID) {
+            browserOptions.setCapability(SCREEN_RESOLUTION_CAPABILITY, screenResolution.getScreenShotResolutionAsString(SAUCELABS));
             webDriver = configureRemoteBrowser(browserOptions, testName);
         } else {
             throw new WebDriverContextException("Unknown run type: " + runType);
@@ -434,7 +445,8 @@ public class WebDriverManager {
             remoteUrl = URI.create("http://" + username + ":" + accessKey + sauceUrl).toString();
             return startScreenshotRemoteDriver(remoteUrl, browserOptions);
         } catch (Exception e) {
-            throw new WebDriverContextException("Unable to start new remote session against saucelabs.", e);
+            throw new WebDriverContextException("Unable to start new remote session against saucelabs. Please check your " +
+                    "configuration.", e);
         }
     }
 

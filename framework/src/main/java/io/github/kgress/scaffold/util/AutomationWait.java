@@ -17,7 +17,7 @@ import java.util.Map;
 @Slf4j
 public class AutomationWait {
 
-    private final static Long TEN_SECONDS = 10L;
+    private final static Long FIVE_SECONDS = 5L;
     private final WebDriverWrapper driver;
 
     // Custom timeout the developer can set if they wish to override the default timeout of 60 seconds on a
@@ -103,7 +103,7 @@ public class AutomationWait {
                 customTimeout = null;
             } else {
                 // If we get here, then use our default timeout
-                returnTimeout = TEN_SECONDS;
+                returnTimeout = FIVE_SECONDS;
             }
         }
         return returnTimeout;

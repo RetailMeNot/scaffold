@@ -24,6 +24,10 @@ public class DateWebElement extends AbstractWebElement {
     // Local DateFormat which will override the global DateFormat
     private DateFormat localDateFormat;
 
+    public DateWebElement(String cssSelector) {
+        super(cssSelector);
+    }
+
     public DateWebElement(By by) {
         super(by);
     }

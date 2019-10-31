@@ -8,6 +8,10 @@ import org.openqa.selenium.WebElement;
  */
 public class InputWebElement extends AbstractClickable {
 
+    public InputWebElement(String cssSelector) {
+        super(cssSelector);
+    }
+
     public InputWebElement(By by) {
         super(by);
     }

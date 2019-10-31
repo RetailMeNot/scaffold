@@ -8,6 +8,10 @@ import org.openqa.selenium.WebElement;
  */
 public class CheckBoxWebElement extends AbstractClickable {
 
+    public CheckBoxWebElement(String cssSelector) {
+        super(cssSelector);
+    }
+
     public CheckBoxWebElement(By by) {
         super(by);
     }

@@ -5,6 +5,7 @@ import io.github.kgress.scaffold.models.unittests.MockLogs;
 import io.github.kgress.scaffold.models.unittests.MockWebDriver;
 import io.github.kgress.scaffold.models.unittests.MockWebElement;
 import io.github.kgress.scaffold.util.AutomationUtils;
+import io.github.kgress.scaffold.webelements.AbstractWebElement;
 import io.github.kgress.scaffold.webelements.DivWebElement;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
@@ -16,11 +17,7 @@ import org.openqa.selenium.logging.LogType;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.springframework.test.util.AssertionErrors.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class AbstractWebElementTests extends BaseUnitTest {
 
@@ -99,47 +96,47 @@ public class AbstractWebElementTests extends BaseUnitTest {
     public void testIsEnabled() {
         var testElement = new TestableAbstractWebElement(mockElement1);
 
-        assertTrue("The element should be enabled by default", testElement.isEnabled());
+        assertTrue(testElement.isEnabled(), "The element should be enabled by default");
         mockElement1.setEnabled(false);
-        assertFalse("The element should no longer be enabled", testElement.isEnabled());
+        assertFalse(testElement.isEnabled(), "The element should no longer be enabled");
     }
 
     @Test
     public void testIsDisplayed() {
         var testElement = new TestableAbstractWebElement(mockElement1);
 
-        assertTrue("The element should be displayed by default", testElement.isDisplayed());
+        assertTrue(testElement.isDisplayed(), "The element should be displayed by default");
         mockElement1.setIsDisplayed(false);
-        assertFalse("The element should no longer be displayed", testElement.isDisplayed());
+        assertFalse(testElement.isDisplayed(), "The element should no longer be displayed");
     }
 
     @Test
     public void testGetSize() {
         testAbstractWebElement.setBaseElement(mockElement1);
-        assertNull("getSize() should return null", testAbstractWebElement.getSize());
+        assertNull(testAbstractWebElement.getSize(), "getSize() should return null");
     }
 
     @Test
     public void testGetLocation() {
         testAbstractWebElement.setBaseElement(mockElement1);
-        assertNull("getLocation() should return null", testAbstractWebElement.getLocation());
+        assertNull(testAbstractWebElement.getLocation(), "getLocation() should return null");
     }
 
     @Test
     public void testGetCssValue() {
         testAbstractWebElement.setBaseElement(mockElement1);
-        assertNull("getCssValue() should return null", testAbstractWebElement.getCssValue("something"));
+        assertNull(testAbstractWebElement.getCssValue("something"), "getCssValue() should return null");
     }
 
     @Test
     public void testExists() {
         var testElement = new TestableAbstractWebElement(mockElement1);
-        assertTrue("The element should exist", testElement.exists());
+        assertTrue(testElement.exists(), "The element should exist");
     }
 
     @Test
     public void testExistsFalse() {
-        assertFalse("The element should not exist", testAbstractWebElement.exists());
+        assertFalse(testAbstractWebElement.exists(), "The element should not exist");
     }
 
     /**
@@ -170,7 +167,7 @@ public class AbstractWebElementTests extends BaseUnitTest {
     @Test
     public void testToStringByAndByConstructor() {
         //The constructor that takes By locators for both the primary element and the parent element
-        var byElementByParent = new TestableAbstractWebElement(By.id( "baz"), By.xpath("//ew/xpath"));
+        var byElementByParent = new TestableAbstractWebElement(By.id("baz"), By.xpath("//ew/xpath"));
         assertEquals("Parent By: [By.xpath: //ew/xpath], By: [By.id: baz]", byElementByParent.toString(),
                 "The element's toString should be correct: 'By, parentBy' constructor");
     }
@@ -178,7 +175,7 @@ public class AbstractWebElementTests extends BaseUnitTest {
     @Test
     public void testToStringByAndWebElementConstructor() {
         //The constructor that takes a By locator for the main element, and a webelement for the parent
-        var byElementWebElementParent = new TestableAbstractWebElement( By.id( "baz"), new MockWebElement() );
+        var byElementWebElementParent = new TestableAbstractWebElement(By.id("baz"), new MockWebElement());
         assertEquals("Parent webelement: [MockWebElement: I Mock Thee!], By: [By.id: baz]", byElementWebElementParent.toString(),
                 "The element's toString should be correct: 'By, parent element' constructor");
     }
@@ -196,5 +193,38 @@ public class AbstractWebElementTests extends BaseUnitTest {
         //Test the null, null constructor (should never happen in real life, but you never know...)
         assertEquals("This element was not properly initialized with a By locator or a base element. Please check your code", testAbstractWebElement.toString(),
                 "The element's toString should be correct: 'null, null' constructor");
+    }
+
+    /**
+     * Test to ensure that we can find elements with the {@link AbstractWebElement#findElement(Class, String)}
+     * method. This method specifically finds an element with a CSS Selector.
+     */
+    @Test
+    public void testFindElementWithCSS() {
+        var sampleText = "Sample Text";
+        var abstractWebElement = new TestableAbstractWebElement("testSelector");
+        var testWebElement = new MockWebElement();
+        testWebElement.setText(sampleText);
+        mockWebDriver.setElementToFind(testWebElement);
+
+        var testDivWebElement = abstractWebElement.findElement(DivWebElement.class, ".testSelector");
+        assertTrue(testDivWebElement.getText().contains(sampleText));
+    }
+
+    @Test
+    public void testFindElementsWithCSS() {
+        var abstractWebElement = new TestableAbstractWebElement("testSelector");
+        var testElement1 = new MockWebElement().text(TEXT_NAME_1);
+        var testElement2 = new MockWebElement().text(TEXT_NAME_2);
+
+        var elementList = new ArrayList<WebElement>();
+        elementList.add(testElement1);
+        elementList.add(testElement2);
+        mockWebDriver.setElementsToFind(elementList);
+
+        var testDivWebElements = abstractWebElement.findElements(DivWebElement.class, ".testSelector");
+        assertEquals(2, testDivWebElements.size());
+        assertTrue(testDivWebElements.get(0).getText().contains(TEXT_NAME_1));
+        assertTrue(testDivWebElements.get(1).getText().contains(TEXT_NAME_2));
     }
 }

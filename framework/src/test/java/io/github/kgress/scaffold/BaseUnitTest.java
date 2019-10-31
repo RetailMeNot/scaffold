@@ -118,9 +118,13 @@ public abstract class BaseUnitTest {
     /**
      * A nested class for testing against abstract elements
      */
-    public class TestableAbstractWebElement extends AbstractWebElement {
+    public static class TestableAbstractWebElement extends AbstractWebElement {
         public TestableAbstractWebElement() {
             this(null, (By) null); //have to cast the second null arg to disambiguate the parentBy from the parentElement
+        }
+
+        public TestableAbstractWebElement(String cssSelector) {
+            super(cssSelector);
         }
 
         public TestableAbstractWebElement(By by, By parentBy) {

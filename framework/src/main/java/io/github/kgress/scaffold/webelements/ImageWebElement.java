@@ -12,6 +12,10 @@ public class ImageWebElement extends AbstractWebElement {
         super(by, parentElement);
     }
 
+    public ImageWebElement(String cssSelector) {
+        super(cssSelector);
+    }
+
     public ImageWebElement(By by) {
         super(by);
     }

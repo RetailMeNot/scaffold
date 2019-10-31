@@ -3,10 +3,13 @@ package io.github.kgress.scaffold.environment.config;
 import io.github.kgress.scaffold.models.enums.BrowserType;
 import io.github.kgress.scaffold.models.enums.Platform;
 import io.github.kgress.scaffold.models.enums.RunType;
+import io.github.kgress.scaffold.models.enums.ScreenResolution;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.NotNull;
+
+import static io.github.kgress.scaffold.models.enums.ScreenResolution.SIZE_1024x1080;
 
 /**
  * This model depicts the many Desired Capabilities of a Selenium WebDriver browser. This is used as an auto configuration
@@ -27,6 +30,7 @@ public class DesiredCapabilitiesConfigurationProperties {
     private String remoteUrl;
     private String browserVersion = ""; // Empty represents latest version
     private Platform runPlatform;
+    private ScreenResolution screenResolution = SIZE_1024x1080; // default screen size
     private boolean uploadScreenshots = false;
     private boolean useProxy = false;
     private final SauceContext sauce = new SauceContext();
@@ -63,6 +67,10 @@ public class DesiredCapabilitiesConfigurationProperties {
         return useProxy;
     }
 
+    public ScreenResolution getScreenResolution() {
+        return screenResolution;
+    }
+
     /**
      * The type of browser to be used. Chrome, Opera, Safari, etc.
      * <p>
@@ -97,6 +105,10 @@ public class DesiredCapabilitiesConfigurationProperties {
      */
     public void setRunType(RunType runType) {
         this.runType = runType;
+    }
+
+    public void setScreenResolution(ScreenResolution screenResolution) {
+        this.screenResolution = screenResolution;
     }
 
     /**

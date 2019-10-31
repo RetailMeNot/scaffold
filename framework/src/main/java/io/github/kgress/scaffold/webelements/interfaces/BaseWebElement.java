@@ -80,6 +80,16 @@ public interface BaseWebElement {
     <T extends AbstractWebElement> T findElement(Class<T> elementClass, By by);
 
     /**
+     * Performs the same find details by {@link #findElement(Class, By)} but with a css selector.
+     *
+     * @param elementClass the class of the element that is being found
+     * @param cssSelector the css selector of the element
+     * @param <T> the Type Reference that extends off of {@link AbstractWebElement}
+     * @return the element as the specified Type Reference {@link AbstractWebElement}
+     */
+    <T extends AbstractWebElement> T findElement(Class<T> elementClass, String cssSelector);
+
+    /**
      * Finds a list of elements of the given class, using the current webelement as the "anchor" point. Similar to the Selenium webelement.findElements() method,
      * this allows you to ask for a {@literal List<LinkWebElement>} or {@literal List<ButtonWebElement>} based on the same criteria.
      *
@@ -92,6 +102,16 @@ public interface BaseWebElement {
      * @return the list of elements as the specified Type Reference {@link AbstractWebElement}
      */
     <T extends AbstractWebElement> List<T> findElements(Class<T> elementClass, By by);
+
+    /**
+     * Performs the same find detailed by {@link #findElements(Class, By)} but with a css selector
+     *
+     * @param elementClass the class of the element that is being found
+     * @param cssSelector the css selector of the element
+     * @param <T> the type reference that extends {@link AbstractWebElement}
+     * @return the list of elements as the specified Type Reference {@link AbstractWebElement}
+     */
+    <T extends AbstractWebElement> List<T> findElements(Class<T> elementClass, String cssSelector);
 
     /**
      * Indicates whether or not the element is displayed.

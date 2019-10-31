@@ -11,8 +11,7 @@ import org.openqa.selenium.WebElement;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class WebDriverWrapperTests extends BaseUnitTest {
 
@@ -47,5 +46,16 @@ public class WebDriverWrapperTests extends BaseUnitTest {
     @Test
     public void testFindElementDoesntExist() {
         assertThrows(NoSuchElementException.class, () -> mockWebDriver.findElement(By.id("elementDoesNotExist")));
+    }
+
+    @Test
+    public void testSetSeleniumTimeout() {
+        var newTimeout = 10L;
+        var existingTimeout = webDriverWrapper.getSeleniumObjectTimeout();
+        var actualExistingTimeout = 15L; //The value set in WebDriverWrapper
+
+        assertEquals(actualExistingTimeout, existingTimeout);
+        webDriverWrapper.setSeleniumObjectTimeout(newTimeout);
+        assertEquals(newTimeout, webDriverWrapper.getSeleniumObjectTimeout());
     }
 }
