@@ -1,5 +1,7 @@
 package io.github.kgress.scaffold.webdriver;
 
+import org.openqa.selenium.interactions.Actions;
+
 /**
  * The purpose of this object is to provide a set of common functionality that can be shared across page objects in
  * an implementing project.
@@ -20,5 +22,13 @@ public abstract class BasePage {
      *
      * @return the {@link Boolean} value to determine if the page is correctly loaded
      */
-    protected abstract boolean isOnPage();
+    public abstract boolean isOnPage();
+
+    protected Actions getActions() {
+        return getWebDriverWrapper().getActions();
+    }
+
+    private WebDriverWrapper getWebDriverWrapper() {
+        return TestContext.baseContext().getWebDriverContext().getWebDriverManager().getWebDriverWrapper();
+    }
 }
