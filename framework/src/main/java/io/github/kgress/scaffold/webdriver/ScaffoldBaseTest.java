@@ -1,8 +1,11 @@
 package io.github.kgress.scaffold.webdriver;
 
 import io.github.kgress.scaffold.environment.config.DesiredCapabilitiesConfigurationProperties;
+import io.github.kgress.scaffold.webdriver.interfaces.TestContextSetting;
+import io.github.kgress.scaffold.webelements.WebElementWait;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
 import org.openqa.selenium.WebDriver;
@@ -82,6 +85,17 @@ public class ScaffoldBaseTest {
      */
     protected WebDriverWrapper getWebDriverWrapper() {
         return getWebDriverContext().getWebDriverManager().getWebDriverWrapper();
+    }
+
+    /**
+     * Enabled explicit waits on the thread. This feature will automatically perform a {@link WebElementWait#waitUntilDisplayed()}
+     * any instantiated strong typed element.
+     *
+     * To properly enable this, add it to your own projects {@link BeforeAll} method. This method must be static to respect
+     * the requirements of JUNIT.
+     */
+    protected static void enableExplicitWaits() {
+        TestContext.baseContext().addSetting(TestContextSetting.WAIT_FOR_DISPLAY_ENABLED, true);
     }
 
     /**

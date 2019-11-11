@@ -19,6 +19,10 @@ public class DivWebElement extends AbstractClickable {
         super(by);
     }
 
+    public DivWebElement(String cssSelector) {
+        super(cssSelector);
+    }
+
     public DivWebElement(By by, By parentBy) {
         super(by, parentBy);
     }
