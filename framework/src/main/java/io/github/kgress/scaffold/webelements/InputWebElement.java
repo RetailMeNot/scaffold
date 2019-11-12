@@ -8,6 +8,10 @@ import org.openqa.selenium.WebElement;
  */
 public class InputWebElement extends AbstractClickable {
 
+    public InputWebElement(String cssSelector) {
+        super(cssSelector);
+    }
+
     public InputWebElement(By by) {
         super(by);
     }
@@ -39,6 +43,15 @@ public class InputWebElement extends AbstractClickable {
      * @see WebElement#sendKeys(CharSequence...)
      */
     public void sendKeys(String keys) {
+        getWebElement().sendKeys(keys);
+    }
+
+    /**
+     * @param keys the text or keyboard action to send to the input
+     *
+     * @see WebElement#sendKeys(CharSequence...)
+     */
+    public void sendKeys(CharSequence ...keys) {
         getWebElement().sendKeys(keys);
     }
 

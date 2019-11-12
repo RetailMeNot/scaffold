@@ -51,6 +51,21 @@ public interface BaseWebElement {
     String getText();
 
     /**
+     * Returns a boolean response on if the html class contains a string specified by the text parameter
+     *
+     * @param text the string being searched for in the html class
+     * @return the response as true or false
+     */
+    boolean hasClass(String text);
+
+    /**
+     * Returns a boolean response on if the html class is currently active
+     *
+     * @return the response as true or false
+     */
+    boolean isActive();
+
+    /**
      * Finds an element of the given class, using the current webelement as the "anchor" point. Similar to the Selenium webelement.findElement() method,
      * this allows you to ask for a LinkWebElement or ButtonWebElement based on the same criteria
      *
@@ -65,6 +80,16 @@ public interface BaseWebElement {
     <T extends AbstractWebElement> T findElement(Class<T> elementClass, By by);
 
     /**
+     * Performs the same find details by {@link #findElement(Class, By)} but with a css selector.
+     *
+     * @param elementClass the class of the element that is being found
+     * @param cssSelector the css selector of the element
+     * @param <T> the Type Reference that extends off of {@link AbstractWebElement}
+     * @return the element as the specified Type Reference {@link AbstractWebElement}
+     */
+    <T extends AbstractWebElement> T findElement(Class<T> elementClass, String cssSelector);
+
+    /**
      * Finds a list of elements of the given class, using the current webelement as the "anchor" point. Similar to the Selenium webelement.findElements() method,
      * this allows you to ask for a {@literal List<LinkWebElement>} or {@literal List<ButtonWebElement>} based on the same criteria.
      *
@@ -77,6 +102,16 @@ public interface BaseWebElement {
      * @return the list of elements as the specified Type Reference {@link AbstractWebElement}
      */
     <T extends AbstractWebElement> List<T> findElements(Class<T> elementClass, By by);
+
+    /**
+     * Performs the same find detailed by {@link #findElements(Class, By)} but with a css selector
+     *
+     * @param elementClass the class of the element that is being found
+     * @param cssSelector the css selector of the element
+     * @param <T> the type reference that extends {@link AbstractWebElement}
+     * @return the list of elements as the specified Type Reference {@link AbstractWebElement}
+     */
+    <T extends AbstractWebElement> List<T> findElements(Class<T> elementClass, String cssSelector);
 
     /**
      * Indicates whether or not the element is displayed.

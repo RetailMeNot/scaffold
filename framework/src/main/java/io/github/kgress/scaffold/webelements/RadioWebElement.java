@@ -11,6 +11,10 @@ import org.openqa.selenium.WebElement;
  */
 public class RadioWebElement extends AbstractClickable {
 
+    public RadioWebElement(String cssSelector) {
+        super(cssSelector);
+    }
+
     public RadioWebElement(By by) {
         super(by);
     }

@@ -12,6 +12,10 @@ import org.openqa.selenium.WebElement;
  */
 public class StaticTextWebElement extends AbstractClickable {
 
+    public StaticTextWebElement(String cssSelector) {
+        super(cssSelector);
+    }
+
     public StaticTextWebElement(By by) {
         super(by);
     }

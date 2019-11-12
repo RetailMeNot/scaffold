@@ -10,10 +10,14 @@ import java.util.stream.Collectors;
 /**
  * A strongly typed representation of a DropDown {@link WebElement}.
  */
-public class DropDownWebElement extends AbstractWebElement {
+public class DropDownWebElement extends AbstractClickable {
 
     public DropDownWebElement(By by) {
         super(by);
+    }
+
+    public DropDownWebElement(String cssSelector) {
+        super(cssSelector);
     }
 
     public DropDownWebElement(By by, By parentBy) {
@@ -71,6 +75,15 @@ public class DropDownWebElement extends AbstractWebElement {
         if (value.isBlank()) {
             getSelectElement().selectByVisibleText(value);
         }
+    }
+
+    /**
+     * @param keys the text or keyboard action to send to the input
+     *
+     * @see WebElement#sendKeys(CharSequence...)
+     */
+    public void sendKeys(CharSequence ...keys) {
+        getWebElement().sendKeys(keys);
     }
 
     /**

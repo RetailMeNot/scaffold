@@ -39,6 +39,11 @@ public abstract class AbstractWebElement implements BaseWebElement {
     protected WebElement baseElement;
     private WebElementWait webElementWait;
 
+    public AbstractWebElement(String cssSelector) {
+        this.setBy(By.cssSelector(cssSelector));
+        initWait();
+    }
+
     /**
      * Create a new element, using the supplied By locator. This does not call or invoke WebDriver in any way--it merely stores the locator for later use
      *
@@ -164,6 +169,16 @@ public abstract class AbstractWebElement implements BaseWebElement {
     }
 
     @Override
+    public boolean hasClass(String text) {
+        return getWebElement().getAttribute("class").contains(text);
+    }
+
+    @Override
+    public boolean isActive() {
+        return getWebElement().getAttribute("class").contains("active");
+    }
+
+    @Override
     // TODO this is duplicate from WebDriverWrapper. Can we just provide the wrapper instead of re-writing? Or, should
     //   we move finding elements to this class?
     public <T extends AbstractWebElement> T findElement(Class<T> elementClass, By by) {
@@ -192,6 +207,11 @@ public abstract class AbstractWebElement implements BaseWebElement {
     }
 
     @Override
+    public <T extends AbstractWebElement> T findElement(Class<T> elementClass, String cssSelector) {
+        return findElement(elementClass, By.cssSelector(cssSelector));
+    }
+
+    @Override
     // TODO this is duplicate from WebDriverWrapper. Can we just provide the wrapper instead of re-writing? Or, should
     //   we move finding elements to this class?
     public <T extends AbstractWebElement> List<T> findElements(Class<T> elementClass, By by) {
@@ -215,6 +235,11 @@ public abstract class AbstractWebElement implements BaseWebElement {
             }
         }
         return newElements;
+    }
+
+    @Override
+    public <T extends AbstractWebElement> List<T> findElements(Class<T> elementClass, String cssSelector) {
+        return findElements(elementClass, By.cssSelector(cssSelector));
     }
 
     @Override

@@ -17,6 +17,10 @@ public abstract class AbstractClickable extends AbstractWebElement {
     private boolean popupsExpected = false;
     protected DisplayWaitCondition waitCondition;
 
+    public AbstractClickable(String cssSelector) {
+        super(cssSelector);
+    }
+
     public AbstractClickable(By by) {
         super(by);
     }
