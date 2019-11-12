@@ -190,8 +190,8 @@ public class WebDriverManager {
                 case Chrome:
                     if (headless) {
                         log.info("Setting up headless browser with maximized screen.");
-                        browserOptions = new ChromeOptions().setAcceptInsecureCerts(true)
-                                .addArguments("--headless").addArguments("--window-size=1440x5000");
+                        browserOptions = new ChromeOptions().setAcceptInsecureCerts(true).setHeadless(true)
+                                .addArguments("--window-size=1440x5000");
                     } else {
                         browserOptions = new ChromeOptions().setAcceptInsecureCerts(true);
                     }
