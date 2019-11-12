@@ -193,7 +193,8 @@ public class WebDriverManager {
                         browserOptions = new ChromeOptions().setAcceptInsecureCerts(true).setHeadless(true)
                                 .addArguments("--window-size=1440x5000");
                     } else {
-                        browserOptions = new ChromeOptions().setAcceptInsecureCerts(true);
+                        browserOptions = new ChromeOptions().setAcceptInsecureCerts(true)
+                        .addArguments("--window-size=" + screenResolution.getScreenShotResolutionAsString(SELENIUM));
                     }
                     break;
                 case Safari:
