@@ -7,7 +7,8 @@ public enum RunType {
     UNIT("UNIT"),
     LOCAL("LOCAL"),
     GRID("GRID"),
-    SAUCE("SAUCE");
+    SAUCE("SAUCE"),
+    HEADLESS("HEADLESS");
 
     private final String runType;
 
