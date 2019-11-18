@@ -172,7 +172,7 @@ public class WebDriverManager {
 
             log.debug(String.format("Opening new WebDriver instance at '%s'", url));
         } else {
-            log.info("No starting URL specified, so no navigation will be performed at this time");
+            log.debug("No starting URL specified, so no navigation will be performed at this time");
         }
     }
 
@@ -195,7 +195,7 @@ public class WebDriverManager {
             switch (browserType) {
                 case Chrome:
                     if (headless) {
-                        log.info("Setting up headless browser with maximized screen.");
+                        log.debug("Setting up headless browser with maximized screen.");
                         browserOptions = new ChromeOptions().setAcceptInsecureCerts(true).setHeadless(true)
                                 .addArguments("--window-size=1440x5000");
                     } else {
@@ -243,7 +243,7 @@ public class WebDriverManager {
         var browserOptions = configureBrowserOptions();
         WebDriver webDriver;
 
-        log.info("Starting driver for test: " + testName);
+        log.debug("Starting driver for test: " + testName);
         if (runType == UNIT) {
             webDriver = new MockWebDriver();
         } else if (runType == LOCAL || runType == HEADLESS) {
@@ -254,7 +254,7 @@ public class WebDriverManager {
         } else {
             throw new WebDriverContextException("Unknown run type: " + runType);
         }
-        log.info("Driver started for test: " + testName);
+        log.debug("Driver started for test: " + testName);
         return webDriver;
     }
 
