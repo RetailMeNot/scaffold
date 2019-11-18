@@ -15,6 +15,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static java.util.logging.Level.SEVERE;
+import static java.util.logging.Level.WARNING;
+
 
 /**
  * This will serve as the "base" web element for everything you want to do on a page.
@@ -335,7 +338,13 @@ public abstract class AbstractWebElement implements BaseWebElement {
                 LogEntries logEntries = getWebDriverWrapper().manage().logs().get("browser");
 
                 for (LogEntry entry : logEntries) {
-                    log.error(new Date(entry.getTimestamp()) + " " + entry.getLevel() + " " + entry.getMessage());
+                    if (entry.getLevel().equals(SEVERE)) {
+                        log.error(new Date(entry.getTimestamp()) + " " + entry.getLevel() + " " + entry.getMessage());
+                    } else if (entry.getLevel().equals(WARNING)) {
+                        log.warn(new Date(entry.getTimestamp()) + " " + entry.getLevel() + " " + entry.getMessage());
+                    } else { // report anything else as info
+                        log.info(new Date(entry.getTimestamp()) + " " + entry.getLevel() + " " + entry.getMessage());
+                    }
                 }
             } catch (NullPointerException n) {
                 log.debug("No Errors reported in Console Logs during failure.");
