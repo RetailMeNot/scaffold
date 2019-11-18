@@ -196,6 +196,7 @@ public class WebDriverManager {
                 case Chrome:
                     if (headless) {
                         log.debug("Setting up headless browser with maximized screen.");
+                        System.setProperty("webdriver.chrome.silentOutput", "true");
                         browserOptions = new ChromeOptions().setAcceptInsecureCerts(true).setHeadless(true)
                                 .addArguments("--window-size=1440x5000");
                     } else {
