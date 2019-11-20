@@ -59,8 +59,8 @@ public class DropDownWebElement extends AbstractClickable {
         getSelectElement().selectByValue(value);
     }
 
-    public void getValue() {
-        getWebElement().getAttribute("value");
+    public String getValue() {
+        return getWebElement().getAttribute("value");
     }
 
     /**
