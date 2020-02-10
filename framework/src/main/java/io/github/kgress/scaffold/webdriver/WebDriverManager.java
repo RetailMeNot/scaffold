@@ -72,6 +72,8 @@ public class WebDriverManager {
     private BrowserType browserType;
     private ScreenResolution screenResolution;
     private String sessionId;
+    private String remoteUrl;
+
 
     @Autowired
     public WebDriverManager(DesiredCapabilitiesConfigurationProperties desiredCapabilities,
@@ -81,6 +83,7 @@ public class WebDriverManager {
         this.runType = desiredCapabilities.getRunType();
         this.browserType = desiredCapabilities.getBrowserType();
         this.screenResolution = desiredCapabilities.getScreenResolution();
+        this.remoteUrl = desiredCapabilities.getRemoteUrl();
     }
 
     /**
@@ -187,10 +190,14 @@ public class WebDriverManager {
      */
     private MutableCapabilities configureBrowserOptions() {
         MutableCapabilities browserOptions;
+
+        // Boolean condition for a headless run
         boolean headless = false;
         if (runType == HEADLESS) {
             headless = true;
         }
+
+        // If the run type isn't unit, configure the options based on the browser type
         if (runType != UNIT) {
             switch (browserType) {
                 case Chrome:
@@ -198,7 +205,10 @@ public class WebDriverManager {
                         log.debug("Setting up headless browser with maximized screen.");
                         System.setProperty("webdriver.chrome.silentOutput", "true");
                         browserOptions = new ChromeOptions().setAcceptInsecureCerts(true).setHeadless(true)
-                                .addArguments("--window-size=1440x5000");
+                                .addArguments("--window-size=1440x5000")
+                                .addArguments("--whitelisted-ips")
+                                .addArguments("--no-sandbox")
+                                .addArguments("--disable-extensions");
                     } else {
                         browserOptions = new ChromeOptions().setAcceptInsecureCerts(true)
                         .addArguments("--window-size=" + screenResolution.getScreenShotResolutionAsString(SELENIUM));
@@ -224,11 +234,14 @@ public class WebDriverManager {
                 default:
                     throw new WebDriverContextException("No browser or invalid browser type called for: " + browserType.toString());
             }
-            // If the runTyep is set to GRID, we should set a "uuid" capability for tracking
+
+            // If the runType is set to GRID, we should set a "uuid" capability for tracking
             if (runType == GRID) {
                 var uuid = TestContext.baseContext().getSetting(String.class, TestContextSetting.TEST_RUN_ID);
                 browserOptions.setCapability("uuid", uuid);
             }
+
+        // Otherwise if the run type is set to UNIT, create a default mutable capabilities object for the mock driver
         } else {
             browserOptions = new MutableCapabilities();
         }
@@ -241,19 +254,38 @@ public class WebDriverManager {
      * @return as {@link WebDriver}
      */
     private WebDriver configureBrowserDriver(String testName) {
-        var browserOptions = configureBrowserOptions();
         WebDriver webDriver;
 
+        // Create the MutableCapabilities based on the type of run that's being executed
+        var browserOptions = configureBrowserOptions();
+
         log.debug("Starting driver for test: " + testName);
+        // Scaffold has a run type of unit to be used with the unit testing in this repo. If it's unit, create a mock driver
         if (runType == UNIT) {
             webDriver = new MockWebDriver();
+
+        // If the run type is local or headless, configure a new browser intended for local use
         } else if (runType == LOCAL || runType == HEADLESS) {
-            webDriver = configureLocalBrowser(browserOptions);
+
+            // If the remote url isn't null, we should be configuring a remote browser. Even though the run type is still
+            // local centric, it's possible to use remote url with "local" or "headless" runs through docker.
+            if (remoteUrl != null) {
+                webDriver = configureRemoteBrowser(browserOptions, testName);
+
+            // Otherwise, if the remote url is not in the configuration, configure a default local browser.
+            } else {
+                webDriver = configureLocalBrowser(browserOptions);
+            }
+
+        // If the run type is sauce of grid, configure a remote browser
         } else if (runType == SAUCE || runType == GRID) {
             browserOptions.setCapability(SCREEN_RESOLUTION_CAPABILITY, screenResolution.getScreenShotResolutionAsString(SAUCELABS));
             webDriver = configureRemoteBrowser(browserOptions, testName);
+
+        // If an unknown run type has been passed in, throw an error
         } else {
-            throw new WebDriverContextException("Unknown run type: " + runType);
+            throw new WebDriverContextException(String
+                    .format("Unknown run type: %s. Please check your configuration.", runType.getRunType()));
         }
         log.debug("Driver started for test: " + testName);
         return webDriver;
@@ -323,11 +355,6 @@ public class WebDriverManager {
         var runPlatform = desiredCapabilities.getRunPlatform();
         RemoteWebDriver remoteWebDriver;
 
-        // If the test is using GRID but the browserOptions are null, throw an error. We must have DesiredCapabilitiesConfigurationProperties configured.
-        if (browserOptions == null) {
-            throw new WebDriverContextException("DesiredCapabilitiesConfigurationProperties object was null.  This must be initialized to use Grid");
-        }
-
         // If the browser version isn't null, set the version capability to what the user wants
         if (browserVersion != null) {
             browserOptions.setCapability("version", browserVersion);
@@ -338,9 +365,12 @@ public class WebDriverManager {
             browserOptions.setCapability("platform", runPlatform);
         }
 
+        // Create the remote web driver and set the session id, adding it to the test context
         remoteWebDriver = createRemoteWebDriver(browserOptions, testName);
         sessionId = remoteWebDriver.getSessionId().toString();
         TestContext.baseContext().addSetting("SESSION_ID", sessionId);
+
+        // Check if the run type is GRID. If it is, send the test info through to grid
         checkIfGridAndSendGridRequest(remoteWebDriver);
         return remoteWebDriver;
     }
@@ -385,12 +415,30 @@ public class WebDriverManager {
         RemoteWebDriver remoteWebDriver;
 
         log.debug("Tests will be executed against a Remote Host");
+        // If the run type is grid, create a generic remote browser
         if (runType == GRID) {
-            remoteWebDriver = configureGridRemoteBrowser(browserOptions);
+            remoteWebDriver = configureGenericRemoteBrowser(browserOptions);
+
+        // If the run type is sauce, create a configuration that is specific to sauce lab
         } else if (runType == SAUCE) {
             remoteWebDriver = configureSauceRemoteBrowser(browserOptions, testName);
-        } else {
-            throw new WebDriverContextException("Error initializing the Remote Web Driver.");
+
+        // If the run type is local or headless, and the remote url is not null, we should create a remote browser with
+        // the provided remote url. Otherwise, throw an exception with instructions on how checking configuration.
+        } else if (runType == LOCAL || runType == HEADLESS) {
+            if (remoteUrl != null) {
+                remoteWebDriver = configureGenericRemoteBrowser(browserOptions);
+            } else {
+                throw new WebDriverException("Unable to start a Remote Web Driver for a run type of HEADLESS or LOCAL" +
+                        "with a null remoteUrl. Please check your configuration and try again.");
+            }
+        }
+
+        // If a non run type is passed in, throw an error.
+        else {
+            throw new WebDriverContextException(String
+                    .format("Unable to start a Remote Web Driver for runType=%s. " +
+                            "Please check your configuration and try again.", runType.getRunType()));
         }
         return remoteWebDriver;
     }
@@ -406,9 +454,7 @@ public class WebDriverManager {
      * @param browserOptions the desired capabilities we're adding on to
      * @return the driver as {@link RemoteWebDriver}
      */
-    private RemoteWebDriver configureGridRemoteBrowser(MutableCapabilities browserOptions) {
-        var remoteUrl = desiredCapabilities.getRemoteUrl();
-
+    private RemoteWebDriver configureGenericRemoteBrowser(MutableCapabilities browserOptions) {
         try {
             return startScreenshotRemoteDriver(remoteUrl, browserOptions);
         } catch (Exception e) {
@@ -438,7 +484,6 @@ public class WebDriverManager {
      * @return the driver as {@link RemoteWebDriver}
      */
     private RemoteWebDriver configureSauceRemoteBrowser(MutableCapabilities browserOptions, String testName) {
-        String remoteUrl;
         var sauce = desiredCapabilities.getSauce();
 
         // In order to build the URi correctly, pull the username and access key from the desired capabilities bean.
@@ -452,7 +497,9 @@ public class WebDriverManager {
                 browserOptions.setCapability("tunnelIdentifier", tunnelIdentifier);
             }
             browserOptions.setCapability("name", testName);
-            remoteUrl = URI.create("http://" + username + ":" + accessKey + sauceUrl).toString();
+            if (remoteUrl == null) {
+                remoteUrl = URI.create("http://" + username + ":" + accessKey + sauceUrl).toString();
+            }
             return startScreenshotRemoteDriver(remoteUrl, browserOptions);
         } catch (Exception e) {
             throw new WebDriverContextException("Unable to start new remote session against saucelabs. Please check your " +
@@ -465,7 +512,7 @@ public class WebDriverManager {
      * <p>
      * This method will throw a {@link MalformedURLException}. Only two methods should be using this helper method:
      * {@link #configureSauceRemoteBrowser(MutableCapabilities, String)} and
-     * {@link #configureGridRemoteBrowser(MutableCapabilities)}. Those methods should be responsible for throwing their
+     * {@link #configureGenericRemoteBrowser(MutableCapabilities)}. Those methods should be responsible for throwing their
      * own custom error message since they both have varying reasons that could cause a failure during the initialization
      * of a new remote driver.
      *
