@@ -1,5 +1,6 @@
 package io.github.kgress.scaffold.webdriver;
 
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.interactions.Actions;
 
 /**
@@ -24,10 +25,32 @@ public abstract class BasePage {
      */
     public abstract boolean isOnPage();
 
+    /**
+     * Gets the Selenium based {@link Actions} object for the current thread. This is currently not strongly typed and
+     * should be added in a future update.
+     *
+     * TODO add a strongly typed {@link Actions} object
+     *
+     * @return {@link Actions}
+     */
     protected Actions getActions() {
         return getWebDriverWrapper().getActions();
     }
 
+    /**
+     * Gets the selenium based {@link JavascriptExecutor} for the current thread.
+     *
+     * @return {@link JavascriptExecutor}
+     */
+    protected JavascriptExecutor getJavascriptExecutor() {
+        return getWebDriverWrapper().getJavascriptExecutor();
+    }
+
+    /**
+     * Gets the {@link WebDriverWrapper} for the current thread.
+     *
+     * @return {@link WebDriverWrapper}
+     */
     private WebDriverWrapper getWebDriverWrapper() {
         return TestContext.baseContext().getWebDriverContext().getWebDriverManager().getWebDriverWrapper();
     }
