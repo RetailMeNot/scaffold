@@ -145,6 +145,7 @@ public class DesiredCapabilitiesConfigurationProperties {
         private String password;
         private String accessKey;
         private String tunnelIdentifier;
+        private String parentTunnel;
 
         public String getUrl() {
             return url;
@@ -165,6 +166,8 @@ public class DesiredCapabilitiesConfigurationProperties {
         public String getTunnelIdentifier() {
             return tunnelIdentifier;
         }
+
+        public String getParentTunnel() { return parentTunnel; }
 
         /**
          * The main sauce URL to be used. In the event this ever changes, we'll let the implementing project handle
@@ -203,6 +206,13 @@ public class DesiredCapabilitiesConfigurationProperties {
          */
         public void setTunnelIdentifier(String tunnelIdentifier) {
             this.tunnelIdentifier = tunnelIdentifier;
+        }
+
+        /**
+         * The name of the user that owns tunnel that is being used to allow sauce labs to connect to your lower environments.
+         */
+        public void setParentTunnel(String parentTunnel) {
+            this.parentTunnel = parentTunnel;
         }
     }
 }
