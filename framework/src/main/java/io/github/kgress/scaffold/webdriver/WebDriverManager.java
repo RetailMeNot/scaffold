@@ -491,10 +491,14 @@ public class WebDriverManager {
         var accessKey = sauce.getAccessKey();
         var sauceUrl = "@ondemand.saucelabs.com/wd/hub";
         var tunnelIdentifier = sauce.getTunnelIdentifier();
+        var parentTunnel = sauce.getParentTunnel();
 
         try {
             if (sauce.getTunnelIdentifier() != null) {
                 browserOptions.setCapability("tunnelIdentifier", tunnelIdentifier);
+            }
+            if (sauce.getParentTunnel() != null) {
+                browserOptions.setCapability("parentTunnel", parentTunnel);
             }
             browserOptions.setCapability("name", testName);
             if (remoteUrl == null) {
