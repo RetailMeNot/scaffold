@@ -29,9 +29,6 @@ public class ScreenshotRemoteDriver extends RemoteWebDriver implements TakesScre
      */
     @Override
     public <X> X getScreenshotAs(OutputType<X> target) throws WebDriverException {
-        if ((Boolean) getCapabilities().getCapability(CapabilityType.TAKES_SCREENSHOT)) {
-            return target.convertFromBase64Png(execute(DriverCommand.SCREENSHOT).getValue().toString());
-        }
-        return null;
+        return target.convertFromBase64Png(execute(DriverCommand.SCREENSHOT).getValue().toString());
     }
 }
