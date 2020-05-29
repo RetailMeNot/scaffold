@@ -278,11 +278,12 @@ public class WebDriverManager {
             }
 
         // If the run type is sauce of grid, configure a remote browser
-        } else if (runType == SAUCE || runType == GRID) {
+        } else if (runType == GRID) {
             browserOptions.setCapability(SCREEN_RESOLUTION_CAPABILITY, screenResolution.getScreenShotResolutionAsString(SAUCELABS));
             webDriver = configureRemoteBrowser(browserOptions, testName);
-
         // If an unknown run type has been passed in, throw an error
+        } else if (runType == SAUCE) {
+            webDriver = configureRemoteBrowser(browserOptions, testName);
         } else {
             throw new WebDriverContextException(String
                     .format("Unknown run type: %s. Please check your configuration.", runType.getRunType()));
@@ -475,8 +476,6 @@ public class WebDriverManager {
      * If any issue is discovered during the starting of this browser, we will throw a {@link WebDriverException} with a
      * custom message.
      * <p>
-     * TODO Let's switch this to W3 standard: https://saucelabs.com/products/open-source-frameworks/selenium/w3c-webdriver-protocol
-     * <p>
      * TODO We also need to update report test pass/fail to sauce so it shows up as pass/fail on the sauce UI
      *
      * @param browserOptions the desired capabilities we're adding on to
@@ -489,22 +488,30 @@ public class WebDriverManager {
         // In order to build the URi correctly, pull the username and access key from the desired capabilities bean.
         var username = sauce.getUserName();
         var accessKey = sauce.getAccessKey();
-        var sauceUrl = "@ondemand.saucelabs.com/wd/hub";
+        var defaultSauceUrl = "@ondemand.saucelabs.com/wd/hub";
         var tunnelIdentifier = sauce.getTunnelIdentifier();
         var parentTunnel = sauce.getParentTunnel();
+        var sauceCaps = new MutableCapabilities();
+        var sauceConfigUrl = sauce.getUrl();
 
         try {
             if (sauce.getTunnelIdentifier() != null) {
-                browserOptions.setCapability("tunnelIdentifier", tunnelIdentifier);
+                sauceCaps.setCapability("tunnelIdentifier", tunnelIdentifier);
             }
             if (sauce.getParentTunnel() != null) {
-                browserOptions.setCapability("parentTunnel", parentTunnel);
+                sauceCaps.setCapability("parentTunnel", parentTunnel);
             }
-            browserOptions.setCapability("name", testName);
-            if (remoteUrl == null) {
-                remoteUrl = URI.create("http://" + username + ":" + accessKey + sauceUrl).toString();
+            if (sauceConfigUrl == null) {
+                sauceConfigUrl = URI.create("https://" + username + ":" + accessKey + defaultSauceUrl).toString();
             }
-            return startScreenshotRemoteDriver(remoteUrl, browserOptions);
+
+            sauceCaps.setCapability("username", username);
+            sauceCaps.setCapability("accessKey", accessKey);
+            sauceCaps.setCapability("name", testName);
+            sauceCaps.setCapability("screenResolution", screenResolution.getScreenShotResolutionAsString(SAUCELABS));
+
+            browserOptions.setCapability("sauce:options", sauceCaps);
+            return startScreenshotRemoteDriver(sauceConfigUrl, browserOptions);
         } catch (Exception e) {
             throw new WebDriverContextException("Unable to start new remote session against saucelabs. Please check your " +
                     "configuration.", e);
@@ -532,4 +539,3 @@ public class WebDriverManager {
         }
     }
 }
-
