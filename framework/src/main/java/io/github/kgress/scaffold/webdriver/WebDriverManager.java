@@ -211,7 +211,7 @@ public class WebDriverManager {
                                 .addArguments("--disable-extensions");
                     } else {
                         browserOptions = new ChromeOptions().setAcceptInsecureCerts(true)
-                        .addArguments("--window-size=" + screenResolution.getScreenShotResolutionAsString(SELENIUM));
+                                .addArguments("--window-size=" + screenResolution.getScreenShotResolutionAsString(SELENIUM));
                     }
                     break;
                 case Safari:
@@ -241,7 +241,7 @@ public class WebDriverManager {
                 browserOptions.setCapability("uuid", uuid);
             }
 
-        // Otherwise if the run type is set to UNIT, create a default mutable capabilities object for the mock driver
+            // Otherwise if the run type is set to UNIT, create a default mutable capabilities object for the mock driver
         } else {
             browserOptions = new MutableCapabilities();
         }
@@ -264,7 +264,7 @@ public class WebDriverManager {
         if (runType == UNIT) {
             webDriver = new MockWebDriver();
 
-        // If the run type is local or headless, configure a new browser intended for local use
+            // If the run type is local or headless, configure a new browser intended for local use
         } else if (runType == LOCAL || runType == HEADLESS) {
 
             // If the remote url isn't null, we should be configuring a remote browser. Even though the run type is still
@@ -272,16 +272,16 @@ public class WebDriverManager {
             if (remoteUrl != null) {
                 webDriver = configureRemoteBrowser(browserOptions, testName);
 
-            // Otherwise, if the remote url is not in the configuration, configure a default local browser.
+                // Otherwise, if the remote url is not in the configuration, configure a default local browser.
             } else {
                 webDriver = configureLocalBrowser(browserOptions);
             }
 
-        // If the run type is sauce of grid, configure a remote browser
+            // If the run type is sauce of grid, configure a remote browser
         } else if (runType == GRID) {
             browserOptions.setCapability(SCREEN_RESOLUTION_CAPABILITY, screenResolution.getScreenShotResolutionAsString(SAUCELABS));
             webDriver = configureRemoteBrowser(browserOptions, testName);
-        // If an unknown run type has been passed in, throw an error
+            // If an unknown run type has been passed in, throw an error
         } else if (runType == SAUCE) {
             webDriver = configureRemoteBrowser(browserOptions, testName);
         } else {
@@ -354,18 +354,35 @@ public class WebDriverManager {
     private WebDriver configureRemoteBrowser(MutableCapabilities browserOptions, String testName) {
         var browserVersion = desiredCapabilities.getBrowserVersion();
         var runPlatform = desiredCapabilities.getRunPlatform();
+		var browserType = desiredCapabilities.getBrowserType();
         RemoteWebDriver remoteWebDriver;
 
-        // If the browser version isn't null, set the version capability to what the user wants
-        if (browserVersion != null) {
-            browserOptions.setCapability("version", browserVersion);
-        }
+        if (runType == SAUCE) {
+            // If the browser version isn't null, set the version capability to what the user wants
+            if (browserVersion != null) {
+                browserOptions.setCapability("browserVersion", browserVersion);
+            }
 
-        // If the run platform value isn't null, set the platform to what the user wants
-        if (runPlatform != null) {
-            browserOptions.setCapability("platform", runPlatform);
-        }
+			// If the browser type isn't null, set the type capability to what the user wants
+			if (browserType != null) {
+				browserOptions.setCapability("browserName", browserType);
+			}
+			
+            // If the run platform value isn't null, set the platform to what the user wants
+            if (runPlatform != null) {
+                browserOptions.setCapability("platformName", runPlatform);
+            }
+        } else {
+            // If the browser version isn't null, set the version capability to what the user wants
+            if (browserVersion != null) {
+                browserOptions.setCapability("version", browserVersion);
+            }
 
+            // If the run platform value isn't null, set the platform to what the user wants
+            if (runPlatform != null) {
+                browserOptions.setCapability("platform", runPlatform);
+            }
+        }
         // Create the remote web driver and set the session id, adding it to the test context
         remoteWebDriver = createRemoteWebDriver(browserOptions, testName);
         sessionId = remoteWebDriver.getSessionId().toString();
@@ -420,12 +437,12 @@ public class WebDriverManager {
         if (runType == GRID) {
             remoteWebDriver = configureGenericRemoteBrowser(browserOptions);
 
-        // If the run type is sauce, create a configuration that is specific to sauce lab
+            // If the run type is sauce, create a configuration that is specific to sauce lab
         } else if (runType == SAUCE) {
             remoteWebDriver = configureSauceRemoteBrowser(browserOptions, testName);
 
-        // If the run type is local or headless, and the remote url is not null, we should create a remote browser with
-        // the provided remote url. Otherwise, throw an exception with instructions on how checking configuration.
+            // If the run type is local or headless, and the remote url is not null, we should create a remote browser with
+            // the provided remote url. Otherwise, throw an exception with instructions on how checking configuration.
         } else if (runType == LOCAL || runType == HEADLESS) {
             if (remoteUrl != null) {
                 remoteWebDriver = configureGenericRemoteBrowser(browserOptions);
