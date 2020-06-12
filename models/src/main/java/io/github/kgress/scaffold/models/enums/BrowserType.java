@@ -5,12 +5,12 @@ package io.github.kgress.scaffold.models.enums;
  */
 public enum BrowserType {
 
-    Firefox("Firefox"),
-    Chrome("Chrome"),
-    Safari("Safari"),
-    InternetExplorer("InternetExplorer"),
-    Edge("Edge"),
-    Opera("Opera");
+    FIREFOX("Firefox"),
+    CHROME("Chrome"),
+    SAFARI("Safari"),
+    INTERNET_EXPLORER("Internet Explorer"),
+    EDGE("Edge"),
+    OPERA("Opera");
 
     private String browserName;
 

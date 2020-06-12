@@ -200,7 +200,7 @@ public class WebDriverManager {
         // If the run type isn't unit, configure the options based on the browser type
         if (runType != UNIT) {
             switch (browserType) {
-                case Chrome:
+                case CHROME:
                     if (headless) {
                         log.debug("Setting up headless browser with maximized screen.");
                         System.setProperty("webdriver.chrome.silentOutput", "true");
@@ -214,20 +214,20 @@ public class WebDriverManager {
                                 .addArguments("--window-size=" + screenResolution.getScreenShotResolutionAsString(SELENIUM));
                     }
                     break;
-                case Safari:
+                case SAFARI:
                     browserOptions = new SafariOptions();
                     break;
-                case Firefox:
+                case FIREFOX:
                     browserOptions = new FirefoxOptions().setAcceptInsecureCerts(true)
                             .addArguments("--window-size=" + screenResolution.getScreenShotResolutionAsString(SELENIUM));
                     break;
-                case InternetExplorer:
+                case INTERNET_EXPLORER:
                     browserOptions = new InternetExplorerOptions();
                     break;
-                case Edge:
+                case EDGE:
                     browserOptions = new EdgeOptions();
                     break;
-                case Opera:
+                case OPERA:
                     browserOptions = new OperaOptions()
                             .addArguments("--window-size=" + screenResolution.getScreenShotResolutionAsString(SELENIUM));
                     break;
@@ -314,27 +314,27 @@ public class WebDriverManager {
 
         log.debug("Tests will be executed locally.");
         switch (browserType) {
-            case Chrome:
+            case CHROME:
                 log.debug("Chrome chosen as browser type.");
                 localWebDriver = new ChromeDriver((ChromeOptions) browserOptions);
                 break;
-            case Safari:
+            case SAFARI:
                 log.debug("Safari chosen as browser type.");
                 localWebDriver = new SafariDriver((SafariOptions) browserOptions);
                 break;
-            case Firefox:
+            case FIREFOX:
                 log.debug("Firefox chosen as browser type.");
                 localWebDriver = new FirefoxDriver((FirefoxOptions) browserOptions);
                 break;
-            case InternetExplorer:
+            case INTERNET_EXPLORER:
                 log.debug("Internet Explorer chosen as browser type.");
                 localWebDriver = new InternetExplorerDriver((InternetExplorerOptions) browserOptions);
                 break;
-            case Edge:
+            case EDGE:
                 log.debug("Edge chosen as browser type.");
                 localWebDriver = new EdgeDriver((EdgeOptions) browserOptions);
                 break;
-            case Opera:
+            case OPERA:
                 log.debug("Opera chosen as browser type.");
                 localWebDriver = new OperaDriver((OperaOptions) browserOptions);
                 break;
@@ -365,12 +365,12 @@ public class WebDriverManager {
 
 			// If the browser type isn't null, set the type capability to what the user wants
 			if (browserType != null) {
-				browserOptions.setCapability("browserName", browserType);
+				browserOptions.setCapability("browserName", browserType.getBrowserName());
 			}
 			
             // If the run platform value isn't null, set the platform to what the user wants
             if (runPlatform != null) {
-                browserOptions.setCapability("platformName", runPlatform);
+                browserOptions.setCapability("platformName", runPlatform.getPlatform());
             }
         } else {
             // If the browser version isn't null, set the version capability to what the user wants

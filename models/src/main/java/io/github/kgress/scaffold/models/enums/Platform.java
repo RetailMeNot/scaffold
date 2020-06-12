@@ -5,7 +5,11 @@ package io.github.kgress.scaffold.models.enums;
  */
 public enum Platform {
 
-    Windows("WINDOWS"),
+    WINDOWS("Windows"),
+    WINDOWS_7("Windows 7"),
+    WINDOWS_8("Windows 8"),
+    WINDOWS_8_1("Windows 8.1"),
+    WINDOWS_10("Windows 10"),
     XP("XP"),
     Vista("VISTA"),
     Mac("MAC"),
