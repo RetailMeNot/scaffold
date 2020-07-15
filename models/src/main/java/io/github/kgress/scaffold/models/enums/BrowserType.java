@@ -9,7 +9,7 @@ public enum BrowserType {
     CHROME("Chrome"),
     SAFARI("Safari"),
     INTERNET_EXPLORER("Internet Explorer"),
-    EDGE("Edge"),
+    EDGE("MicrosoftEdge"),
     OPERA("Opera");
 
     private String browserName;
