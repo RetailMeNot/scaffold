@@ -346,6 +346,8 @@ public abstract class AbstractWebElement implements BaseWebElement {
                         log.info(new Date(entry.getTimestamp()) + " " + entry.getLevel() + " " + entry.getMessage());
                     }
                 }
+            } catch (UnsupportedCommandException n) {
+                log.debug("Logging not supported for the supplied browser.");
             } catch (NullPointerException n) {
                 log.debug("No Errors reported in Console Logs during failure.");
             }
