@@ -146,6 +146,7 @@ public class DesiredCapabilitiesConfigurationProperties {
         private String accessKey;
         private String tunnelIdentifier;
         private String parentTunnel;
+        private String timeZone;
 
         public String getUrl() {
             return url;
@@ -168,6 +169,8 @@ public class DesiredCapabilitiesConfigurationProperties {
         }
 
         public String getParentTunnel() { return parentTunnel; }
+
+        public String getTimeZone() { return timeZone; }
 
         /**
          * The main sauce URL to be used. In the event this ever changes, we'll let the implementing project handle
@@ -213,6 +216,13 @@ public class DesiredCapabilitiesConfigurationProperties {
          */
         public void setParentTunnel(String parentTunnel) {
             this.parentTunnel = parentTunnel;
+        }
+
+        /**
+         * The custom time zone to use when spinning up the sauce lab VM.
+         */
+        public void setTimeZone(String timeZone) {
+            this.timeZone = timeZone;
         }
     }
 }

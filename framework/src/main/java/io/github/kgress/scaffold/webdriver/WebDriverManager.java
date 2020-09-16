@@ -508,6 +508,7 @@ public class WebDriverManager {
         var defaultSauceUrl = "@ondemand.saucelabs.com/wd/hub";
         var tunnelIdentifier = sauce.getTunnelIdentifier();
         var parentTunnel = sauce.getParentTunnel();
+        var timeZone = sauce.getTimeZone();
         var sauceCaps = new MutableCapabilities();
         var sauceConfigUrl = sauce.getUrl();
 
@@ -520,6 +521,9 @@ public class WebDriverManager {
             }
             if (sauceConfigUrl == null) {
                 sauceConfigUrl = URI.create("https://" + username + ":" + accessKey + defaultSauceUrl).toString();
+            }
+            if (sauce.getTimeZone() != null) {
+                sauceCaps.setCapability("timeZone", timeZone);
             }
 
             sauceCaps.setCapability("username", username);
