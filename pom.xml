@@ -39,6 +39,8 @@
         <org.selenium-java.version>3.141.59</org.selenium-java.version>
         <com.saucelabs.sauce-junit.version>2.1.25</com.saucelabs.sauce-junit.version>
         <com.saucelabs.saucerest.version>1.0.44</com.saucelabs.saucerest.version>
+        <org.mockito.version>3.6.0</org.mockito.version>
+        <net.byte-buddy.version>1.10.18</net.byte-buddy.version>
 
         <!--Plugins-->
         <org.apache.maven.plugins.maven-compiler-plugin.veresion>3.8.1</org.apache.maven.plugins.maven-compiler-plugin.veresion>
@@ -302,6 +304,27 @@
                 <groupId>com.saucelabs</groupId>
                 <artifactId>saucerest</artifactId>
                 <version>${com.saucelabs.saucerest.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>${org.mockito.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-junit-jupiter</artifactId>
+                <version>${org.mockito.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <!--This byte buddy version is required in order to resolve an issue with instantiation of mocked classes in Mockito-->
+            <dependency>
+                <groupId>net.bytebuddy</groupId>
+                <artifactId>byte-buddy</artifactId>
+                <version>${net.byte-buddy.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

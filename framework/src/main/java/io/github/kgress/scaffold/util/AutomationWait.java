@@ -1,7 +1,9 @@
 package io.github.kgress.scaffold.util;
 
 import io.github.kgress.scaffold.exception.AutomationWaitException;
+import io.github.kgress.scaffold.webdriver.BasePage;
 import io.github.kgress.scaffold.webdriver.WebDriverWrapper;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.ExpectedCondition;
@@ -15,6 +17,7 @@ import java.util.Map;
  * via WebDriver's built-in wait mechanism.
  */
 @Slf4j
+@Getter
 public class AutomationWait {
 
     private final static Long FIVE_SECONDS = 5L;
@@ -82,6 +85,22 @@ public class AutomationWait {
     }
 
     /**
+     * A custom wait condition to wait until the page's DOM has switched to the complete status. Useful for page navigation
+     * to wait on returning a new page object until the DOM is loaded.
+     *
+     * This is already called in {@link BasePage} isOnPage to allow users verification of the web page they've navigated to.
+     * It is unnecessary to call this again after a page has loaded. However, this might come in handy when interactions
+     * on your web page change the state of the dom.
+     *
+     * @return as {@link Boolean}
+     */
+    public Boolean waitUntilPageIsLoaded() {
+        var domReadyStateScript = "return document.readyState";
+        return waitForCustomCondition(
+                page -> getDriver().getJavascriptExecutor().executeScript(domReadyStateScript).equals("complete"));
+    }
+
+    /**
      * Returns the set timeout in seconds.
      *
      * @return the timeout as a {@link Long} in seconds.
@@ -122,4 +141,3 @@ public class AutomationWait {
         return waits.get(timeOutToUse);
     }
 }
-
