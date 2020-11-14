@@ -43,8 +43,8 @@ public abstract class BasePage {
      * It's best to use this method in the constructor of the page object as it will be invoked at the time the page is
      * instantiated. For example:
      *
-     * <pre>{@code
-     * @Getter
+     * <pre>
+     * &#64;Getter
      * public class LoginPage() {
      *     private InputWebElement emailInput = new InputWebElement("#email");
      *     private InputWebElement passwordInput = new InputWebElement("#password");
@@ -53,7 +53,7 @@ public abstract class BasePage {
      *         isOnPage(getEmailInput, getPasswordInput);
      *     }
      * }
-     * }</pre>
+     * </pre>
      *
      * The elements passed in to this method will be checked by selenium to see if they are displayed. Make sure to pass in
      * elements that are unique to the page that won't show up on other pages. For example, a login page will have an email
