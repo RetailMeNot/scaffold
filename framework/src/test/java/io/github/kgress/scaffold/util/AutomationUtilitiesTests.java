@@ -1,12 +1,13 @@
 package io.github.kgress.scaffold.util;
 
+import io.github.kgress.scaffold.BaseUnitTest;
 import org.junit.jupiter.api.Test;
 
 import static io.github.kgress.scaffold.util.AutomationUtils.*;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class AutomationUtilitiesTests {
+public class AutomationUtilitiesTests extends BaseUnitTest {
 
     @Test
     public void testGetTextFromHTML() {
