@@ -23,5 +23,6 @@ if [ -n "$OLD_VERSION" ]; then BUMP_TYPE=$(npx -p conventional-changelog-angular
     echo "Performing release for version $NEXT_VERSION";
     mvn -Prelease -Dtag=${NEXT_VERSION} deploy scm:tag;
   else
-    echo "Could not detect a previous version with git-semver-tags";
+    echo "A problem was encountered when determining the version bump. Please check logs.";
+    return 1;
   fi
