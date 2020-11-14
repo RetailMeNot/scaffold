@@ -16,7 +16,7 @@ jobs:
       name: 'Run testing'
       install: true
       script:
-        - mvn test
+        - mvn -U --no-transfer-progress clean test
 
     # This job is for deploys to maven central using conventional commits. This job should only run against the master branch when it detects a merge. It should also not execute against forked repos.
     - stage: deploy

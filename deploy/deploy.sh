@@ -19,9 +19,9 @@ if [ -n "$OLD_VERSION" ]; then BUMP_TYPE=$(npx -p conventional-changelog-angular
     # Add a message to console with the next version number
     echo "Versioning artifacts with version $NEXT_VERSION";
     # Sets the new version for the release and deploys using the maven release profile
-    mvn versions:set --define newVersion=${NEXT_VERSION};
+    mvn -U --no-transfer-progress versions:set --define newVersion=${NEXT_VERSION};
     echo "Performing release for version $NEXT_VERSION";
-    mvn -Prelease -Dtag=${NEXT_VERSION} deploy scm:tag;
+    mvn -U --no-transfer-progress -P release -Dtag=${NEXT_VERSION} deploy scm:tag;
   else
     echo "A problem was encountered when determining the version bump. Please check logs.";
     return 1;
