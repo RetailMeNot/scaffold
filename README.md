@@ -288,23 +288,16 @@ configure Sauce credentials. During a test run, you specify the spring profile t
 The spring profiles should live under the resources package in the environment module that was set up earlier in this guide. E.G: `environment > src > main > resources > application-chrome_sauce.properties`. For more information on spring profiles, [check out this link here](https://www.springboottutorial.com/spring-boot-profiles).
 
 #### Desired Capabilities
-To set the `DesiredCapabilites`, include pre configured properties from the `DesiredCapabilitiesConfigurationProperties` file. A full list of these properties [can be found at the following link](https://github.com/kgress/scaffold/blob/master/environment/src/main/java/com/kgress/scaffold/environment/config/DesiredCapabilitiesConfigurationProperties.java).
+Desired Capabilities are browser options that you can set for your instance of WebDriver. Scaffold uses this concept for settings on the browser
+and other options, like Sauce a sauce or mobile emulator configuration. To set the `DesiredCapabilites`, include pre configured properties from the `DesiredCapabilitiesConfigurationProperties` file. A full list of these properties [can be found at the following link](https://github.com/kgress/scaffold/blob/master/environment/src/main/java/com/kgress/scaffold/environment/config/DesiredCapabilitiesConfigurationProperties.java).
 All of these properties are preceded by the prefix of `desired-capabilities`. So, for example, if you wish to define the run type of sauce, you'd enter `desired-capabilities.run-type=sauce`. Because Scaffold includes an
 auto configuration for these properties, you gain the benefit of auto complete, as well. Simply type the first few letters of the word `desired` will show you a list of capabilities that can be set.
 
 If you'd like to learn more about desired capabilities, details on the configuration [options that can be found here](https://wiki.saucelabs.com/display/DOCS/Test+Configuration+Options).
-
-Below is the current list of potential desired capabilities to set.
-```
-# Browser/OS Config
-desired-capabilities.run-type=where the browser testing is running, e.g. local, sauce, or grid
-desired-capabilities.environment-type=the environment the testing is running on, e.g. test or stage.
-desired-capabilities.browser-type=the browser type to be launched
-desired-capabilities.browserVersion=the version of the browser to be launched
-desired-capabilities.runPlatform=the operating system the browser is launching on
-desired-capabilities.remote-url=The default grid URL to use
-desired-capabilities.upload-screenshots=a boolean to determine if screenshots will be uploaded
-``` 
+ 
+Scaffold handles some high level validation on Desired Capabilities. By default, the Run Type will always be required. For Sauce and 
+mobile emulation, be sure to inclue with SauceAuthentication or MobileEmulator, respectively. A full list of what is required or optional
+can be found on the `DesiredCapabilitiesConfigurationProperties` file
 
 #### Local Chrome Example
 One option of a test run could include a local execution. This type of configuration is good for a one off test to debug or for POC'ing a test. It's not recommended that you run a large suite of testing with a local
@@ -358,7 +351,17 @@ desired-capabilities.run-platform=windows
 6. The tunnel identifier is the name of your tunnel that is started in your CI (or locally) to run against.
 7. The run type is sauce because the testing is running against sauce labs
 8. The browser type is chrome because we'd like to run the testing in chrome. This can be changed to any other browser supported by Sauce Labs.
-9. The run platform is windows because we'd like to run the testing on a Windows OS. 
+9. The run platform is windows because we'd like to run the testing on a Windows OS.
+
+#### Sauce Mobile Emulator Example
+```
+base-environment-url=http://www.websitetest.com
+
+desired-capabilities.run-type=sauce_mobile_emulator
+desired-capabilities.mobile.platform-name=ios
+desired-capabilities.mobile.sauce-device-name=iphone_12_pro
+desired-capabilities.mobile.browser-name=safari
+```
 
 #### Configuring Constant Values for DesiredCapabilities
 Because of the hierarchy of the spring profile system, it is possible to create constant environment variable values that all spring profiles can automatically include. This is useful for sauce credentials since you can include

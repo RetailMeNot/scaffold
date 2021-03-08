@@ -37,7 +37,7 @@
         <org.junit.platform.surefire-provider.version>1.3.2</org.junit.platform.surefire-provider.version>
         <org.selenium-java.version>3.141.59</org.selenium-java.version>
         <com.saucelabs.sauce-junit.version>2.1.25</com.saucelabs.sauce-junit.version>
-        <com.saucelabs.saucerest.version>1.0.44</com.saucelabs.saucerest.version>
+        <com.saucelabs.saucerest.version>1.0.47</com.saucelabs.saucerest.version>
         <org.mockito.version>3.6.28</org.mockito.version>
         <net.byte-buddy.version>1.10.18</net.byte-buddy.version>
 
@@ -450,6 +450,7 @@
                         <target>${java.version}</target>
                         <source>${java.version}</source>
                         <release>${java.version}</release>
+                        <parameters>true</parameters>
                     </configuration>
                 </plugin>
 
