@@ -9,12 +9,13 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum RunType {
-  UNIT("UNIT"),
-  LOCAL("LOCAL"),
-  GRID("GRID"),
-  SAUCE("SAUCE"),
-  SAUCE_MOBILE_EMULATOR("SAUCE MOBILE EMULATOR"),
-  HEADLESS("HEADLESS");
+  UNIT("Unit Testing"),
+  LOCAL("Local"),
+  GRID("Selenium Grid"),
+  AWS_LAMBDA("AWS Lambda"),
+  SAUCE("SauceLabs"),
+  SAUCE_MOBILE_EMULATOR("SauceLabs Mobile Emulator"),
+  HEADLESS("Headless");
 
   private final String runType;
 }

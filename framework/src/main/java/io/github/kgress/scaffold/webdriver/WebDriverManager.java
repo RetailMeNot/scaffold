@@ -1,28 +1,23 @@
 package io.github.kgress.scaffold.webdriver;
 
-import static io.github.kgress.scaffold.models.enums.desktop.RunType.GRID;
-import static io.github.kgress.scaffold.models.enums.desktop.RunType.HEADLESS;
 import static io.github.kgress.scaffold.models.enums.desktop.RunType.SAUCE;
 import static io.github.kgress.scaffold.models.enums.desktop.RunType.SAUCE_MOBILE_EMULATOR;
-import static io.github.kgress.scaffold.models.enums.desktop.RunType.UNIT;
 import static io.github.kgress.scaffold.models.enums.desktop.ScreenResolution.ScreenResolutionType.SAUCELABS;
 import static io.github.kgress.scaffold.models.enums.desktop.ScreenResolution.ScreenResolutionType.SELENIUM;
-import static io.github.kgress.scaffold.models.enums.mobileemulator.MobileBrowserName.ANDROID;
-import static io.github.kgress.scaffold.models.enums.mobileemulator.MobileBrowserName.CHROME;
-import static io.github.kgress.scaffold.models.enums.mobileemulator.MobileBrowserName.SAFARI;
-import static io.github.kgress.scaffold.models.enums.mobileemulator.MobilePlatform.IOS;
 import static io.github.kgress.scaffold.util.AutomationUtils.getStackTrace;
+import static io.github.kgress.scaffold.util.WebDriverValidationUtil.validateAwsLambdaDesiredCapabilities;
+import static io.github.kgress.scaffold.util.WebDriverValidationUtil.validateRequiredDesktopBrowserCapabilities;
+import static io.github.kgress.scaffold.util.WebDriverValidationUtil.validateRequiredMobileEmulatorCapabilities;
+import static io.github.kgress.scaffold.util.WebDriverValidationUtil.validateRequiredSauceAuth;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 import io.github.kgress.scaffold.environment.config.DesiredCapabilitiesConfigurationProperties;
-import io.github.kgress.scaffold.environment.config.DesiredCapabilitiesConfigurationProperties.MobileEmulator;
 import io.github.kgress.scaffold.environment.config.SeleniumGridServiceConfiguration;
 import io.github.kgress.scaffold.exception.WebDriverContextException;
 import io.github.kgress.scaffold.exception.WebDriverManagerException;
 import io.github.kgress.scaffold.models.GridSessionRequest;
 import io.github.kgress.scaffold.models.GridSessionResponse;
 import io.github.kgress.scaffold.models.enums.desktop.RunType;
-import io.github.kgress.scaffold.models.enums.mobileemulator.MobilePlatform;
 import io.github.kgress.scaffold.models.unittests.MockWebDriver;
 import io.github.kgress.scaffold.webdriver.interfaces.TestContextSetting;
 import java.net.MalformedURLException;
@@ -87,10 +82,9 @@ public class WebDriverManager {
   private static final String GRID_TEST_SESSION_URI = "/grid/api/testsession";
   private static final Long TEN_SECONDS = 10L;
   private static final Long THIRTY_SECONDS = 30L;
-  private static final String SCREEN_RESOLUTION_CAPABILITY = "screenResolution"; //conforms to selenium capability standard
-
-  @Getter
-  private final RestTemplate seleniumGridRestTemplate;
+  private static final String SCREEN_RESOLUTION_CAPABILITY = "screenResolution";
+  private final Object startLock = new Object();
+  private final Object closeLock = new Object();
 
   @Getter
   private final DesiredCapabilitiesConfigurationProperties desiredCapabilities;
@@ -98,8 +92,8 @@ public class WebDriverManager {
   @Getter
   private WebDriverWrapper webDriverWrapper;
 
-  private final Object startLock = new Object();
-  private final Object closeLock = new Object();
+  @Getter
+  private final RestTemplate seleniumGridRestTemplate;
 
   @Autowired
   public WebDriverManager(DesiredCapabilitiesConfigurationProperties desiredCapabilities,
@@ -109,6 +103,10 @@ public class WebDriverManager {
   }
 
   /**
+   * TODO Consider changing the method signature to {@link WebDriver} to allow us some form of unit
+   * testing of this class. We just need to make sure doing so will not allow end users to modify
+   * the web driver directly after it has been instantiated.
+   * <p>
    * Creates a new instance of a {@link WebDriver}, wraps it into a {@link WebDriverWrapper}, and
    * sets an implicit timeout.
    * <p>
@@ -125,12 +123,13 @@ public class WebDriverManager {
       throw new WebDriverContextException(
           "Driver already exists. Try closing/quitting it before trying to initialize a new one");
     }
-    var browserDriver = configureBrowserDriver(testName);
-    webDriverWrapper = new WebDriverWrapper(browserDriver);
+    var webDriver = configureWebDriver(testName);
+    webDriverWrapper = new WebDriverWrapper(webDriver);
 
     // Configure the browser to implicitly wait anytime a user attempts to locate an element. If
     // using mobile emulator, we need to kick this timeout up quite a bit since it's powered by
-    // appium. Otherwise, a 10 second timeout on desktop has proven to be good.
+    // appium. Otherwise, a 10 second timeout on desktop has proven to be good. It wouldn't be
+    // a bad idea to also add a desired capability for setting this implicit wait.
     if (getDesiredCapabilities().getRunType().equals(SAUCE_MOBILE_EMULATOR)) {
       webDriverWrapper.manage().timeouts().implicitlyWait(THIRTY_SECONDS, SECONDS);
     } else {
@@ -158,200 +157,53 @@ public class WebDriverManager {
   }
 
   /**
-   * Configures a new instance of a browser driver. First checks the {@link
-   * DesiredCapabilitiesConfigurationProperties} to detect a desktop or mobile test execution.
-   * Afterwards, creates {@link MutableCapabilities} and configures either a remote browser or local
-   * browser based on the {@link DesiredCapabilitiesConfigurationProperties#getRunType()}.
+   * Checks the run type from {@link #getDesiredCapabilities()} and configures browser options.
+   * Afterwards, creates the {@link WebDriver} based on the browser options.
    *
+   * @param testName the name of the test being executed
    * @return as {@link WebDriver}
    */
-  private WebDriver configureBrowserDriver(String testName) {
-    var browserOptions = configureBrowserOptions();
-    return configureWebDriver(browserOptions, testName);
-  }
-
-  /**
-   * Checks to determine if the desired capabilities set by the spring profile confer with a desktop
-   * execution or a mobile emulator execution. Once determined, returns a set of {@link
-   * MutableCapabilities} for either a desktop configuration or mobile configuration.
-   * <p>
-   * To check, pull in the {@link DesiredCapabilitiesConfigurationProperties#getRunPlatform()} and
-   * {@link MobileEmulator#getRunPlatform()}. Check to ensure the following conditions:
-   * <p>
-   * 1. Both runPlatform and platformName should not be provided. Only one or the other should be
-   * provided. 2. If runPlatform exists and platformName doesn't, configure a desktop browser. 3. If
-   * platformName exists and runPlatform doesn't, configure a mobile emulator browser. 4. If neither
-   * exists, throw an error asking to provide at least one or the other.
-   *
-   * @return depending on the resolution of the logic above, this method returns {@link
-   * MutableCapabilities} from either {@link #configureDesktopBrowserOptions()} or {@link
-   * #configureMobileEmulatorCapabilities()}.
-   */
-  private MutableCapabilities configureBrowserOptions() {
-    MutableCapabilities mutableCapabilities;
-    var runPlatform = Optional.ofNullable(getDesiredCapabilities().getRunPlatform());
-    var mobilePlatform = Optional
-        .ofNullable(getDesiredCapabilities().getMobile().getPlatformName());
-
-    if (runPlatform.isPresent() && mobilePlatform.isEmpty()) {
-      log.debug("Desktop configuration detected.");
-      validateRequiredDesktopBrowserCapabilities();
-      mutableCapabilities = configureDesktopBrowserOptions();
-    } else if (runPlatform.isEmpty() && mobilePlatform.isPresent()) {
-      log.debug("Mobile configuration detected.");
-      validateRequiredMobileEmulatorCapabilities();
-      mutableCapabilities = configureMobileEmulatorCapabilities();
-    } else if (runPlatform.isPresent() && mobilePlatform.isPresent()) {
-      throw new WebDriverManagerException(String.format(
-          "Desktop and mobile emulation configuration detected! "
-              + "runPlatform: %s. mobilePlatform: %s. Please check your configuration and try again.",
-          runPlatform.get().getPlatform(), mobilePlatform.get().getPlatform()
-      ));
-    } else {
-      throw new WebDriverManagerException(
-          "A desktop or mobile platform could not be found. "
-              + "Please check your configuration and try again.");
-    }
-    return mutableCapabilities;
-  }
-
-  /**
-   * Checks the required values from the {@link DesiredCapabilitiesConfigurationProperties} to
-   * ensure they are not null.
-   */
-  private void validateRequiredDesktopBrowserCapabilities() {
-    var runType = Optional
-        .ofNullable(getDesiredCapabilities().getRunType());
-    var runPlatform = Optional
-        .ofNullable(getDesiredCapabilities().getRunPlatform());
-    var browserType = Optional
-        .ofNullable(getDesiredCapabilities().getBrowserType());
-    var screenResolution = Optional
-        .ofNullable(getDesiredCapabilities().getScreenResolution());
-
-    if (runPlatform.isEmpty()) {
-      throw new WebDriverManagerException(
-          "Run Platform must be defined when initiating a desktop web driver configuration. "
-              + "Please check your configuration and try again.");
-    }
-    if (browserType.isEmpty()) {
-      throw new WebDriverManagerException(
-          "Browser type must be defined when initiating a desktop web driver configuration. "
-              + "Please check your configuration and try again.");
-    }
-    // In case screen resolution ever is not set as default, this will catch the change in the future.
-    if (screenResolution.isEmpty()) {
-      throw new WebDriverManagerException(
-          "Screen Resolution must be defined when initiating a desktop web driver configuration. "
-              + "Please check your configuration and try again.");
-    }
-    // In case run type ever is not checked by lombok, this will catch the change in the future.
-    if (runType.isEmpty()) {
-      throw new WebDriverManagerException(
-          "Run Type must be defined when initiating a desktop web driver configuration. "
-              + "Please check your configuration and try again.");
-    }
-  }
-
-  /**
-   * Checks the required values from the {@link MobileEmulator} to ensure they are not null. Also
-   * checks to ensure a mismatch is not present between the platform and browser. We are opting not
-   * to perform error checks against the device name, os, and browser name since there an exorbitant
-   * amount of combinations. Instead, we will surface the sauce error to the user.
-   */
-  private void validateRequiredMobileEmulatorCapabilities() {
-    var deviceName = Optional
-        .ofNullable(getDesiredCapabilities().getMobile().getSauceDeviceName());
-    var browserName = Optional
-        .ofNullable(getDesiredCapabilities().getMobile().getBrowserName());
-    var platformName = Optional
-        .ofNullable(getDesiredCapabilities().getMobile().getPlatformName());
-
-    var mismatchedBrowserAndPlatformException =
-        new WebDriverManagerException(String.format(
-            "Operating system and browser mismatch: platformName = %s, browserName = %s. "
-                + "Please check your configuration and try again.",
-            platformName, browserName));
-
-    if (deviceName.isEmpty()) {
-      throw new WebDriverManagerException(
-          "Device Name must be defined when initiating a mobile emulator web driver configuration. "
-              + "Please check your configuration and try again.");
-    }
-    if (browserName.isEmpty()) {
-      throw new WebDriverManagerException(
-          "Browser Name must be defined when initiating a mobile emulator web driver configuration. "
-              + "Please check your configuration and try again.");
-    }
-    if (platformName.isEmpty()) {
-      throw new WebDriverManagerException(
-          "Platform Name must be defined when initiating a mobile emulator web driver configuration. "
-              + "Please check your configuration and try again.");
-    }
-
-    // Some high level validation so we can fail faster
-    if ((platformName.get() == MobilePlatform.ANDROID) && (browserName.get() == SAFARI)) {
-      throw mismatchedBrowserAndPlatformException;
-    }
-
-    if ((platformName.get() == IOS) && (browserName.get() == CHROME)) {
-      throw mismatchedBrowserAndPlatformException;
-    }
-
-    if ((platformName.get() == IOS) && (browserName.get() == ANDROID)) {
-      throw mismatchedBrowserAndPlatformException;
-    }
-  }
-
-  /**
-   * Configures a new {@link WebDriver} with {@link MutableCapabilities} from either {@link
-   * #configureDesktopBrowserOptions()} or {@link #configureMobileEmulatorCapabilities()}.
-   *
-   * @param browserOptions the {@link MutableCapabilities} to be used when configuring the web
-   *                       driver
-   * @param testName       the name of the test being executed
-   * @return as {@link WebDriver}
-   */
-  private WebDriver configureWebDriver(MutableCapabilities browserOptions, String testName) {
+  private WebDriver configureWebDriver(String testName) {
+    MutableCapabilities browserOptions;
     WebDriver webDriver;
-    var runType = getDesiredCapabilities().getRunType(); // already null checked
-    var screenResolution = getDesiredCapabilities().getScreenResolution(); //already null checked
-    var remoteUrl = Optional.ofNullable(getDesiredCapabilities().getRemoteUrl());
+    var runType = getDesiredCapabilities().getRunType(); // already null checked via lombok
+    var screenResolution = getDesiredCapabilities().getScreenResolution(); // already has default
 
     log.debug(String.format("Starting driver for test: %s", testName));
     switch (runType) {
       case UNIT:
-        log.debug("Configuring local browser for Scaffold unit testing.");
+        log.debug("Configuring mock browser for Scaffold unit testing.");
         webDriver = new MockWebDriver();
         break;
       case LOCAL:
+        browserOptions = configureLocalBrowserOptions();
+        webDriver = checkForRemoteUrl(browserOptions, runType);
+        break;
       case HEADLESS:
-        // If the remote url isn't null, we should be configuring a remote browser. Even though the
-        // run type is still local centric, it's possible to use remote url with "local" or
-        // "headless" runs through docker.
-        if (remoteUrl.isPresent()) {
-          log.debug("Configuring remote browser for Headless.");
-          webDriver = configureRemoteBrowser(browserOptions, testName);
-          // Otherwise, if the remote url is not in the configuration, configure a default local
-          // browser.
-        } else {
-          log.debug("Configuring local browser for Headless.");
-          webDriver = configureLocalBrowser(browserOptions);
-        }
+        browserOptions = configureHeadlessChromeOptions();
+        webDriver = checkForRemoteUrl(browserOptions, runType);
         break;
       case GRID:
         log.debug("Configuring remote browser for Grid.");
+        browserOptions = configureGridBrowserOptions();
         browserOptions.setCapability(SCREEN_RESOLUTION_CAPABILITY,
             screenResolution.getScreenShotResolutionAsString(SAUCELABS));
-        webDriver = configureRemoteBrowser(browserOptions, testName);
+        webDriver = createGridRemoteDriver(browserOptions);
         break;
       case SAUCE:
         log.debug("Configuring remote browser for Sauce.");
-        webDriver = configureRemoteBrowser(browserOptions, testName);
+        browserOptions = configureSauceBrowserOptions();
+        webDriver = configureSauceRemoteBrowser(browserOptions, testName);
         break;
       case SAUCE_MOBILE_EMULATOR:
         log.debug("Configuring remote browser for Sauce's Mobile Emulation");
-        webDriver = configureRemoteBrowser(browserOptions, testName);
+        browserOptions = configureMobileEmulatorOptions();
+        webDriver = configureSauceRemoteBrowser(browserOptions, testName);
+        break;
+      case AWS_LAMBDA:
+        log.debug("Configuring remote browser for AWS Lambda");
+        browserOptions = configureAWSLambdaChromeOptions();
+        webDriver = configureRemoteDriver(browserOptions);
         break;
       default:
         throw new WebDriverManagerException(String
@@ -363,83 +215,89 @@ public class WebDriverManager {
   }
 
   /**
-   * Gets the desired capabilities via browser options. Browser options are browser dependent, thus
-   * they have their own object. However, they all extend off of {@link MutableCapabilities}. Set up
-   * the browser options for each browser specific case and return those browser options.
-   * <p>
-   * This is used during the {@link #configureBrowserDriver(String)} to obtain the capabilities when
-   * creating the new Driver.
+   * Checks to see if a {@link RunType#LOCAL} or {@link RunType#HEADLESS} test configuration
+   * includes a {@link DesiredCapabilitiesConfigurationProperties#getRemoteUrl()}. If it exists,
+   * return a new {@link RemoteWebDriver}. Otherwise, return a {@link WebDriver} for a local run.
    *
-   * @return as a browser options object like {@link ChromeOptions}. It must be an object that
-   * extends off of {@link MutableCapabilities}
+   * @param browserOptions the browser options represented as {@link MutableCapabilities}
+   * @param runType        the {@link RunType}. Used for logging purposes.
+   * @return as {@link WebDriver}
    */
-  private MutableCapabilities configureDesktopBrowserOptions() {
-    MutableCapabilities browserOptions;
-    var runType = getDesiredCapabilities()
-        .getRunType(); // runType already has null check via lombok
-    var screenResolution = getDesiredCapabilities().getScreenResolution(); // Has a default set
-    var browserType = getDesiredCapabilities().getBrowserType(); // already null checked
-
-    // Boolean condition for a headless run
-    boolean headless = false;
-    if (runType == HEADLESS) {
-      headless = true;
-    }
-
-    // If the run type isn't unit, configure the options based on the browser type
-    if (runType != UNIT) {
-      switch (browserType) {
-        case CHROME:
-          if (headless) {
-            log.debug("Setting up headless browser with maximized screen.");
-            System.setProperty("webdriver.chrome.silentOutput", "true");
-            browserOptions = new ChromeOptions().setAcceptInsecureCerts(true).setHeadless(true)
-                .addArguments("--window-size=1440x5000")
-                .addArguments("--whitelisted-ips")
-                .addArguments("--no-sandbox")
-                .addArguments("--disable-extensions");
-          } else {
-            browserOptions = new ChromeOptions().setAcceptInsecureCerts(true)
-                .addArguments(
-                    "--window-size=" + screenResolution.getScreenShotResolutionAsString(SELENIUM));
-          }
-          break;
-        case SAFARI:
-          browserOptions = new SafariOptions();
-          break;
-        case FIREFOX:
-          browserOptions = new FirefoxOptions().setAcceptInsecureCerts(true)
-              .addArguments(
-                  "--window-size=" + screenResolution.getScreenShotResolutionAsString(SELENIUM));
-          break;
-        case INTERNET_EXPLORER:
-          browserOptions = new InternetExplorerOptions();
-          break;
-        case EDGE:
-          browserOptions = new EdgeOptions();
-          break;
-        case OPERA:
-          browserOptions = new OperaOptions()
-              .addArguments(
-                  "--window-size=" + screenResolution.getScreenShotResolutionAsString(SELENIUM));
-          break;
-        default:
-          throw new WebDriverManagerException(
-              String.format("Unknown browser type %s", browserType.toString()));
-      }
-
-      // If the runType is set to GRID, we should set a "uuid" capability for tracking
-      if (runType == GRID) {
-        var uuid = TestContext.baseContext()
-            .getSetting(String.class, TestContextSetting.TEST_RUN_ID);
-        browserOptions.setCapability("uuid", uuid);
-      }
-
-      // Otherwise if the run type is set to UNIT, create a default mutable capabilities object
-      // for the mock driver
+  private WebDriver checkForRemoteUrl(MutableCapabilities browserOptions, RunType runType) {
+    WebDriver webDriver;
+    var remoteUrl = Optional.ofNullable(getDesiredCapabilities().getRemoteUrl());
+    if (remoteUrl.isPresent()) {
+      log.debug(String
+          .format("Configuring remote browser for a %s docker execution.", runType.getRunType()));
+      webDriver = createRemoteWebDriver(browserOptions);
     } else {
-      browserOptions = new MutableCapabilities();
+      log.debug(String.format("Configuring local browser for %s execution.", runType.getRunType()));
+      webDriver = configureLocalDriver(browserOptions);
     }
+    return webDriver;
+  }
+
+  /**
+   * Configures browser options for a {@link RunType#LOCAL} test execution.
+   *
+   * @return as {@link MutableCapabilities}
+   */
+  private MutableCapabilities configureLocalBrowserOptions() {
+    validateRequiredDesktopBrowserCapabilities(getDesiredCapabilities());
+    var browserOptions = configureDesktopBrowserOptions();
+    browserOptions.setCapability("platform", getDesiredCapabilities().getRunPlatform());
+    Optional.ofNullable(getDesiredCapabilities().getBrowserVersion())
+        .ifPresent(version -> browserOptions.setCapability("version", version));
+    return browserOptions;
+  }
+
+  /**
+   * Configures browser options for a {@link RunType#HEADLESS} test execution.
+   *
+   * @return as {@link MutableCapabilities}
+   */
+  private MutableCapabilities configureHeadlessChromeOptions() {
+    validateRequiredDesktopBrowserCapabilities(getDesiredCapabilities());
+    System.setProperty("webdriver.chrome.silentOutput", "true");
+    var chromeOptions = new ChromeOptions().setAcceptInsecureCerts(true).setHeadless(true)
+        .addArguments("--window-size=1440x5000")
+        .addArguments("--whitelisted-ips")
+        .addArguments("--no-sandbox")
+        .addArguments("--disable-extensions");
+    chromeOptions.setCapability("platform", getDesiredCapabilities().getRunPlatform());
+    Optional.ofNullable(getDesiredCapabilities().getBrowserVersion())
+        .ifPresent(version -> chromeOptions.setCapability("version", version));
+    return chromeOptions;
+  }
+
+  /**
+   * Configures browser options for a {@link RunType#GRID} test execution.
+   *
+   * @return as {@link MutableCapabilities}
+   */
+  private MutableCapabilities configureGridBrowserOptions() {
+    validateRequiredDesktopBrowserCapabilities(getDesiredCapabilities());
+    var browserOptions = configureDesktopBrowserOptions();
+    var uuid = TestContext.baseContext()
+        .getSetting(String.class, TestContextSetting.TEST_RUN_ID);
+    browserOptions.setCapability("uuid", uuid);
+    return browserOptions;
+  }
+
+  /**
+   * Configures browser options for a {@link RunType#SAUCE} test execution.
+   *
+   * @return as {@link MutableCapabilities}
+   */
+  private MutableCapabilities configureSauceBrowserOptions() {
+    validateRequiredDesktopBrowserCapabilities(getDesiredCapabilities());
+    var browserOptions = configureDesktopBrowserOptions();
+    browserOptions.setCapability("browserName",
+        getDesiredCapabilities().getBrowserType().getBrowserName()); // already null checked
+    browserOptions.setCapability("platformName",
+        getDesiredCapabilities().getRunPlatform().getPlatform()); // already null checked
+    Optional.ofNullable(getDesiredCapabilities().getBrowserVersion())
+        .ifPresent(version -> browserOptions.setCapability("browserVersion", version));
     return browserOptions;
   }
 
@@ -453,13 +311,13 @@ public class WebDriverManager {
    * For example, if sauceDeviceName.isPresent() && amazonDeviceName.isEmpty() -> setSauceDeviceName
    * if amazonDeviceName.isPresent() && sauceDeviceName.isEmpty() -> setAmazonDeviceName etc.
    * <p>
-   * Mobile emulation through sauce uses the older {@link DesiredCapabilities} but it does extend
-   * off of {@link MutableCapabilities} so existing code will work here. Mobile testing options
-   * through sauce can be found at this link: https://wiki.saucelabs.com/display/DOCS/Test+Configuration+Options#TestConfigurationOptions-MobileTestingOptions
+   * Mobile testing options through sauce can be found at this link:
+   * https://wiki.saucelabs.com/display/DOCS/Test+Configuration+Options#TestConfigurationOptions-MobileTestingOptions
    *
    * @return as {@link DesiredCapabilities}
    */
-  private MutableCapabilities configureMobileEmulatorCapabilities() {
+  private MutableCapabilities configureMobileEmulatorOptions() {
+    validateRequiredMobileEmulatorCapabilities(getDesiredCapabilities());
     var caps = new MutableCapabilities();
 
     // Setting required capabilities
@@ -504,10 +362,80 @@ public class WebDriverManager {
   }
 
   /**
+   * Configures browser options for a {@link RunType#AWS_LAMBDA} test execution.
+   *
+   * @return as {@link MutableCapabilities}
+   */
+  private MutableCapabilities configureAWSLambdaChromeOptions() {
+    validateRequiredDesktopBrowserCapabilities(getDesiredCapabilities());
+    validateAwsLambdaDesiredCapabilities(getDesiredCapabilities());
+    var chromeOptions = new ChromeOptions()
+        .setBinary(getDesiredCapabilities().getAwsLambda().getBrowserBinaryPath())
+        .setHeadless(true)
+        .setAcceptInsecureCerts(true)
+        .addArguments("--no-sandbox")
+        .addArguments("--single-process")
+        .addArguments("--disable-dev-shm-usage")
+        .addArguments("--window-size=1440x5000")
+        .addArguments("--disable-gpu");
+    Optional.ofNullable(getDesiredCapabilities().getAwsLambda().getDataPath())
+        .ifPresent(dataPath -> chromeOptions.addArguments("--data-path=" + dataPath));
+    Optional.ofNullable(getDesiredCapabilities().getAwsLambda().getDiskCacheDir())
+        .ifPresent(diskCacheDir -> chromeOptions.addArguments("--disk-cache-dir=" + diskCacheDir));
+    Optional.ofNullable(getDesiredCapabilities().getAwsLambda().getHomeDir())
+        .ifPresent(homeDir -> chromeOptions.addArguments("--homedir=" + homeDir));
+    Optional.ofNullable(getDesiredCapabilities().getAwsLambda().getUserDataDir())
+        .ifPresent(userDataDir -> chromeOptions.addArguments("--user-data-dir=" + userDataDir));
+    return chromeOptions;
+  }
+
+  /**
+   * Helper method that creates {@link MutableCapabilities} based on the browser type.
+   *
+   * @return as {@link MutableCapabilities}
+   */
+  private MutableCapabilities configureDesktopBrowserOptions() {
+    MutableCapabilities browserOptions;
+    var screenResolution = getDesiredCapabilities().getScreenResolution(); // Has a default set
+    var browserType = getDesiredCapabilities().getBrowserType(); // already null checked
+
+    switch (browserType) {
+      case CHROME:
+        browserOptions = new ChromeOptions().setAcceptInsecureCerts(true)
+            .addArguments(
+                "--window-size=" + screenResolution.getScreenShotResolutionAsString(SELENIUM));
+        break;
+      case SAFARI:
+        browserOptions = new SafariOptions();
+        break;
+      case FIREFOX:
+        browserOptions = new FirefoxOptions().setAcceptInsecureCerts(true)
+            .addArguments(
+                "--window-size=" + screenResolution.getScreenShotResolutionAsString(SELENIUM));
+        break;
+      case INTERNET_EXPLORER:
+        browserOptions = new InternetExplorerOptions();
+        break;
+      case EDGE:
+        browserOptions = new EdgeOptions();
+        break;
+      case OPERA:
+        browserOptions = new OperaOptions()
+            .addArguments(
+                "--window-size=" + screenResolution.getScreenShotResolutionAsString(SELENIUM));
+        break;
+      default:
+        throw new WebDriverManagerException(
+            String.format("Unknown browser type %s", browserType.toString()));
+    }
+    return browserOptions;
+  }
+
+  /**
    * This helper method configures a {@link RemoteWebDriver}. A {@link RemoteWebDriver} is used for
-   * testing against Selenium Grid or SauceLabs.
+   * testing against Selenium Grid SauceLabs, AWS Lambda, or Docker.
    * <p>
-   * Serves the purpose of configuring a remote browser for both desktop and mobile emulation. Since
+   * Serves the purpose of configuring a remote driver for both desktop and mobile emulation. Since
    * mobile emulation uses {@link RunType#SAUCE_MOBILE_EMULATOR}, we don't need to worry about any
    * desktop specific settings being applied to the execution.
    *
@@ -515,60 +443,33 @@ public class WebDriverManager {
    *                       RemoteWebDriver}
    * @return the new {@link RemoteWebDriver} as a {@link WebDriver}
    */
-  private WebDriver configureRemoteBrowser(MutableCapabilities browserOptions,
-      String testName) {
+  private WebDriver configureRemoteDriver(MutableCapabilities browserOptions) {
     RemoteWebDriver remoteWebDriver;
-    var runType = getDesiredCapabilities().getRunType(); // already null checked through lombok
-    // These values are already null checked previously. However, using optionals for their lambdas
-    // cut down on code and it looks prettier. So let's do that!
-    var desktopRunPlatform = Optional.ofNullable(getDesiredCapabilities().getRunPlatform());
-    var desktopBrowserType = Optional.ofNullable(getDesiredCapabilities().getBrowserType());
-    var desktopBrowserVersion = Optional.ofNullable(getDesiredCapabilities().getBrowserVersion());
-
-    // Sauce capability keys are different and must be set accordingly/.
-    // Only set if not sauce mobile emulator
-    if (runType != SAUCE_MOBILE_EMULATOR) {
-      if (runType == SAUCE) {
-        desktopBrowserVersion
-            .ifPresent(version -> browserOptions.setCapability("browserVersion", version));
-        desktopBrowserType.ifPresent(
-            browser -> browserOptions.setCapability("browserName", browser.getBrowserName()));
-        desktopRunPlatform.ifPresent(
-            platform -> browserOptions.setCapability("platformName", platform.getPlatform()));
-      } else {
-        desktopBrowserVersion
-            .ifPresent(version -> browserOptions.setCapability("version", version));
-        desktopRunPlatform.ifPresent(
-            platform -> browserOptions.setCapability("platform", platform.getPlatform()));
-      }
-    }
-    // Create the remote web driver and set the session id, adding it to the test context
-    remoteWebDriver = createRemoteWebDriver(browserOptions, testName);
+    remoteWebDriver = createRemoteWebDriver(browserOptions);
     String sessionId = remoteWebDriver.getSessionId().toString();
     TestContext.baseContext().addSetting("SESSION_ID", sessionId);
-
-    // Check if the run type is GRID. If it is, send the test info through to grid
-    checkIfGridAndSendGridRequest(remoteWebDriver);
     return remoteWebDriver;
   }
 
   /**
    * This helper method configures a {@link WebDriver} for local use. We are now using the updated
-   * methods for creating the new {@link WebDriver}. In this case:
+   * W3C standardized browser drivers for creating the new {@link WebDriver}. In this case:
    * <p>
    * {@link ChromeDriver} {@link SafariDriver} {@link FirefoxDriver} {@link InternetExplorerDriver}
    * {@link OperaDriver}
    * <p>
-   * I've noticed that the drivers require properties to be set to indicate where a particular web
-   * driver exists on the machine. These properties are set as a system property like:
-   * webdriver.chrome.driver=path/to/file.
+   * A local web driver execution requires the browser driver to be installed on your machine.
+   * Selenium checks for the following system property: webdriver.chrome.driver=path/to/file. By
+   * default, when installing a browser driver on your machine, the path to file is typically added
+   * to your systems' $PATH env variable. If it isn't, you can manually add it so you can skip
+   * having to specify the path as a system property during test execution.
    * <p>
    *
    * @param browserOptions the browser configuration to be used with the new {@link
    *                       RemoteWebDriver}
    * @return the new {@link WebDriver}
    */
-  private WebDriver configureLocalBrowser(MutableCapabilities browserOptions) {
+  private WebDriver configureLocalDriver(MutableCapabilities browserOptions) {
     WebDriver localWebDriver;
     var browserType = getDesiredCapabilities().getBrowserType();
 
@@ -606,91 +507,36 @@ public class WebDriverManager {
   }
 
   /**
-   * Helper method for {@link #configureRemoteBrowser(MutableCapabilities, String)}.
-   * <p>
-   * Checks if the run type from the desiredCapabilities bean is GRID. If it is, it'll pull the
-   * session id and send a new grid request using the {@link RestTemplate} set up from {@link
-   * SeleniumGridServiceConfiguration}.
-   * <p>
+   * Pulls the session id and sends a new grid request using the {@link RestTemplate} set up from
+   * {@link SeleniumGridServiceConfiguration}.
    *
-   * @param remoteWebDriver the {@link RemoteWebDriver} that was setup from the configuration
-   *                        method.
+   * @param browserOptions the browser options represented as {@link MutableCapabilities}
+   * @return as {@link RemoteWebDriver}
    */
-  private void checkIfGridAndSendGridRequest(RemoteWebDriver remoteWebDriver) {
+  private RemoteWebDriver createGridRemoteDriver(MutableCapabilities browserOptions) {
+    var remoteWebDriver = createRemoteWebDriver(browserOptions);
     var sessionId = remoteWebDriver.getSessionId().toString();
-    var runType = getDesiredCapabilities().getRunType(); // already null checked
+    try {
+      // Pull the session id and add it to the Grid request
+      var gridSessionRequest = new GridSessionRequest();
+      gridSessionRequest.setSession(sessionId);
+      var request = new HttpEntity<>(gridSessionRequest);
 
-    if (runType == GRID) {
-      try {
-        // Pull the session id and add it to the Grid request
-        var gridSessionRequest = new GridSessionRequest();
-        gridSessionRequest.setSession(sessionId);
-        var request = new HttpEntity<>(gridSessionRequest);
-
-        var fullPath = GRID_TEST_SESSION_URI + "?session=" + gridSessionRequest.getSession();
-        seleniumGridRestTemplate.getForObject(fullPath, GridSessionResponse.class, request);
-      } catch (Exception ex) {
-        log.error("Unable to call the Selenium Grid", ex);
-      }
-    }
-  }
-
-  /**
-   * Helper method for {@link #configureRemoteBrowser(MutableCapabilities, String)}.
-   * <p>
-   * Checks the run type from the desiredCapabilities bean and creates a new {@link
-   * RemoteWebDriver}.
-   *
-   * @param browserOptions the desired capabilites for the browser
-   * @param testName       the information on the test that is being ran. This plugs in with Junit
-   *                       Jupiter annotations.
-   * @return the new {@link RemoteWebDriver}
-   */
-  private RemoteWebDriver createRemoteWebDriver(MutableCapabilities browserOptions,
-      String testName) {
-    RemoteWebDriver remoteWebDriver;
-    var runType = getDesiredCapabilities().getRunType(); // already null checked
-    var remoteUrl = Optional.ofNullable(getDesiredCapabilities().getRemoteUrl());
-
-    log.debug("Test executing against a Remote Host");
-    switch (runType) {
-      case GRID:
-        remoteWebDriver = configureGenericRemoteBrowser(browserOptions);
-        break;
-      case SAUCE:
-      case SAUCE_MOBILE_EMULATOR:
-        remoteWebDriver = configureSauceRemoteBrowser(browserOptions, testName);
-        break;
-      case LOCAL:
-      case HEADLESS:
-        if (remoteUrl.isPresent()) {
-          remoteWebDriver = configureGenericRemoteBrowser(browserOptions);
-        } else {
-          throw new WebDriverException(
-              "Unable to start a Remote Web Driver for a run type of HEADLESS or LOCAL" +
-                  "with a null remoteUrl. Please check your configuration and try again.");
-        }
-        break;
-      default:
-        throw new WebDriverException(
-            String.format("Unable to start a Remote Web Driver for runType: %s. " +
-                "Please check your configuration and try again.", runType.getRunType()));
+      var fullPath = GRID_TEST_SESSION_URI + "?session=" + gridSessionRequest.getSession();
+      seleniumGridRestTemplate.getForObject(fullPath, GridSessionResponse.class, request);
+    } catch (Exception ex) {
+      log.error("Unable to call the Selenium Grid", ex);
     }
     return remoteWebDriver;
   }
 
   /**
-   * Helper method for {@link #createRemoteWebDriver(MutableCapabilities, String)}.
-   * <p>
-   * If the {@link RunType} is GRID, this sets up the remote driver session for Selenium Grid.
-   * <p>
-   * If any issue is discovered during the starting of this browser, we will throw a {@link
-   * WebDriverException} with a custom message.
+   * Creates a new {@link RemoteWebDriver} based on {@link MutableCapabilities}.
    *
-   * @param browserOptions the desired capabilities we're adding on to
-   * @return the driver as {@link RemoteWebDriver}
+   * @param browserOptions the browser options represented as {@link MutableCapabilities}
+   * @return as {@link RemoteWebDriver}
    */
-  private RemoteWebDriver configureGenericRemoteBrowser(MutableCapabilities browserOptions) {
+  private RemoteWebDriver createRemoteWebDriver(MutableCapabilities browserOptions) {
     var runType = getDesiredCapabilities().getRunType(); // already null checked
     var remoteUrl = getDesiredCapabilities().getRemoteUrl(); // already null checked
 
@@ -705,8 +551,6 @@ public class WebDriverManager {
   }
 
   /**
-   * Helper method for {@link #createRemoteWebDriver(MutableCapabilities, String)}
-   * <p>
    * Sets up the desired capabilities for Sauce and returns the fully configured remote url.
    * <p>
    * If the {@link RunType} is SAUCE, set the user credentials and add the sauce connect tunnel id
@@ -726,7 +570,7 @@ public class WebDriverManager {
    */
   private RemoteWebDriver configureSauceRemoteBrowser(MutableCapabilities browserOptions,
       String testName) {
-    validateRequiredSauceAuth();
+    validateRequiredSauceAuth(getDesiredCapabilities());
     var sauceCaps = new MutableCapabilities();
     var sauce = getDesiredCapabilities().getSauce();
     var screenResolution = getDesiredCapabilities().getScreenResolution(); // already null checked
@@ -776,30 +620,14 @@ public class WebDriverManager {
     }
   }
 
-  private void validateRequiredSauceAuth() {
-    var username = Optional.ofNullable(getDesiredCapabilities().getSauce().getUserName());
-    var accessKey = Optional.ofNullable(getDesiredCapabilities().getSauce().getAccessKey());
-
-    if (username.isEmpty()) {
-      throw new WebDriverManagerException(
-          "Username must be defined when initiating a Sauce based browser configuration. "
-              + "Please check your configuration and try again.");
-    }
-    if (accessKey.isEmpty()) {
-      throw new WebDriverManagerException(
-          "Access Key must be defined when initiating a Sauce based browser configuration. "
-              + "Please check your configuration and try again.");
-    }
-  }
-
   /**
    * Starts a new {@link ScreenshotRemoteDriver} for the remote session.
    * <p>
    * This method will throw a {@link MalformedURLException}. Only two methods should be using this
    * helper method: {@link #configureSauceRemoteBrowser(MutableCapabilities, String)} and {@link
-   * #configureGenericRemoteBrowser(MutableCapabilities)}. Those methods should be responsible for
-   * throwing their own custom error message since they both have varying reasons that could cause a
-   * failure during the initialization of a new remote driver.
+   * #createRemoteWebDriver(MutableCapabilities)}. Those methods should be responsible for throwing
+   * their own custom error message since they both have varying reasons that could cause a failure
+   * during the initialization of a new remote driver.
    *
    * @param remoteUrl      the remote URL to be used
    * @param browserOptions the mutable capabilities of the browser

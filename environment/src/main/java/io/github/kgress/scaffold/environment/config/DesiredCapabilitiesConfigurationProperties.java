@@ -110,6 +110,12 @@ public class DesiredCapabilitiesConfigurationProperties {
   private final MobileEmulator mobile = new MobileEmulator();
 
   /**
+   * Creates a new {@link AWSLambda} in the event there are AWS Lambda options for the test
+   * execution.
+   */
+  private final AWSLambda awsLambda = new AWSLambda();
+
+  /**
    * SauceAuthentication configuration properties are used for setting Sauce credentials up in your
    * Spring profile.
    */
@@ -216,5 +222,36 @@ public class DesiredCapabilitiesConfigurationProperties {
      * Optional. The orientation in which the simulator/device will be rendered.
      */
     private DeviceOrientation deviceOrientation;
+  }
+
+  @Getter
+  @Setter
+  public static class AWSLambda {
+
+    /**
+     * Required. For use with {@link RunType#AWS_LAMBDA}. Allows you to set the binary path of the
+     * browser. For example, /bin/headless-chromium
+     */
+    private String browserBinaryPath;
+
+    /**
+     * Optional. Sets the data path. For example, /tmp/user-data
+     */
+    private String dataPath;
+
+    /**
+     * Optional. Sets the home directory. For example, /tmp/data-path
+     */
+    private String homeDir;
+
+    /**
+     * Optional. Sets the disk cache directory. For example, /tmp/cache-dir
+     */
+    private String diskCacheDir;
+
+    /**
+     * Optional. Sets the user data directory. For example, /tmp/user-data
+     */
+    private String userDataDir;
   }
 }
