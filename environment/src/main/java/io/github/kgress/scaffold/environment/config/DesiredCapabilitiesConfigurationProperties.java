@@ -229,8 +229,8 @@ public class DesiredCapabilitiesConfigurationProperties {
   public static class AWSLambda {
 
     /**
-     * Required. For use with {@link RunType#AWS_LAMBDA}. Allows you to set the binary path of the
-     * browser. For example, /bin/headless-chromium
+     * Required. For use with {@link RunType#AWS_LAMBDA_REMOTE} or {@link RunType#AWS_LAMBDA_LOCAL}.
+     * Allows you to set the binary path of the browser. For example, /bin/headless-chromium
      */
     private String browserBinaryPath;
 

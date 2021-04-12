@@ -21,7 +21,7 @@ import java.util.Optional;
 public class WebDriverValidationUtil {
 
   /**
-   * Performs validation on {@link RunType#AWS_LAMBDA}.
+   * Performs validation on {@link RunType#AWS_LAMBDA_REMOTE} and {@link RunType#AWS_LAMBDA_LOCAL}.
    */
   public static void validateAwsLambdaDesiredCapabilities(
       DesiredCapabilitiesConfigurationProperties desiredCapabilities) {
@@ -44,7 +44,7 @@ public class WebDriverValidationUtil {
 
   /**
    * Performs validation on {@link RunType#LOCAL}, {@link RunType#HEADLESS}, {@link RunType#GRID},
-   * {@link RunType#SAUCE}, and {@link RunType#AWS_LAMBDA}
+   * {@link RunType#SAUCE}, {@link RunType#AWS_LAMBDA_REMOTE}, and {@link RunType#AWS_LAMBDA_LOCAL}
    */
   public static void validateRequiredDesktopBrowserCapabilities(
       DesiredCapabilitiesConfigurationProperties desiredCapabilities) {

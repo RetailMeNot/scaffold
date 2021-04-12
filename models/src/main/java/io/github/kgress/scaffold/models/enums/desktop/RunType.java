@@ -12,7 +12,8 @@ public enum RunType {
   UNIT("Unit Testing"),
   LOCAL("Local"),
   GRID("Selenium Grid"),
-  AWS_LAMBDA("AWS Lambda"),
+  AWS_LAMBDA_LOCAL("AWS Lambda Local"),
+  AWS_LAMBDA_REMOTE("AWS Lambda Remote"),
   SAUCE("SauceLabs"),
   SAUCE_MOBILE_EMULATOR("SauceLabs Mobile Emulator"),
   HEADLESS("Headless");

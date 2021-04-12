@@ -34,14 +34,14 @@ public class WebDriverValidationUtilTests {
 
   @Test
   public void testAwsCaps_emptyBinaryPathAndBrowser_fails() {
-    caps.setRunType(RunType.AWS_LAMBDA);
+    caps.setRunType(RunType.AWS_LAMBDA_REMOTE);
     assertThrows(WebDriverManagerException.class, () ->
         WebDriverValidationUtil.validateAwsLambdaDesiredCapabilities(caps));
   }
 
   @Test
   public void testAwsCaps_emptyBrowser_fails() {
-    caps.setRunType(RunType.AWS_LAMBDA);
+    caps.setRunType(RunType.AWS_LAMBDA_REMOTE);
     caps.getAwsLambda().setBrowserBinaryPath(TEST_BINARY_PATH);
     assertThrows(WebDriverManagerException.class, () ->
         WebDriverValidationUtil.validateAwsLambdaDesiredCapabilities(caps));
@@ -49,7 +49,7 @@ public class WebDriverValidationUtilTests {
 
   @Test
   public void testAwsCaps_succeeds() {
-    caps.setRunType(RunType.AWS_LAMBDA);
+    caps.setRunType(RunType.AWS_LAMBDA_REMOTE);
     caps.setBrowserType(BrowserType.CHROME);
     caps.getAwsLambda().setBrowserBinaryPath(TEST_BINARY_PATH);
     assertDoesNotThrow(() ->

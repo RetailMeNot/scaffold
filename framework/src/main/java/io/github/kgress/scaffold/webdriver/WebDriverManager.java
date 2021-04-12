@@ -200,7 +200,12 @@ public class WebDriverManager {
         browserOptions = configureMobileEmulatorOptions();
         webDriver = configureSauceRemoteBrowser(browserOptions, testName);
         break;
-      case AWS_LAMBDA:
+      case AWS_LAMBDA_LOCAL:
+        log.debug("Configuring local browser for AWS Lambda");
+        browserOptions = configureAWSLambdaChromeOptions();
+        webDriver = configureLocalDriver(browserOptions);
+        break;
+      case AWS_LAMBDA_REMOTE:
         log.debug("Configuring remote browser for AWS Lambda");
         browserOptions = configureAWSLambdaChromeOptions();
         webDriver = configureRemoteDriver(browserOptions);
@@ -362,7 +367,7 @@ public class WebDriverManager {
   }
 
   /**
-   * Configures browser options for a {@link RunType#AWS_LAMBDA} test execution.
+   * Configures browser options for a {@link RunType#AWS_LAMBDA_REMOTE} test execution.
    *
    * @return as {@link MutableCapabilities}
    */
