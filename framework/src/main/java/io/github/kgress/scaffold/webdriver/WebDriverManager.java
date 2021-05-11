@@ -268,7 +268,9 @@ public class WebDriverManager {
         .addArguments("--window-size=1440x5000")
         .addArguments("--whitelisted-ips")
         .addArguments("--no-sandbox")
-        .addArguments("--disable-extensions");
+        .addArguments("--disable-extensions")
+        .addArguments("--no-zygote")
+        .addArguments("--disable-dev-tools");
     chromeOptions.setCapability("platform", getDesiredCapabilities().getRunPlatform());
     Optional.ofNullable(getDesiredCapabilities().getBrowserVersion())
         .ifPresent(version -> chromeOptions.setCapability("version", version));
