@@ -55,6 +55,8 @@ jobs:
 
       - name: Run the Deployment Script
         run: |
+          git pull
+          git branch
           git config --global user.name 'Kyle Gress'
           git config --global user.email 'kgress88@gmail.com'
           sh deploy/deploy.sh
