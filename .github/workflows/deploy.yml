@@ -1,0 +1,61 @@
+# Main deployment workflow for github actions. Only initiate a deployment after a merge commit against master is detected.
+name: Deploy
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+      - name: Build and Test
+        run: mvn -U --no-transfer-progress clean install
+
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 10
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Set up Sonatype
+        uses: actions/setup-java@v2
+        with: # running setup-java again overwrites the runners .m2/settings.xml
+          java-version: '11'
+          distribution: 'adopt'
+          server-id: ossrh
+          server-username: OSSRH_USERNAME
+          server-password: OSSRH_PASSWORD
+          gpg-private-key: ${{ secrets.GPG_KEYNAME }}
+          gpg-passphrase: GPG_PASSWORD
+
+      - name: Use Node v12
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+
+      - name: Run the Deployment Script
+        run: |
+          git pull
+          git branch
+          sh deploy/deploy.sh
+        env:
+          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+          GPG_PASSWORD: ${{ secrets.GPG_PASSWORD }}

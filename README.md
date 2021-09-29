@@ -27,7 +27,7 @@ For a quick start on creating a new Scaffold project, [check out the Scaffold-Ar
 * Maven 3.x
 
 # CI
-The build can be found [on Travis CI](https://travis-ci.org/kgress/scaffold).
+CI jobs can be viewed on [github actions](https://github.com/kgress/scaffold/actions) page of this repo. 
 
 # Setting Up Your Project
 Use this section for setting up a new project using Scaffold. Setup follows a fairly standard Spring Boot application design by using modules for the code base's environment and main testing.
