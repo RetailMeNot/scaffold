@@ -267,10 +267,7 @@ public class WebDriverManager {
     var chromeOptions = new ChromeOptions().setAcceptInsecureCerts(true).setHeadless(true)
         .addArguments("--window-size=1440x5000")
         .addArguments("--whitelisted-ips")
-        .addArguments("--no-sandbox")
-        .addArguments("--disable-extensions")
-        .addArguments("--no-zygote")
-        .addArguments("--disable-dev-tools");
+        .addArguments("--no-sandbox");
     chromeOptions.setCapability("platform", getDesiredCapabilities().getRunPlatform());
     Optional.ofNullable(getDesiredCapabilities().getBrowserVersion())
         .ifPresent(version -> chromeOptions.setCapability("version", version));
@@ -384,7 +381,11 @@ public class WebDriverManager {
         .addArguments("--single-process")
         .addArguments("--disable-dev-shm-usage")
         .addArguments("--window-size=1440x5000")
-        .addArguments("--disable-gpu");
+        .addArguments("--disable-gpu")
+        .addArguments("--disable-dev-tools")
+        .addArguments("--no-zygote")
+        .addArguments("--disable-extensions")
+        .addArguments("--disable-application-cache");
     Optional.ofNullable(getDesiredCapabilities().getAwsLambda().getDataPath())
         .ifPresent(dataPath -> chromeOptions.addArguments("--data-path=" + dataPath));
     Optional.ofNullable(getDesiredCapabilities().getAwsLambda().getDiskCacheDir())
