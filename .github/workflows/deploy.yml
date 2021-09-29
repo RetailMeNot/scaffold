@@ -19,7 +19,7 @@ jobs:
       - name: Build and Test
         run: mvn -U --no-transfer-progress clean install
 
-  cofigure-git:
+  configure-git:
     runs-on: ubuntu-latest
 
     steps:
