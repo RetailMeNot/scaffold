@@ -5,35 +5,29 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 
-/**
- * Scaffold's strongly typed interpretation of a radio element.
- *
- * A RadioWebElement and a CheckBoxElement can sometimes be interchangeable. In the future, we should distinguish these
- * by adding functionality that is specific to their concept.
- */
-public class RadioWebElement extends BaseClickableWebElement {
+public class BaseClickableAndTypableWebElement extends BaseClickableWebElement {
 
     /**
-     * Creates a new {@link RadioWebElement}. It is highly recommended using {@link By#cssSelector(String)} over
-     * another method, such as {@link By#xpath(String)}, in almost all cases as it can be less flaky and less reliant
-     * on DOM hierarchy.
+     * Creates a new {@link BaseClickableAndTypableWebElement}. It is highly recommended using
+     * {@link By#cssSelector(String)} over another method, such as {@link By#xpath(String)}, in almost all cases as it
+     * can be less flaky and less reliant on DOM hierarchy.
      *
      * @see BaseWebElement#BaseWebElement(String)
      * @param cssSelector   the value of the {@link By#cssSelector(String)}
      */
-    public RadioWebElement(String cssSelector) {
+    public BaseClickableAndTypableWebElement(String cssSelector) {
         super(cssSelector);
     }
 
     /**
      * Use this constructor when you'd like to locate an element with a {@link By} method different from
-     * {@link By#cssSelector(String)}. We strongly recommend using {@link #RadioWebElement(String cssSelector)}
+     * {@link By#cssSelector(String)}. We strongly recommend using {@link #BaseClickableAndTypableWebElement(String)}
      * in almost all cases.
      *
      * @see BaseWebElement#BaseWebElement(By)
      * @param by    the {@link By} locator
      */
-    public RadioWebElement(By by) {
+    public BaseClickableAndTypableWebElement(By by) {
         super(by);
     }
 
@@ -45,8 +39,24 @@ public class RadioWebElement extends BaseClickableWebElement {
      * @param by        the {@link By} locator for the child element
      * @param parentBy  the {@link By} locator for the parent element
      */
-    public RadioWebElement(By by, By parentBy) {
+    public BaseClickableAndTypableWebElement(By by, By parentBy) {
         super(by, parentBy);
+    }
+
+    /**
+     * Creates a new Scaffold element with a raw {@link WebElement}. This is primarily used during construction of
+     * elements in the {@link #findElements(Class, By)} method.
+     *
+     * When instantiating new elements with this constructor, There is a risk of a
+     * {@link StaleElementReferenceException} occurring when interacting with elements since
+     * {@link #getRawWebElement()} will return the raw web element on being present. This means we are not re
+     * finding the element prior to interacting with it. Use this constructor at your own risk.
+     *
+     * @param by            the {@link By} locator to be used by this element
+     * @param webElement    the {@link WebElement} being wrapped
+     */
+    public BaseClickableAndTypableWebElement(By by, WebElement webElement) {
+        super(by, webElement);
     }
 
     /**
@@ -62,7 +72,7 @@ public class RadioWebElement extends BaseClickableWebElement {
      * @param parentBy      the {@link By} locator to be used by the parent element
      * @param webElement    the {@link WebElement} being wrapped
      */
-    public RadioWebElement(By by, By parentBy, WebElement webElement) {
+    public BaseClickableAndTypableWebElement(By by, By parentBy, WebElement webElement) {
         super(by, parentBy, webElement);
     }
 
@@ -75,34 +85,49 @@ public class RadioWebElement extends BaseClickableWebElement {
      * {@link #getRawWebElement()} will return the raw web element on being present. This means we are not re
      * finding the element prior to interacting with it. Use this constructor at your own risk.
      *
-     * @param by            the {@link By} locator to be used by this element
      * @param webElement    the {@link WebElement} being wrapped
      */
-    public RadioWebElement(By by, WebElement webElement) {
-        super(by, webElement);
-    }
-
-    /**
-     * Creates a new Scaffold element with a raw {@link WebElement}. This is primarily used during construction of
-     * elements in the {@link #findElements(Class, By)} method.
-     *
-     * When instantiating new elements with this constructor, There is a risk of a
-     * {@link StaleElementReferenceException} occurring when interacting with elements since
-     * {@link #getRawWebElement()} will return the raw web element on being present. This means we are not re
-     * finding the element prior to interacting with it. Use this constructor at your own risk.
-     *
-     * @param webElement    the {@link WebElement} being wrapped
-     */
-    public RadioWebElement(WebElement webElement) {
+    public BaseClickableAndTypableWebElement(WebElement webElement) {
         super(webElement);
     }
 
     /**
-     * Indicates if an element is selected.
+     * Performs a {@link WebElement#sendKeys(CharSequence...)} operation to the element.
      *
-     @return the result as {@link boolean}
+     * @param keys  the text or keyboard action to execute
      */
-    public boolean isSelected() {
-        return getRawWebElement().isSelected();
+    public void sendKeys(CharSequence ...keys) {
+        getRawWebElement().sendKeys(keys);
+    }
+
+    /**
+     * Gets the current value of the dropdown.
+     *
+     * @return as {@link String}
+     */
+    public String getValue() {
+        return getRawWebElement().getAttribute("value");
+    }
+
+    /**
+     * Clears the text from the input.
+     *
+     * @see WebElement#clear()
+     */
+    public void clear() {
+        getRawWebElement().clear();
+    }
+
+    /**
+     * Clears the input field and sends the given keys. If the string is null or empty, this will simply have the
+     * effect of clearing the field. NOTE: If you just send whitespace, it *will* be typed into the field.
+     *
+     * @param keys the text to send to the input
+     */
+    public void clearAndSendKeys(String keys) {
+        this.clear();
+        if (keys != null && keys.length() > 0) {
+            this.sendKeys(keys);
+        }
     }
 }

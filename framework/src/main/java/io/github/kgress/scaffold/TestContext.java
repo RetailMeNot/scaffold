@@ -1,4 +1,4 @@
-package io.github.kgress.scaffold.webdriver;
+package io.github.kgress.scaffold;
 
 /**
  * A simple Singleton approach for creating a new instance of a {@link WebDriverManager} and Test.

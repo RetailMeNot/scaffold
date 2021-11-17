@@ -1,9 +1,5 @@
 package io.github.kgress.scaffold.util;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import io.github.kgress.scaffold.BaseUnitTest;
 import io.github.kgress.scaffold.environment.config.DesiredCapabilitiesConfigurationProperties;
 import io.github.kgress.scaffold.exception.WebDriverManagerException;
@@ -14,23 +10,16 @@ import io.github.kgress.scaffold.models.enums.desktop.ScreenResolution;
 import io.github.kgress.scaffold.models.enums.mobileemulator.MobileBrowserName;
 import io.github.kgress.scaffold.models.enums.mobileemulator.MobilePlatform;
 import io.github.kgress.scaffold.models.enums.mobileemulator.SauceDeviceName;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.parallel.Execution;
-import org.junit.jupiter.api.parallel.ExecutionMode;
 
-/**
- * This test class doesn't requires any Spring Boot context. Because of that, we can use a runner
- * independent of {@link BaseUnitTest}.
- */
-@Slf4j
-@Execution(ExecutionMode.CONCURRENT)
-public class WebDriverValidationUtilTests {
+import static org.junit.jupiter.api.Assertions.*;
+
+public class WebDriverValidationUtilTests extends BaseUnitTest {
 
   private final static String TEST_BINARY_PATH = "/tmp/headless-chromium";
   private final static String TEST_ACCESS_KEY = "testAccessKey";
   private final static String TEST_USERNAME = "testUsername";
-  private DesiredCapabilitiesConfigurationProperties caps = new DesiredCapabilitiesConfigurationProperties();
+  private final DesiredCapabilitiesConfigurationProperties caps = new DesiredCapabilitiesConfigurationProperties();
 
   @Test
   public void testAwsCaps_emptyBinaryPathAndBrowser_fails() {

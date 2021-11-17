@@ -4,8 +4,8 @@ import io.github.kgress.scaffold.BaseUnitTest;
 import org.junit.jupiter.api.Test;
 
 import static io.github.kgress.scaffold.util.AutomationUtils.*;
-import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AutomationUtilitiesTests extends BaseUnitTest {
 
@@ -25,21 +25,20 @@ public class AutomationUtilitiesTests extends BaseUnitTest {
     @Test
     public void testGetTextFromHTMLNoStartsWith() {
         var html = "<head>Hello!</head><body><h1>This is the body</body>";
-        assertTrue("Passing a startsWith that isn't there should return an empty string",
-                getTextFromHTML(html, "not there", "body").isEmpty());
+        assertTrue(getTextFromHTML(html, "not there", "body").isEmpty(),
+                "Passing a startsWith that isn't there should return an empty string");
     }
 
     @Test
     public void testGetTextFromHTMLNoEndsWith() {
         var html = "<head>Hello!</head><body><h1>This is the body</body>";
-        assertTrue("Passing an endsWith that isn't there should return an empty string",
-                getTextFromHTML(html, "<body>", "not there").isEmpty());
+        assertTrue(getTextFromHTML(html, "<body>", "not there").isEmpty(),
+                "Passing an endsWith that isn't there should return an empty string");
     }
 
     @Test
     public void testGetUniqueString() {
-        assertEquals(32, getUniqueString().length(),
-                "The uniqueString should be 32 chars long");
+        assertEquals(32, getUniqueString().length(), "The uniqueString should be 32 chars long");
     }
 
     @Test

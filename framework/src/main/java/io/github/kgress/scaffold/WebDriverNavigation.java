@@ -1,4 +1,4 @@
-package io.github.kgress.scaffold.webdriver;
+package io.github.kgress.scaffold;
 
 /**
  * This class is for handling threading during navigation for an implementing project.

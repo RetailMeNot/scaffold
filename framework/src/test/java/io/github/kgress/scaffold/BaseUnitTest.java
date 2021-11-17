@@ -2,149 +2,529 @@ package io.github.kgress.scaffold;
 
 import io.github.kgress.scaffold.environment.config.DesiredCapabilitiesConfigurationProperties;
 import io.github.kgress.scaffold.environment.config.ScaffoldConfiguration;
-import io.github.kgress.scaffold.models.unittests.MockLogs;
-import io.github.kgress.scaffold.models.unittests.MockWebDriver;
-import io.github.kgress.scaffold.models.unittests.MockWebElement;
-import io.github.kgress.scaffold.webdriver.TestContext;
-import io.github.kgress.scaffold.webdriver.WebDriverManager;
-import io.github.kgress.scaffold.webdriver.WebDriverWrapper;
-import io.github.kgress.scaffold.webelements.AbstractWebElement;
+import io.github.kgress.scaffold.webdrivercontext.WebDriverContextTests;
+import io.github.kgress.scaffold.webelements.*;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.logging.LogEntry;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.openqa.selenium.*;
+import org.openqa.selenium.support.ui.Select;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.logging.Level;
-
-import static io.github.kgress.scaffold.util.AutomationUtils.getUniqueString;
+import static org.mockito.Mockito.when;
 
 @ActiveProfiles("unit_testing")
 @Slf4j
 @Execution(ExecutionMode.CONCURRENT)
-@ExtendWith(SpringExtension.class)
+@ExtendWith({
+        SpringExtension.class,
+        MockitoExtension.class})
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.NONE,
         classes = { ScaffoldConfiguration.class }
 )
 public abstract class BaseUnitTest {
 
-    protected static final String TAG_NAME_1 = "test element 1";
-    protected static final String TAG_NAME_2 = "test element 2";
-    protected static final String TEXT_NAME_1 = "element 1";
-    protected static final String TEXT_NAME_2 = "element 2";
-    protected static final Level LOG_LEVEL = Level.SEVERE;
-    protected static final long TIME_STAMP = new Date().getTime();
-    protected static final String MESSAGE = "Mock Log Entry";
-    private static String MOCK_UNIT_TEST;
+    @Mock
+    protected WebElement mockRawWebElement;
 
-    protected WebDriverManager webDriverContextImpl;
-    protected WebDriverWrapper webDriverWrapper;
-    protected MockWebDriver mockWebDriver;
-    protected TestableAbstractWebElement testAbstractWebElement;
-    protected MockWebElement mockElement1;
-    protected MockWebElement mockElement2;
-    protected MockLogs mockLogs = new MockLogs();
+    @Mock
+    protected WebElement mockParentRawWebElement;
 
-    @Autowired
-    protected RestTemplate seleniumGridRestTemplate;
+    @Mock
+    protected WebDriver mockBaseWebDriver;
+
+    @Mock
+    protected WebDriverWrapper mockWebDriverWrapper;
+
+    @Mock
+    protected WebElementWait mockWebElementWait;
+
+    @Mock
+    protected JavascriptExecutor mockJavascriptExecutor;
+
+    @Mock
+    protected Select mockSelect;
 
     @Autowired
     protected DesiredCapabilitiesConfigurationProperties desiredCapabilities;
 
+    @Autowired
+    protected RestTemplate seleniumGridRestTemplate;
+
     /**
-     * Setup the mock web driver and test data before every method
+     * A helper method to set a base level when from {@link org.mockito.Mockito}. The reason it's being used as
+     * a helper method instead of in a BeforeEach step is because some tests in test files don't require stubbing like
+     * this prior to the test running. Mockito wasn't very happy about the stubbing existing when it didn't need it.
+     * Thus, the birth of this helper.
+     *
+     * @param element   the element that's being interacted with
+     * @param <T>       the type reference as an extension of {@link BaseWebElement}
      */
-    @BeforeEach
-    protected void setupTestWebDriver() {
-        // Create a new unique ID for the test name
-        MOCK_UNIT_TEST = "Mock Unit Test " + getUniqueString();
-
-        // Create a new WebDriverContext and create a TestContext singleton with the WebDriverContext and test name
-        webDriverContextImpl = new WebDriverManager(desiredCapabilities, seleniumGridRestTemplate);
-        TestContext.baseContext().setContext(webDriverContextImpl, MOCK_UNIT_TEST);
-
-        // Hit initDriver to create the mock driver and auto assign the webDriverWrapper to the WebDriverContext
-        // with reflection magic
-        webDriverContextImpl.initDriver(MOCK_UNIT_TEST);
-
-        // Set the webdriverwrapper to the one created and set to the WebDriverContext.
-        webDriverWrapper = webDriverContextImpl.getWebDriverWrapper();
-
-        // Set the mockWebDriver to the one created and set to the webdriverwrapper from the WebDriverContext.
-        mockWebDriver = (MockWebDriver) webDriverWrapper.getBaseWebDriver();
-
-        setupTestData();
+    protected <T extends BaseWebElement> void setBaseWhen(T element) {
+        when(mockWebElementWait.waitUntilDisplayed()).thenReturn(mockRawWebElement);
+        when(element.getRawWebElement()).thenReturn(mockRawWebElement);
     }
 
     /**
-     * Get rid of the web driver context after the test
+     * A helper method to set a when from {@link org.mockito.Mockito} when we're wanting to invoke the scroll into
+     * view script and expect it to succeed.
      */
-    @AfterEach
-    protected void tearDownTestWebDriver() {
-        TestContext.baseContext().removeContext();
+    protected void setWhenScrollIntoViewSucceed() {
+        when(mockWebDriverWrapper.getJavascriptExecutor()).thenReturn(mockJavascriptExecutor);
+        when((WebElement) mockWebDriverWrapper
+                .getJavascriptExecutor()
+                .executeScript(SharedTestVariables.SCROLL_INTO_VIEW_SCRIPT, mockRawWebElement))
+                .thenReturn(mockRawWebElement);
     }
 
     /**
-     * A helper method for setting up shared test data
+     * A helper method to set a when from {@link org.mockito.Mockito} when we're wanting to invoke the scroll into
+     * view script and expect it to fail.
      */
-    private void setupTestData() {
-        testAbstractWebElement = new TestableAbstractWebElement();
-        mockElement1 = new MockWebElement()
-                .text(TEXT_NAME_1)
-                .tagName(TAG_NAME_1);
-        mockElement2 = new MockWebElement()
-                .text(TEXT_NAME_2)
-                .tagName(TAG_NAME_2);
-
-        // Create a new error log entry
-        List<LogEntry> logEntryList = new ArrayList<>();
-        logEntryList.add(new LogEntry(LOG_LEVEL, TIME_STAMP, MESSAGE));
-        mockLogs.set(logEntryList);
+    protected void setWhenScrollIntoViewFail() {
+        when(mockWebDriverWrapper.getJavascriptExecutor()).thenReturn(mockJavascriptExecutor);
+        when((WebElement) mockWebDriverWrapper
+                .getJavascriptExecutor()
+                .executeScript(SharedTestVariables.SCROLL_INTO_VIEW_SCRIPT, mockRawWebElement))
+                .thenThrow(TimeoutException.class);
     }
 
     /**
-     * A nested class for testing against abstract elements
+     * A helper method to set a when from {@link org.mockito.Mockito} when we're wanting to invoke the get raw parent
+     * web element script and expect it to succeed.
      */
-    public static class TestableAbstractWebElement extends AbstractWebElement {
-        public TestableAbstractWebElement() {
-            this(null, (By) null); //have to cast the second null arg to disambiguate the parentBy from the parentElement
+    protected void setWhenGetRawParentElementSucceed() {
+        when(mockWebDriverWrapper.getJavascriptExecutor()).thenReturn(mockJavascriptExecutor);
+        when((WebElement) mockWebDriverWrapper
+                .getJavascriptExecutor()
+                .executeScript(SharedTestVariables.PARENT_ELEMENT_SCRIPT, mockRawWebElement))
+                .thenReturn(mockParentRawWebElement);
+    }
+
+    /**
+     * A helper method to set a when from {@link org.mockito.Mockito} when we're wanting to invoke the get raw parent
+     * web element script and expect it to fail.
+     */
+    protected void setWhenGetRawParentElementFail() {
+        when(mockWebDriverWrapper.getJavascriptExecutor()).thenReturn(mockJavascriptExecutor);
+        when((WebElement) mockWebDriverWrapper
+                .getJavascriptExecutor()
+                .executeScript(SharedTestVariables.PARENT_ELEMENT_SCRIPT, mockRawWebElement))
+                .thenThrow(TimeoutException.class);
+    }
+
+    /**
+     * A test class required for configuring a web driver in {@link WebDriverContextTests}. The super requires package
+     * level access.
+     */
+    protected static class TestWebDriverManager extends WebDriverManager {
+        public TestWebDriverManager(DesiredCapabilitiesConfigurationProperties desiredCapabilities,
+                                    RestTemplate seleniumGridRestTemplate) {
+            super(desiredCapabilities, seleniumGridRestTemplate);
         }
 
-        public TestableAbstractWebElement(String cssSelector) {
+        public void initDriver_fromParent(String testName) {
+            initDriver(testName);
+        }
+
+        public WebDriverWrapper getWebDriverWrapper_fromParent() {
+            return getWebDriverWrapper();
+        }
+    }
+
+    /**
+     * A test class required for configuring a web driver in {@link WebDriverContextTests}. The super requires package
+     * level access.
+     */
+    protected static class TestWebDriverWrapper extends WebDriverWrapper {
+        public TestWebDriverWrapper(WebDriver baseWebDriver, Long waitTimeoutInSeconds) {
+            super(baseWebDriver, waitTimeoutInSeconds);
+        }
+    }
+
+    /**
+     * A nested class for testing. It's living in {@link BaseUnitTest} because it requires package access. it also
+     * requires some overrides, so we can return mocks instead of invoking the real method calls.
+     */
+    public class TestBaseWebElement extends BaseWebElement {
+        public TestBaseWebElement(String cssSelector) {
             super(cssSelector);
         }
 
-        public TestableAbstractWebElement(By by, By parentBy) {
+        public TestBaseWebElement(By by) {
+            super(by);
+        }
+
+        public TestBaseWebElement(By by, By parentBy) {
             super(by, parentBy);
         }
 
-        public TestableAbstractWebElement(By by, WebElement parentElement) {
-            super(by, parentElement);
+        @Override
+        public WebDriverWrapper getWebDriverWrapper() {
+            return mockWebDriverWrapper;
         }
 
-        public TestableAbstractWebElement(By by) {
-            super( by );
+        @Override
+        public void setWebElementWait() {}
+
+        @Override
+        public WebElementWait getWebElementWait() {
+            return mockWebElementWait;
+        }
+    }
+
+    /**
+     * A nested class for testing. It's living in {@link BaseUnitTest} because it requires package access. it also
+     * requires some overrides, so we can return mocks instead of invoking the real method calls.
+     */
+    public class TestBaseClickableWebElement extends BaseClickableWebElement {
+        public TestBaseClickableWebElement(String cssSelector) {
+            super(cssSelector);
         }
 
-        public TestableAbstractWebElement(WebElement element) {
-            super(element);
+        public TestBaseClickableWebElement(By by, By parentBy) {
+            super(by, parentBy);
         }
 
-        public String getText() {
-            return getWebElement().getText();
+        public TestBaseClickableWebElement(By by) {
+            super(by);
+        }
+
+        @Override
+        public WebDriverWrapper getWebDriverWrapper() {
+            return mockWebDriverWrapper;
+        }
+
+        @Override
+        public void setWebElementWait() {}
+
+        @Override
+        public WebElementWait getWebElementWait() {
+            return mockWebElementWait;
+        }
+    }
+
+    /**
+     * A nested class for testing. It's living in {@link BaseUnitTest} because it requires package access. it also
+     * requires some overrides, so we can return mocks instead of invoking the real method calls.
+     */
+    public class TestBaseClickableAndTypableWebElement extends BaseClickableAndTypableWebElement {
+        public TestBaseClickableAndTypableWebElement(String cssSelector) {
+            super(cssSelector);
+        }
+
+        public TestBaseClickableAndTypableWebElement(By by) {
+            super(by);
+        }
+
+        public TestBaseClickableAndTypableWebElement(By by, By parentBy) {
+            super(by, parentBy);
+        }
+
+        @Override
+        public WebDriverWrapper getWebDriverWrapper() {
+            return mockWebDriverWrapper;
+        }
+
+        @Override
+        public void setWebElementWait() {}
+
+        @Override
+        public WebElementWait getWebElementWait() {
+            return mockWebElementWait;
+        }
+    }
+
+    /**
+     * A nested class for testing. It's living in {@link BaseUnitTest} because it requires package access. it also
+     * requires some overrides, so we can return mocks instead of invoking the real method calls.
+     */
+    public class TestDivWebElement extends DivWebElement {
+        public TestDivWebElement(String cssSelector) {
+            super(cssSelector);
+        }
+
+        public TestDivWebElement(By by) {
+            super(by);
+        }
+
+        public TestDivWebElement(By by, By parentBy) {
+            super(by, parentBy);
+        }
+
+        @Override
+        public WebDriverWrapper getWebDriverWrapper() {
+            return mockWebDriverWrapper;
+        }
+
+        @Override
+        public void setWebElementWait() {}
+
+        @Override
+        public WebElementWait getWebElementWait() {
+            return mockWebElementWait;
+        }
+    }
+
+    /**
+     * A nested class for testing. It's living in {@link BaseUnitTest} because it requires package access. it also
+     * requires some overrides, so we can return mocks instead of invoking the real method calls.
+     */
+    public class TestButtonWebElement extends ButtonWebElement {
+        public TestButtonWebElement(String cssSelector) {
+            super(cssSelector);
+        }
+
+        public TestButtonWebElement(By by) {
+            super(by);
+        }
+
+        public TestButtonWebElement(By by, By parentBy) {
+            super(by, parentBy);
+        }
+
+        @Override
+        public WebDriverWrapper getWebDriverWrapper() {
+            return mockWebDriverWrapper;
+        }
+
+        @Override
+        public void setWebElementWait() {}
+
+        @Override
+        public WebElementWait getWebElementWait() {
+            return mockWebElementWait;
+        }
+    }
+
+    /**
+     * A nested class for testing. It's living in {@link BaseUnitTest} because it requires package access. it also
+     * requires some overrides, so we can return mocks instead of invoking the real method calls.
+     */
+    public class TestCheckboxWebElement extends CheckBoxWebElement {
+        public TestCheckboxWebElement(String cssSelector) {
+            super(cssSelector);
+        }
+
+        public TestCheckboxWebElement(By by) {
+            super(by);
+        }
+
+        public TestCheckboxWebElement(By by, By parentBy) {
+            super(by, parentBy);
+        }
+
+        @Override
+        public WebDriverWrapper getWebDriverWrapper() {
+            return mockWebDriverWrapper;
+        }
+
+        @Override
+        public void setWebElementWait() {}
+
+        @Override
+        public WebElementWait getWebElementWait() {
+            return mockWebElementWait;
+        }
+    }
+
+    /**
+     * A nested class for testing. It's living in {@link BaseUnitTest} because it requires package access. it also
+     * requires some overrides, so we can return mocks instead of invoking the real method calls.
+     */
+    public class TestImageWebElement extends ImageWebElement {
+        public TestImageWebElement(String cssSelector) {
+            super(cssSelector);
+        }
+
+        public TestImageWebElement(By by) {
+            super(by);
+        }
+
+        public TestImageWebElement(By by, By parentBy) {
+            super(by, parentBy);
+        }
+
+        @Override
+        public WebDriverWrapper getWebDriverWrapper() {
+            return mockWebDriverWrapper;
+        }
+
+        @Override
+        public void setWebElementWait() {}
+
+        @Override
+        public WebElementWait getWebElementWait() {
+            return mockWebElementWait;
+        }
+    }
+
+    /**
+     * A nested class for testing. It's living in {@link BaseUnitTest} because it requires package access. it also
+     * requires some overrides, so we can return mocks instead of invoking the real method calls.
+     */
+    public class TestInputWebElement extends InputWebElement {
+        public TestInputWebElement(String cssSelector) {
+            super(cssSelector);
+        }
+
+        public TestInputWebElement(By by) {
+            super(by);
+        }
+
+        public TestInputWebElement(By by, By parentBy) {
+            super(by, parentBy);
+        }
+
+        @Override
+        public WebDriverWrapper getWebDriverWrapper() {
+            return mockWebDriverWrapper;
+        }
+
+        @Override
+        public void setWebElementWait() {}
+
+        @Override
+        public WebElementWait getWebElementWait() {
+            return mockWebElementWait;
+        }
+    }
+
+    /**
+     * A nested class for testing. It's living in {@link BaseUnitTest} because it requires package access. it also
+     * requires some overrides, so we can return mocks instead of invoking the real method calls.
+     */
+    public class TestLinkWebElement extends LinkWebElement {
+        public TestLinkWebElement(String cssSelector) {
+            super(cssSelector);
+        }
+
+        public TestLinkWebElement(By by) {
+            super(by);
+        }
+
+        public TestLinkWebElement(By by, By parentBy) {
+            super(by, parentBy);
+        }
+
+        @Override
+        public WebDriverWrapper getWebDriverWrapper() {
+            return mockWebDriverWrapper;
+        }
+
+        @Override
+        public void setWebElementWait() {}
+
+        @Override
+        public WebElementWait getWebElementWait() {
+            return mockWebElementWait;
+        }
+    }
+
+    /**
+     * A nested class for testing. It's living in {@link BaseUnitTest} because it requires package access. it also
+     * requires some overrides, so we can return mocks instead of invoking the real method calls.
+     */
+    public class TestStaticTextWebElement extends StaticTextWebElement {
+        public TestStaticTextWebElement(String cssSelector) {
+            super(cssSelector);
+        }
+
+        public TestStaticTextWebElement(By by) {
+            super(by);
+        }
+
+        public TestStaticTextWebElement(By by, By parentBy) {
+            super(by, parentBy);
+        }
+
+        @Override
+        public WebDriverWrapper getWebDriverWrapper() {
+            return mockWebDriverWrapper;
+        }
+
+        @Override
+        public void setWebElementWait() {}
+
+        @Override
+        public WebElementWait getWebElementWait() {
+            return mockWebElementWait;
+        }
+    }
+
+    /**
+     * A nested class for testing. It's living in {@link BaseUnitTest} because it requires package access. it also
+     * requires some overrides, so we can return mocks instead of invoking the real method calls.
+     */
+    public class TestDropDownWebElement extends DropDownWebElement {
+        public TestDropDownWebElement(String cssSelector) {
+            super(cssSelector);
+        }
+
+        public TestDropDownWebElement(By by) {
+            super(by);
+        }
+
+        public TestDropDownWebElement(By by, By parentBy) {
+            super(by, parentBy);
+        }
+
+        @Override
+        public WebDriverWrapper getWebDriverWrapper() {
+            return mockWebDriverWrapper;
+        }
+
+        @Override
+        public void setWebElementWait() {}
+
+        @Override
+        public WebElementWait getWebElementWait() {
+            return mockWebElementWait;
+        }
+
+        @Override
+        public Select getSelectElement() {
+            return mockSelect;
+        }
+    }
+
+    /**
+     * A nested class for testing. It's living in {@link BaseUnitTest} because it requires package access. it also
+     * requires some overrides, so we can return mocks instead of invoking the real method calls.
+     */
+    public class TestRadioWebElement extends RadioWebElement {
+
+        public TestRadioWebElement(String cssSelector) {
+            super(cssSelector);
+        }
+
+        public TestRadioWebElement(By by) {
+            super(by);
+        }
+
+        public TestRadioWebElement(By by, By parentBy) {
+            super(by, parentBy);
+        }
+
+        @Override
+        public WebDriverWrapper getWebDriverWrapper() {
+            return mockWebDriverWrapper;
+        }
+
+        @Override
+        public void setWebElementWait() {}
+
+        @Override
+        public WebElementWait getWebElementWait() {
+            return mockWebElementWait;
         }
     }
 }

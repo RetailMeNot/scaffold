@@ -1,15 +1,4 @@
-package io.github.kgress.scaffold.webdriver;
-
-import static io.github.kgress.scaffold.models.enums.desktop.RunType.SAUCE;
-import static io.github.kgress.scaffold.models.enums.desktop.RunType.SAUCE_MOBILE_EMULATOR;
-import static io.github.kgress.scaffold.models.enums.desktop.ScreenResolution.ScreenResolutionType.SAUCELABS;
-import static io.github.kgress.scaffold.models.enums.desktop.ScreenResolution.ScreenResolutionType.SELENIUM;
-import static io.github.kgress.scaffold.util.AutomationUtils.getStackTrace;
-import static io.github.kgress.scaffold.util.WebDriverValidationUtil.validateAwsLambdaDesiredCapabilities;
-import static io.github.kgress.scaffold.util.WebDriverValidationUtil.validateRequiredDesktopBrowserCapabilities;
-import static io.github.kgress.scaffold.util.WebDriverValidationUtil.validateRequiredMobileEmulatorCapabilities;
-import static io.github.kgress.scaffold.util.WebDriverValidationUtil.validateRequiredSauceAuth;
-import static java.util.concurrent.TimeUnit.SECONDS;
+package io.github.kgress.scaffold;
 
 import io.github.kgress.scaffold.environment.config.DesiredCapabilitiesConfigurationProperties;
 import io.github.kgress.scaffold.environment.config.SeleniumGridServiceConfiguration;
@@ -18,12 +7,7 @@ import io.github.kgress.scaffold.exception.WebDriverManagerException;
 import io.github.kgress.scaffold.models.GridSessionRequest;
 import io.github.kgress.scaffold.models.GridSessionResponse;
 import io.github.kgress.scaffold.models.enums.desktop.RunType;
-import io.github.kgress.scaffold.models.unittests.MockWebDriver;
-import io.github.kgress.scaffold.webdriver.interfaces.TestContextSetting;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
-import java.util.Optional;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.MutableCapabilities;
@@ -48,6 +32,17 @@ import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
+import java.util.Optional;
+
+import static io.github.kgress.scaffold.models.enums.desktop.RunType.SAUCE;
+import static io.github.kgress.scaffold.models.enums.desktop.ScreenResolution.ScreenResolutionType.SAUCELABS;
+import static io.github.kgress.scaffold.models.enums.desktop.ScreenResolution.ScreenResolutionType.SELENIUM;
+import static io.github.kgress.scaffold.util.AutomationUtils.getStackTrace;
+import static io.github.kgress.scaffold.util.WebDriverValidationUtil.*;
+
 /**
  * This class manages {@link WebDriverWrapper} instances on a per thread basis. This is useful for
  * multi-threaded tests to be able to seamlessly access their associated WebDriver instance
@@ -63,9 +58,8 @@ import org.springframework.web.client.RestTemplate;
  * must be higher due to the slower speeds from Appium. 30 seconds has provided more than ample time
  * to allow for Appium's slower responses. However, this increases the time of failure for a test.
  * We'll monitor the performance and make improvements along the way. Perhaps we could allow for a
- * user based setting, much like the {@link WebDriverWrapper#getSeleniumObjectTimeout()}. It might
- * be prudent to allow a timeout field as a desired capability. Or even, perhaps, the implicit waits
- * timeout as set during {@link #initDriver(String)}.
+ * user based setting. It might be prudent to allow a timeout field as a desired capability. Or even, perhaps,
+ * the implicit waits timeout as set during {@link #initDriver(String)}.
  * <p>
  * We have an opportunity to also explore desktop mobile view. For example, it's entirely possible
  * to set an experimental option on chrome to change its view to a mobile device, using the
@@ -80,19 +74,21 @@ import org.springframework.web.client.RestTemplate;
 public class WebDriverManager {
 
   private static final String GRID_TEST_SESSION_URI = "/grid/api/testsession";
-  private static final Long TEN_SECONDS = 10L;
-  private static final Long THIRTY_SECONDS = 30L;
   private static final String SCREEN_RESOLUTION_CAPABILITY = "screenResolution";
+
+  @Getter(AccessLevel.PRIVATE)
   private final Object startLock = new Object();
+
+  @Getter(AccessLevel.PRIVATE)
   private final Object closeLock = new Object();
 
-  @Getter
+  @Getter(AccessLevel.PRIVATE)
   private final DesiredCapabilitiesConfigurationProperties desiredCapabilities;
 
-  @Getter
+  @Getter(AccessLevel.PACKAGE)
   private WebDriverWrapper webDriverWrapper;
 
-  @Getter
+  @Getter(AccessLevel.PRIVATE)
   private final RestTemplate seleniumGridRestTemplate;
 
   @Autowired
@@ -118,23 +114,13 @@ public class WebDriverManager {
    * @param testName the information on the test that is being ran. This plugs in with Junit Jupiter
    *                 annotations.
    */
-  public void initDriver(String testName) {
-    if (webDriverWrapper != null) {
+  protected void initDriver(String testName) {
+    if (getWebDriverWrapper() != null) {
       throw new WebDriverContextException(
           "Driver already exists. Try closing/quitting it before trying to initialize a new one");
     }
     var webDriver = configureWebDriver(testName);
-    webDriverWrapper = new WebDriverWrapper(webDriver);
-
-    // Configure the browser to implicitly wait anytime a user attempts to locate an element. If
-    // using mobile emulator, we need to kick this timeout up quite a bit since it's powered by
-    // appium. Otherwise, a 10 second timeout on desktop has proven to be good. It wouldn't be
-    // a bad idea to also add a desired capability for setting this implicit wait.
-    if (getDesiredCapabilities().getRunType().equals(SAUCE_MOBILE_EMULATOR)) {
-      webDriverWrapper.manage().timeouts().implicitlyWait(THIRTY_SECONDS, SECONDS);
-    } else {
-      webDriverWrapper.manage().timeouts().implicitlyWait(TEN_SECONDS, SECONDS);
-    }
+    webDriverWrapper = new WebDriverWrapper(webDriver, getDesiredCapabilities().getWaitTimeoutInSeconds());
   }
 
   /**
@@ -143,11 +129,11 @@ public class WebDriverManager {
    * 1. Check if the {@link WebDriverWrapper} is not null. If it's not null, proceed with the
    * closing of the driver. 2. Quit the driver on the thread.
    */
-  public void closeDriver() {
-    if (webDriverWrapper != null) {
+  void closeDriver() {
+    if (getWebDriverWrapper() != null) {
       try {
-        synchronized (closeLock) {
-          webDriverWrapper.quit();
+        synchronized (getCloseLock()) {
+          getWebDriverWrapper().quit();
         }
       } catch (Exception e) {
         log.error("Error quitting browser: " + getStackTrace(e));
@@ -173,7 +159,7 @@ public class WebDriverManager {
     switch (runType) {
       case UNIT:
         log.debug("Configuring mock browser for Scaffold unit testing.");
-        webDriver = new MockWebDriver();
+        webDriver = null;
         break;
       case LOCAL:
         browserOptions = configureLocalBrowserOptions();
@@ -531,7 +517,7 @@ public class WebDriverManager {
       var request = new HttpEntity<>(gridSessionRequest);
 
       var fullPath = GRID_TEST_SESSION_URI + "?session=" + gridSessionRequest.getSession();
-      seleniumGridRestTemplate.getForObject(fullPath, GridSessionResponse.class, request);
+      getSeleniumGridRestTemplate().getForObject(fullPath, GridSessionResponse.class, request);
     } catch (Exception ex) {
       log.error("Unable to call the Selenium Grid", ex);
     }
@@ -645,7 +631,7 @@ public class WebDriverManager {
       MutableCapabilities browserOptions)
       throws MalformedURLException {
 
-    synchronized (startLock) {
+    synchronized (getStartLock()) {
       return new ScreenshotRemoteDriver(new URL(remoteUrl), browserOptions);
     }
   }

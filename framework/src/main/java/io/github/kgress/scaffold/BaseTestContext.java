@@ -1,8 +1,7 @@
-package io.github.kgress.scaffold.webdriver;
+package io.github.kgress.scaffold;
 
 import io.github.kgress.scaffold.exception.WebDriverContextException;
 import io.github.kgress.scaffold.models.TestInformation;
-import io.github.kgress.scaffold.webdriver.interfaces.TestContextSetting;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
@@ -21,8 +20,6 @@ public class BaseTestContext {
     private final Map<String, TestInformation> testInformationManager = new ConcurrentHashMap<>();
 
     BaseTestContext() {
-        // Set both of the available Boolean settings to false (off) by default
-        addSetting(TestContextSetting.WAIT_FOR_DISPLAY_ENABLED, false);
         addSetting(TestContextSetting.IMPLICIT_SCROLLING_ENABLED, false);
     }
 
@@ -125,7 +122,7 @@ public class BaseTestContext {
 
         webDriverContext
                 .webDriverManager(webDriverManager)
-                .testName(testName);
+                .setTestName(testName);
         driverManager.set(webDriverContext);
         log.debug(String.format("Setting webdrivercontext for %s", testName));
     }
@@ -143,7 +140,7 @@ public class BaseTestContext {
             webDriverManager.closeDriver();
             webDriverContext
                     .webDriverManager(null)
-                    .testName(null);
+                    .setTestName(null);
             log.debug("Context existed and removed.");
         }
     }

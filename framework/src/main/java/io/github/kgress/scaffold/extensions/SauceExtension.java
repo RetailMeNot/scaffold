@@ -1,7 +1,7 @@
 package io.github.kgress.scaffold.extensions;
 
 import com.saucelabs.saucerest.SauceREST;
-import io.github.kgress.scaffold.webdriver.TestContext;
+import io.github.kgress.scaffold.TestContext;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;

@@ -7,32 +7,17 @@ import org.openqa.selenium.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
-public class CheckBoxWebElementTests extends BaseUnitTest {
+public class ButtonWebElementTests extends BaseUnitTest {
 
-    private final TestCheckboxWebElement elementByCssSelector =
-            new TestCheckboxWebElement(SharedTestVariables.CSS_SELECTOR1);
-    private final TestCheckboxWebElement elementByClass =
-            new TestCheckboxWebElement(By.className(SharedTestVariables.CLASS_NAME));
-
-    @Test
-    public void testCheckboxWebElement_byCss_checkTrue() {
-        setBaseWhen(elementByCssSelector);
-        when(mockRawWebElement.isSelected()).thenReturn(true);
-        elementByCssSelector.check(true);
-        verify(mockRawWebElement, times(1)).isSelected();
-    }
+    private final TestButtonWebElement elementByCssSelector =
+            new TestButtonWebElement(SharedTestVariables.CSS_SELECTOR1);
+    private final TestButtonWebElement elementByClass =
+            new TestButtonWebElement(By.className(SharedTestVariables.CLASS_NAME));
 
     @Test
-    public void testCheckboxWebElement_byCss_checkFalse() {
-        setBaseWhen(elementByCssSelector);
-        when(mockRawWebElement.isSelected()).thenReturn(false);
-        elementByCssSelector.check(false);
-        verify(mockRawWebElement, times(1)).isSelected();
-    }
-
-    @Test
-    public void testCheckboxWebElement_byCss_click() {
+    public void testButtonWebElement_byCss_click() {
         setBaseWhen(elementByCssSelector);
         setWhenScrollIntoViewSucceed();
         elementByCssSelector.click();
@@ -40,35 +25,35 @@ public class CheckBoxWebElementTests extends BaseUnitTest {
     }
 
     @Test
-    public void testCheckboxWebElement_byCss_isEnabled() {
+    public void testButtonWebElement_byCss_isEnabled() {
         setBaseWhen(elementByCssSelector);
         when(mockRawWebElement.isEnabled()).thenReturn(true);
         assertTrue(elementByCssSelector.isEnabled());
     }
 
     @Test
-    public void testCheckboxWebElement_byCss_isDisabled() {
+    public void testButtonWebElement_byCss_isDisabled() {
         setBaseWhen(elementByCssSelector);
         when(mockRawWebElement.isEnabled()).thenReturn(false);
         assertFalse(elementByCssSelector.isEnabled());
     }
 
     @Test
-    public void testCheckboxWebElement_byCss_isDisplayed() {
+    public void testButtonWebElement_byCss_isDisplayed() {
         setBaseWhen(elementByCssSelector);
         when(mockRawWebElement.isDisplayed()).thenReturn(true);
         assertTrue(elementByCssSelector.isDisplayed());
     }
 
     @Test
-    public void testCheckboxWebElement_byCss_isNotDisplayed() {
+    public void testButtonWebElement_byCss_isNotDisplayed() {
         setBaseWhen(elementByCssSelector);
         when(mockRawWebElement.isDisplayed()).thenReturn(false);
         assertFalse(elementByCssSelector.isDisplayed());
     }
 
     @Test
-    public void testCheckboxWebElement_byCss_isActive() {
+    public void testButtonWebElement_byCss_isActive() {
         setBaseWhen(elementByCssSelector);
         when(mockRawWebElement.getAttribute(SharedTestVariables.CLASS_ATTRIBUTE))
                 .thenReturn(SharedTestVariables.ACTIVE_CLASS_NAME);
@@ -76,7 +61,7 @@ public class CheckBoxWebElementTests extends BaseUnitTest {
     }
 
     @Test
-    public void testCheckboxWebElement_byCss_isNotActive() {
+    public void testButtonWebElement_byCss_isNotActive() {
         setBaseWhen(elementByCssSelector);
         when(mockRawWebElement.getAttribute(SharedTestVariables.CLASS_ATTRIBUTE))
                 .thenReturn(SharedTestVariables.CLASS_NAME);
@@ -84,7 +69,7 @@ public class CheckBoxWebElementTests extends BaseUnitTest {
     }
 
     @Test
-    public void testCheckboxWebElement_byCss_hasClass() {
+    public void testButtonWebElement_byCss_hasClass() {
         setBaseWhen(elementByCssSelector);
         when(mockRawWebElement.getAttribute(SharedTestVariables.CLASS_ATTRIBUTE))
                 .thenReturn(SharedTestVariables.CLASS_NAME);
@@ -92,7 +77,7 @@ public class CheckBoxWebElementTests extends BaseUnitTest {
     }
 
     @Test
-    public void testCheckboxWebElement_byCss_doesNotHaveClass() {
+    public void testButtonWebElement_byCss_doesNotHaveClass() {
         setBaseWhen(elementByCssSelector);
         var notExpectingText = "NOT HERE <.< >.>";
         when(mockRawWebElement.getAttribute(SharedTestVariables.CLASS_ATTRIBUTE))
@@ -101,7 +86,7 @@ public class CheckBoxWebElementTests extends BaseUnitTest {
     }
 
     @Test
-    public void testCheckboxWebElement_byCss_getAttribute() {
+    public void testButtonWebElement_byCss_getAttribute() {
         setBaseWhen(elementByCssSelector);
         when(mockRawWebElement.getAttribute(SharedTestVariables.CLASS_ATTRIBUTE))
                 .thenReturn(SharedTestVariables.CLASS_NAME);
@@ -110,21 +95,21 @@ public class CheckBoxWebElementTests extends BaseUnitTest {
     }
 
     @Test
-    public void testCheckboxWebElement_byCss_getText() {
+    public void testButtonWebElement_byCss_getText() {
         setBaseWhen(elementByCssSelector);
         when(mockRawWebElement.getText()).thenReturn(SharedTestVariables.TEXT_1);
         assertEquals(SharedTestVariables.TEXT_1, elementByCssSelector.getText());
     }
 
     @Test
-    public void testCheckboxWebElement_byCss_getTagName() {
+    public void testButtonWebElement_byCss_getTagName() {
         setBaseWhen(elementByCssSelector);
         when(mockRawWebElement.getTagName()).thenReturn(SharedTestVariables.TAG_NAME_1);
         assertEquals(SharedTestVariables.TAG_NAME_1, elementByCssSelector.getTagName());
     }
 
     @Test
-    public void testCheckboxWebElement_byCss_getLocation() {
+    public void testButtonWebElement_byCss_getLocation() {
         setBaseWhen(elementByCssSelector);
         var testPoint = new Point(1, 1);
         when(mockRawWebElement.getLocation()).thenReturn(testPoint);
@@ -132,7 +117,7 @@ public class CheckBoxWebElementTests extends BaseUnitTest {
     }
 
     @Test
-    public void testCheckboxWebElement_byCss_getSize() {
+    public void testButtonWebElement_byCss_getSize() {
         setBaseWhen(elementByCssSelector);
         var testDimension = new Dimension(1,1);
         when(mockRawWebElement.getSize()).thenReturn(testDimension);
@@ -140,7 +125,7 @@ public class CheckBoxWebElementTests extends BaseUnitTest {
     }
 
     @Test
-    public void testCheckboxWebElement_byCss_getRect() {
+    public void testButtonWebElement_byCss_getRect() {
         setBaseWhen(elementByCssSelector);
         var testRectangle = new Rectangle(1, 1, 1, 1);
         when(mockRawWebElement.getRect()).thenReturn(testRectangle);
@@ -148,7 +133,7 @@ public class CheckBoxWebElementTests extends BaseUnitTest {
     }
 
     @Test
-    public void testCheckboxWebElement_byCss_getCssValue() {
+    public void testButtonWebElement_byCss_getCssValue() {
         setBaseWhen(elementByCssSelector);
         var testCssProperty = "testProperty";
         var expectedTestCssValue = "Dagobah";
@@ -157,64 +142,48 @@ public class CheckBoxWebElementTests extends BaseUnitTest {
     }
 
     @Test
-    public void testCheckboxWebElement_byCss_getRawWebElement_success() {
+    public void testButtonWebElement_byCss_getRawWebElement_success() {
         setBaseWhen(elementByCssSelector);
         assertEquals(mockRawWebElement, elementByCssSelector.getRawWebElement());
     }
 
     @Test
-    public void testCheckboxWebElement_byCss_getRawWebElement_fail() {
+    public void testButtonWebElement_byCss_getRawWebElement_fail() {
         setBaseWhen(elementByCssSelector);
         when(elementByCssSelector.getRawWebElement()).thenThrow(TimeoutException.class);
         assertThrows(TimeoutException.class, elementByCssSelector::getRawWebElement);
     }
 
     @Test
-    public void testCheckboxWebElement_byCss_getRawParentWebElement_success() {
+    public void testButtonWebElement_byCss_getRawParentWebElement_success() {
         setBaseWhen(elementByCssSelector);
         setWhenGetRawParentElementSucceed();
         assertEquals(mockParentRawWebElement, elementByCssSelector.getRawParentWebElement());
     }
 
     @Test
-    public void testCheckboxWebElement_byCss_getRawParentWebElement_fail() {
+    public void testButtonWebElement_byCss_getRawParentWebElement_fail() {
         setBaseWhen(elementByCssSelector);
         setWhenGetRawParentElementFail();
         assertThrows(TimeoutException.class, elementByCssSelector::getRawParentWebElement);
     }
 
     @Test
-    public void testCheckboxWebElement_byCss_scrollIntoView_success() {
+    public void testButtonWebElement_byCss_scrollIntoView_success() {
         setBaseWhen(elementByCssSelector);
         setWhenScrollIntoViewSucceed();
         assertEquals(mockRawWebElement, elementByCssSelector.scrollIntoView());
     }
 
     @Test
-    public void testCheckboxWebElement_byCss_scrollIntoView_fail() {
+    public void testButtonWebElement_byCss_scrollIntoView_fail() {
         setBaseWhen(elementByCssSelector);
         setWhenScrollIntoViewFail();
         assertThrows(TimeoutException.class, elementByCssSelector::scrollIntoView);
     }
 
     @Test
-    public void testCheckboxWebElement_byClass_checkTrue() {
-        setBaseWhen(elementByClass);
-        when(mockRawWebElement.isSelected()).thenReturn(true);
-        elementByClass.check(true);
-        verify(mockRawWebElement, times(1)).isSelected();
-    }
-
-    @Test
-    public void testCheckboxWebElement_byClass_checkFalse() {
-        setBaseWhen(elementByClass);
-        when(mockRawWebElement.isSelected()).thenReturn(false);
-        elementByClass.check(false);
-        verify(mockRawWebElement, times(1)).isSelected();
-    }
-
-    @Test
-    public void testCheckboxWebElement_byClass_click() {
+    public void testButtonWebElement_byClass_click() {
         setBaseWhen(elementByClass);
         setWhenScrollIntoViewSucceed();
         elementByClass.click();
@@ -222,35 +191,35 @@ public class CheckBoxWebElementTests extends BaseUnitTest {
     }
 
     @Test
-    public void testCheckboxWebElement_byClass_isEnabled() {
+    public void testButtonWebElement_byClass_isEnabled() {
         setBaseWhen(elementByClass);
         when(mockRawWebElement.isEnabled()).thenReturn(true);
         assertTrue(elementByClass.isEnabled());
     }
 
     @Test
-    public void testCheckboxWebElement_byClass_isDisabled() {
+    public void testButtonWebElement_byClass_isDisabled() {
         setBaseWhen(elementByClass);
         when(mockRawWebElement.isEnabled()).thenReturn(false);
         assertFalse(elementByClass.isEnabled());
     }
 
     @Test
-    public void testCheckboxWebElement_byClass_isDisplayed() {
+    public void testButtonWebElement_byClass_isDisplayed() {
         setBaseWhen(elementByClass);
         when(mockRawWebElement.isDisplayed()).thenReturn(true);
         assertTrue(elementByClass.isDisplayed());
     }
 
     @Test
-    public void testCheckboxWebElement_byClass_isNotDisplayed() {
+    public void testButtonWebElement_byClass_isNotDisplayed() {
         setBaseWhen(elementByClass);
         when(mockRawWebElement.isDisplayed()).thenReturn(false);
         assertFalse(elementByClass.isDisplayed());
     }
 
     @Test
-    public void testCheckboxWebElement_byClass_isActive() {
+    public void testButtonWebElement_byClass_isActive() {
         setBaseWhen(elementByClass);
         when(mockRawWebElement.getAttribute(SharedTestVariables.CLASS_ATTRIBUTE))
                 .thenReturn(SharedTestVariables.ACTIVE_CLASS_NAME);
@@ -258,7 +227,7 @@ public class CheckBoxWebElementTests extends BaseUnitTest {
     }
 
     @Test
-    public void testCheckboxWebElement_byClass_isNotActive() {
+    public void testButtonWebElement_byClass_isNotActive() {
         setBaseWhen(elementByClass);
         when(mockRawWebElement.getAttribute(SharedTestVariables.CLASS_ATTRIBUTE))
                 .thenReturn(SharedTestVariables.CLASS_NAME);
@@ -266,7 +235,7 @@ public class CheckBoxWebElementTests extends BaseUnitTest {
     }
 
     @Test
-    public void testCheckboxWebElement_byClass_hasClass() {
+    public void testButtonWebElement_byClass_hasClass() {
         setBaseWhen(elementByClass);
         when(mockRawWebElement.getAttribute(SharedTestVariables.CLASS_ATTRIBUTE))
                 .thenReturn(SharedTestVariables.CLASS_NAME);
@@ -274,7 +243,7 @@ public class CheckBoxWebElementTests extends BaseUnitTest {
     }
 
     @Test
-    public void testCheckboxWebElement_byClass_doesNotHaveClass() {
+    public void testButtonWebElement_byClass_doesNotHaveClass() {
         setBaseWhen(elementByClass);
         var notExpectingText = "NOT HERE <.< >.>";
         when(mockRawWebElement.getAttribute(SharedTestVariables.CLASS_ATTRIBUTE))
@@ -283,7 +252,7 @@ public class CheckBoxWebElementTests extends BaseUnitTest {
     }
 
     @Test
-    public void testCheckboxWebElement_byClass_getAttribute() {
+    public void testButtonWebElement_byClass_getAttribute() {
         setBaseWhen(elementByClass);
         when(mockRawWebElement.getAttribute(SharedTestVariables.CLASS_ATTRIBUTE))
                 .thenReturn(SharedTestVariables.CLASS_NAME);
@@ -292,21 +261,21 @@ public class CheckBoxWebElementTests extends BaseUnitTest {
     }
 
     @Test
-    public void testCheckboxWebElement_byClass_getText() {
+    public void testButtonWebElement_byClass_getText() {
         setBaseWhen(elementByClass);
         when(mockRawWebElement.getText()).thenReturn(SharedTestVariables.TEXT_1);
         assertEquals(SharedTestVariables.TEXT_1, elementByClass.getText());
     }
 
     @Test
-    public void testCheckboxWebElement_byClass_getTagName() {
+    public void testButtonWebElement_byClass_getTagName() {
         setBaseWhen(elementByClass);
         when(mockRawWebElement.getTagName()).thenReturn(SharedTestVariables.TAG_NAME_1);
         assertEquals(SharedTestVariables.TAG_NAME_1, elementByClass.getTagName());
     }
 
     @Test
-    public void testCheckboxWebElement_byClass_getLocation() {
+    public void testButtonWebElement_byClass_getLocation() {
         setBaseWhen(elementByClass);
         var testPoint = new Point(1, 1);
         when(mockRawWebElement.getLocation()).thenReturn(testPoint);
@@ -314,7 +283,7 @@ public class CheckBoxWebElementTests extends BaseUnitTest {
     }
 
     @Test
-    public void testCheckboxWebElement_byClass_getSize() {
+    public void testButtonWebElement_byClass_getSize() {
         setBaseWhen(elementByClass);
         var testDimension = new Dimension(1,1);
         when(mockRawWebElement.getSize()).thenReturn(testDimension);
@@ -322,7 +291,7 @@ public class CheckBoxWebElementTests extends BaseUnitTest {
     }
 
     @Test
-    public void testCheckboxWebElement_byClass_getRect() {
+    public void testButtonWebElement_byClass_getRect() {
         setBaseWhen(elementByClass);
         var testRectangle = new Rectangle(1, 1, 1, 1);
         when(mockRawWebElement.getRect()).thenReturn(testRectangle);
@@ -330,7 +299,7 @@ public class CheckBoxWebElementTests extends BaseUnitTest {
     }
 
     @Test
-    public void testCheckboxWebElement_byClass_getCssValue() {
+    public void testButtonWebElement_byClass_getCssValue() {
         setBaseWhen(elementByClass);
         var testCssProperty = "testProperty";
         var expectedTestCssValue = "Dagobah";
@@ -339,41 +308,41 @@ public class CheckBoxWebElementTests extends BaseUnitTest {
     }
 
     @Test
-    public void testCheckboxWebElement_byClass_getRawWebElement_success() {
+    public void testButtonWebElement_byClass_getRawWebElement_success() {
         setBaseWhen(elementByClass);
         assertEquals(mockRawWebElement, elementByClass.getRawWebElement());
     }
 
     @Test
-    public void testCheckboxWebElement_byClass_getRawWebElement_fail() {
+    public void testButtonWebElement_byClass_getRawWebElement_fail() {
         setBaseWhen(elementByClass);
         when(elementByClass.getRawWebElement()).thenThrow(TimeoutException.class);
         assertThrows(TimeoutException.class, elementByClass::getRawWebElement);
     }
 
     @Test
-    public void testCheckboxWebElement_byClass_getRawParentWebElement_success() {
+    public void testButtonWebElement_byClass_getRawParentWebElement_success() {
         setBaseWhen(elementByClass);
         setWhenGetRawParentElementSucceed();
         assertEquals(mockParentRawWebElement, elementByClass.getRawParentWebElement());
     }
 
     @Test
-    public void testCheckboxWebElement_byClass_getRawParentWebElement_fail() {
+    public void testButtonWebElement_byClass_getRawParentWebElement_fail() {
         setBaseWhen(elementByClass);
         setWhenGetRawParentElementFail();
         assertThrows(TimeoutException.class, elementByClass::getRawParentWebElement);
     }
 
     @Test
-    public void testCheckboxWebElement_byClass_scrollIntoView_success() {
+    public void testButtonWebElement_byClass_scrollIntoView_success() {
         setBaseWhen(elementByClass);
         setWhenScrollIntoViewSucceed();
         assertEquals(mockRawWebElement, elementByClass.scrollIntoView());
     }
 
     @Test
-    public void testCheckboxWebElement_byClass_scrollIntoView_fail() {
+    public void testButtonWebElement_byClass_scrollIntoView_fail() {
         setBaseWhen(elementByClass);
         setWhenScrollIntoViewFail();
         assertThrows(TimeoutException.class, elementByClass::scrollIntoView);

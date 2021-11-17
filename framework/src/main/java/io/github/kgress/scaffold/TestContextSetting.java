@@ -1,4 +1,4 @@
-package io.github.kgress.scaffold.webdriver.interfaces;
+package io.github.kgress.scaffold;
 
 /**
  * Various config settings available to use with TestContext settings.
@@ -13,5 +13,4 @@ public interface TestContextSetting {
     String SESSION_ID = "SESSION_ID";
     String TEST_APPLICATION_CONTEXT = "test_application_context";
     String WAIT_CONDITION = "wait_condition";
-    String WAIT_FOR_DISPLAY_ENABLED = "wait_for_display_enabled";
 }

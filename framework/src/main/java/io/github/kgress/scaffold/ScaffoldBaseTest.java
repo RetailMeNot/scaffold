@@ -1,11 +1,8 @@
-package io.github.kgress.scaffold.webdriver;
+package io.github.kgress.scaffold;
 
 import io.github.kgress.scaffold.environment.config.DesiredCapabilitiesConfigurationProperties;
-import io.github.kgress.scaffold.webdriver.interfaces.TestContextSetting;
-import io.github.kgress.scaffold.webelements.WebElementWait;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
 import org.openqa.selenium.WebDriver;
@@ -88,20 +85,9 @@ public class ScaffoldBaseTest {
     }
 
     /**
-     * Enabled explicit waits on the thread. This feature will automatically perform a {@link WebElementWait#waitUntilDisplayed()}
-     * any instantiated strong typed element.
-     *
-     * To properly enable this, add it to your own projects {@link BeforeAll} method. This method must be static to respect
-     * the requirements of JUNIT.
-     */
-    protected static void enableExplicitWaits() {
-        TestContext.baseContext().addSetting(TestContextSetting.WAIT_FOR_DISPLAY_ENABLED, true);
-    }
-
-    /**
      * Helper method for {@link #setup(TestInfo)}.
      * <p>
-     * This will create a new {@link WebDriverContext} by creating a new instance of {@link io.github.kgress.scaffold.webdriver.WebDriverManager} and creating
+     * This will create a new {@link WebDriverContext} by creating a new instance of {@link WebDriverManager} and creating
      * a singleton with the webdrivercontext and the test name. This will make it easier to refer to this webdrivercontext at a later time.
      *
      * @param testName the information on the test that is being ran. This plugs in with Junit Jupiter annotations.

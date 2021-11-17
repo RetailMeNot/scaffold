@@ -1,18 +1,17 @@
 package io.github.kgress.scaffold.util;
 
-import static io.github.kgress.scaffold.models.enums.mobileemulator.MobileBrowserName.ANDROID;
-import static io.github.kgress.scaffold.models.enums.mobileemulator.MobileBrowserName.CHROME;
-import static io.github.kgress.scaffold.models.enums.mobileemulator.MobileBrowserName.SAFARI;
-import static io.github.kgress.scaffold.models.enums.mobileemulator.MobilePlatform.IOS;
-
+import io.github.kgress.scaffold.WebDriverManager;
 import io.github.kgress.scaffold.environment.config.DesiredCapabilitiesConfigurationProperties;
 import io.github.kgress.scaffold.environment.config.DesiredCapabilitiesConfigurationProperties.MobileEmulator;
 import io.github.kgress.scaffold.exception.WebDriverManagerException;
 import io.github.kgress.scaffold.models.enums.desktop.BrowserType;
 import io.github.kgress.scaffold.models.enums.desktop.RunType;
 import io.github.kgress.scaffold.models.enums.mobileemulator.MobilePlatform;
-import io.github.kgress.scaffold.webdriver.WebDriverManager;
+
 import java.util.Optional;
+
+import static io.github.kgress.scaffold.models.enums.mobileemulator.MobileBrowserName.*;
+import static io.github.kgress.scaffold.models.enums.mobileemulator.MobilePlatform.IOS;
 
 /**
  * This class is used in {@link WebDriverManager} to validate required properties based on the
@@ -22,6 +21,8 @@ public class WebDriverValidationUtil {
 
   /**
    * Performs validation on {@link RunType#AWS_LAMBDA_REMOTE} and {@link RunType#AWS_LAMBDA_LOCAL}.
+   *
+   * @param desiredCapabilities   the {@link DesiredCapabilitiesConfigurationProperties} to verify
    */
   public static void validateAwsLambdaDesiredCapabilities(
       DesiredCapabilitiesConfigurationProperties desiredCapabilities) {
@@ -45,6 +46,8 @@ public class WebDriverValidationUtil {
   /**
    * Performs validation on {@link RunType#LOCAL}, {@link RunType#HEADLESS}, {@link RunType#GRID},
    * {@link RunType#SAUCE}, {@link RunType#AWS_LAMBDA_REMOTE}, and {@link RunType#AWS_LAMBDA_LOCAL}
+   *
+   * @param desiredCapabilities   the {@link DesiredCapabilitiesConfigurationProperties} to verify
    */
   public static void validateRequiredDesktopBrowserCapabilities(
       DesiredCapabilitiesConfigurationProperties desiredCapabilities) {
@@ -86,6 +89,8 @@ public class WebDriverValidationUtil {
    * checks to ensure a mismatch is not present between the platform and browser. We are opting not
    * to perform error checks against the device name, os, and browser name since there an exorbitant
    * amount of combinations. Instead, we will surface the sauce error to the user.
+   *
+   * @param desiredCapabilities   the {@link DesiredCapabilitiesConfigurationProperties} to verify
    */
   public static void validateRequiredMobileEmulatorCapabilities(
       DesiredCapabilitiesConfigurationProperties desiredCapabilities) {
@@ -134,6 +139,8 @@ public class WebDriverValidationUtil {
 
   /**
    * Performs validation on {@link RunType#SAUCE} and {@link RunType#SAUCE_MOBILE_EMULATOR}.
+   *
+   * @param desiredCapabilities   the {@link DesiredCapabilitiesConfigurationProperties} to verify
    */
   public static void validateRequiredSauceAuth(
       DesiredCapabilitiesConfigurationProperties desiredCapabilities) {

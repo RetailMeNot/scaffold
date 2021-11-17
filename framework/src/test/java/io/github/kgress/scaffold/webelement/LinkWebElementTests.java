@@ -1,42 +1,383 @@
 package io.github.kgress.scaffold.webelement;
 
 import io.github.kgress.scaffold.BaseUnitTest;
-import io.github.kgress.scaffold.models.unittests.MockWebElement;
-import io.github.kgress.scaffold.webelements.LinkWebElement;
-import org.junit.jupiter.api.BeforeEach;
+import io.github.kgress.scaffold.SharedTestVariables;
 import org.junit.jupiter.api.Test;
-import org.openqa.selenium.By;
+import org.openqa.selenium.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.*;
 
 public class LinkWebElementTests extends BaseUnitTest {
 
-    private static String HREF_TEXT = "test href";
-    private LinkWebElement linkWebElement;
-
-    @BeforeEach
-    private void setupLinkWebElementData() {
-        mockElement1.setAttribute("href", HREF_TEXT);
-        linkWebElement = new LinkWebElement(By.id("fake"));
-    }
-
+    private final TestLinkWebElement elementByCssSelector = new TestLinkWebElement(SharedTestVariables.CSS_SELECTOR1);
+    private final TestLinkWebElement elementByClass =
+            new TestLinkWebElement(By.className(SharedTestVariables.CLASS_NAME));
 
     @Test
-    public void testGetLinkHref() {
-        mockWebDriver.setElementToFind(mockElement1);
-        assertEquals(HREF_TEXT, linkWebElement.getLinkHref(),
-                "The link href should be " + HREF_TEXT);
+    public void testLinkWebElement_byCss_getLinkHref() {
+        setBaseWhen(elementByCssSelector);
+        when(mockRawWebElement.getAttribute(SharedTestVariables.HREF_ATTRIBUTE))
+                .thenReturn(SharedTestVariables.LINK_HREF);
+        var elementHref = elementByCssSelector.getLinkHref();
+        assertEquals(SharedTestVariables.LINK_HREF, elementHref);
     }
 
     @Test
-    public void testGetLinkText() {
-        var linkElementText = "link element";
-        var parentElement = new MockWebElement();
-        var childElement = new MockWebElement().text(linkElementText);
+    public void testLinkWebElement_byCss_getLinkText() {
+        setBaseWhen(elementByCssSelector);
+        when(mockRawWebElement.getText()).thenReturn(SharedTestVariables.LINK_TEXT);
+        var elementLinkText = elementByCssSelector.getLinkText();
+        assertEquals(SharedTestVariables.LINK_TEXT, elementLinkText);
+    }
 
-        parentElement.setElementToFind(childElement);
-        var testElement = new LinkWebElement(By.id("fake"), parentElement);
-        assertEquals(linkElementText, testElement.getLinkText(),
-                "The link's text should be 'link element");
+    @Test
+    public void testLinkWebElement_byCss_click() {
+        setBaseWhen(elementByCssSelector);
+        setWhenScrollIntoViewSucceed();
+        elementByCssSelector.click();
+        verify(mockRawWebElement, times(1)).click();
+    }
+
+    @Test
+    public void testLinkWebElement_byCss_isEnabled() {
+        setBaseWhen(elementByCssSelector);
+        when(mockRawWebElement.isEnabled()).thenReturn(true);
+        assertTrue(elementByCssSelector.isEnabled());
+    }
+
+    @Test
+    public void testLinkWebElement_byCss_isDisabled() {
+        setBaseWhen(elementByCssSelector);
+        when(mockRawWebElement.isEnabled()).thenReturn(false);
+        assertFalse(elementByCssSelector.isEnabled());
+    }
+
+    @Test
+    public void testLinkWebElement_byCss_isDisplayed() {
+        setBaseWhen(elementByCssSelector);
+        when(mockRawWebElement.isDisplayed()).thenReturn(true);
+        assertTrue(elementByCssSelector.isDisplayed());
+    }
+
+    @Test
+    public void testLinkWebElement_byCss_isNotDisplayed() {
+        setBaseWhen(elementByCssSelector);
+        when(mockRawWebElement.isDisplayed()).thenReturn(false);
+        assertFalse(elementByCssSelector.isDisplayed());
+    }
+
+    @Test
+    public void testLinkWebElement_byCss_isActive() {
+        setBaseWhen(elementByCssSelector);
+        when(mockRawWebElement.getAttribute(SharedTestVariables.CLASS_ATTRIBUTE))
+                .thenReturn(SharedTestVariables.ACTIVE_CLASS_NAME);
+        assertTrue(elementByCssSelector.isActive());
+    }
+
+    @Test
+    public void testLinkWebElement_byCss_isNotActive() {
+        setBaseWhen(elementByCssSelector);
+        when(mockRawWebElement.getAttribute(SharedTestVariables.CLASS_ATTRIBUTE))
+                .thenReturn(SharedTestVariables.CLASS_NAME);
+        assertFalse(elementByCssSelector.isActive());
+    }
+
+    @Test
+    public void testLinkWebElement_byCss_hasClass() {
+        setBaseWhen(elementByCssSelector);
+        when(mockRawWebElement.getAttribute(SharedTestVariables.CLASS_ATTRIBUTE))
+                .thenReturn(SharedTestVariables.CLASS_NAME);
+        assertTrue(elementByCssSelector.hasClass(SharedTestVariables.CLASS_NAME));
+    }
+
+    @Test
+    public void testLinkWebElement_byCss_doesNotHaveClass() {
+        setBaseWhen(elementByCssSelector);
+        var notExpectingText = "NOT HERE <.< >.>";
+        when(mockRawWebElement.getAttribute(SharedTestVariables.CLASS_ATTRIBUTE))
+                .thenReturn(SharedTestVariables.CLASS_NAME);
+        assertFalse(elementByCssSelector.hasClass(notExpectingText));
+    }
+
+    @Test
+    public void testLinkWebElement_byCss_getAttribute() {
+        setBaseWhen(elementByCssSelector);
+        when(mockRawWebElement.getAttribute(SharedTestVariables.CLASS_ATTRIBUTE))
+                .thenReturn(SharedTestVariables.CLASS_NAME);
+        assertEquals(SharedTestVariables.CLASS_NAME,
+                elementByCssSelector.getAttribute(SharedTestVariables.CLASS_ATTRIBUTE));
+    }
+
+    @Test
+    public void testLinkWebElement_byCss_getText() {
+        setBaseWhen(elementByCssSelector);
+        when(mockRawWebElement.getText()).thenReturn(SharedTestVariables.TEXT_1);
+        assertEquals(SharedTestVariables.TEXT_1, elementByCssSelector.getText());
+    }
+
+    @Test
+    public void testLinkWebElement_byCss_getTagName() {
+        setBaseWhen(elementByCssSelector);
+        when(mockRawWebElement.getTagName()).thenReturn(SharedTestVariables.TAG_NAME_1);
+        assertEquals(SharedTestVariables.TAG_NAME_1, elementByCssSelector.getTagName());
+    }
+
+    @Test
+    public void testLinkWebElement_byCss_getLocation() {
+        setBaseWhen(elementByCssSelector);
+        var testPoint = new Point(1, 1);
+        when(mockRawWebElement.getLocation()).thenReturn(testPoint);
+        assertEquals(testPoint, elementByCssSelector.getLocation());
+    }
+
+    @Test
+    public void testLinkWebElement_byCss_getSize() {
+        setBaseWhen(elementByCssSelector);
+        var testDimension = new Dimension(1,1);
+        when(mockRawWebElement.getSize()).thenReturn(testDimension);
+        assertEquals(testDimension, elementByCssSelector.getSize());
+    }
+
+    @Test
+    public void testLinkWebElement_byCss_getRect() {
+        setBaseWhen(elementByCssSelector);
+        var testRectangle = new Rectangle(1, 1, 1, 1);
+        when(mockRawWebElement.getRect()).thenReturn(testRectangle);
+        assertEquals(testRectangle, elementByCssSelector.getRect());
+    }
+
+    @Test
+    public void testLinkWebElement_byCss_getCssValue() {
+        setBaseWhen(elementByCssSelector);
+        var testCssProperty = "testProperty";
+        var expectedTestCssValue = "Dagobah";
+        when(mockRawWebElement.getCssValue(testCssProperty)).thenReturn(expectedTestCssValue);
+        assertEquals(expectedTestCssValue, elementByCssSelector.getCssValue(testCssProperty));
+    }
+
+    @Test
+    public void testLinkWebElement_byCss_getRawWebElement_success() {
+        setBaseWhen(elementByCssSelector);
+        assertEquals(mockRawWebElement, elementByCssSelector.getRawWebElement());
+    }
+
+    @Test
+    public void testLinkWebElement_byCss_getRawWebElement_fail() {
+        setBaseWhen(elementByCssSelector);
+        when(elementByCssSelector.getRawWebElement()).thenThrow(TimeoutException.class);
+        assertThrows(TimeoutException.class, elementByCssSelector::getRawWebElement);
+    }
+
+    @Test
+    public void testLinkWebElement_byCss_getRawParentWebElement_success() {
+        setBaseWhen(elementByCssSelector);
+        setWhenGetRawParentElementSucceed();
+        assertEquals(mockParentRawWebElement, elementByCssSelector.getRawParentWebElement());
+    }
+
+    @Test
+    public void testLinkWebElement_byCss_getRawParentWebElement_fail() {
+        setBaseWhen(elementByCssSelector);
+        setWhenGetRawParentElementFail();
+        assertThrows(TimeoutException.class, elementByCssSelector::getRawParentWebElement);
+    }
+
+    @Test
+    public void testLinkWebElement_byCss_scrollIntoView_success() {
+        setBaseWhen(elementByCssSelector);
+        setWhenScrollIntoViewSucceed();
+        assertEquals(mockRawWebElement, elementByCssSelector.scrollIntoView());
+    }
+
+    @Test
+    public void testLinkWebElement_byCss_scrollIntoView_fail() {
+        setBaseWhen(elementByCssSelector);
+        setWhenScrollIntoViewFail();
+        assertThrows(TimeoutException.class, elementByCssSelector::scrollIntoView);
+    }
+
+    @Test
+    public void testLinkWebElement_byClass_getLinkHref() {
+        setBaseWhen(elementByClass);
+        when(mockRawWebElement.getAttribute(SharedTestVariables.HREF_ATTRIBUTE))
+                .thenReturn(SharedTestVariables.LINK_HREF);
+        var elementHref = elementByClass.getLinkHref();
+        assertEquals(SharedTestVariables.LINK_HREF, elementHref);
+    }
+
+    @Test
+    public void testLinkWebElement_byClass_getLinkText() {
+        setBaseWhen(elementByClass);
+        when(mockRawWebElement.getText()).thenReturn(SharedTestVariables.LINK_TEXT);
+        var elementLinkText = elementByClass.getLinkText();
+        assertEquals(SharedTestVariables.LINK_TEXT, elementLinkText);
+    }
+
+    @Test
+    public void testLinkWebElement_byClass_click() {
+        setBaseWhen(elementByClass);
+        setWhenScrollIntoViewSucceed();
+        elementByClass.click();
+        verify(mockRawWebElement, times(1)).click();
+    }
+
+    @Test
+    public void testLinkWebElement_byClass_isEnabled() {
+        setBaseWhen(elementByClass);
+        when(mockRawWebElement.isEnabled()).thenReturn(true);
+        assertTrue(elementByClass.isEnabled());
+    }
+
+    @Test
+    public void testLinkWebElement_byClass_isDisabled() {
+        setBaseWhen(elementByClass);
+        when(mockRawWebElement.isEnabled()).thenReturn(false);
+        assertFalse(elementByClass.isEnabled());
+    }
+
+    @Test
+    public void testLinkWebElement_byClass_isDisplayed() {
+        setBaseWhen(elementByClass);
+        when(mockRawWebElement.isDisplayed()).thenReturn(true);
+        assertTrue(elementByClass.isDisplayed());
+    }
+
+    @Test
+    public void testLinkWebElement_byClass_isNotDisplayed() {
+        setBaseWhen(elementByClass);
+        when(mockRawWebElement.isDisplayed()).thenReturn(false);
+        assertFalse(elementByClass.isDisplayed());
+    }
+
+    @Test
+    public void testLinkWebElement_byClass_isActive() {
+        setBaseWhen(elementByClass);
+        when(mockRawWebElement.getAttribute(SharedTestVariables.CLASS_ATTRIBUTE))
+                .thenReturn(SharedTestVariables.ACTIVE_CLASS_NAME);
+        assertTrue(elementByClass.isActive());
+    }
+
+    @Test
+    public void testLinkWebElement_byClass_isNotActive() {
+        setBaseWhen(elementByClass);
+        when(mockRawWebElement.getAttribute(SharedTestVariables.CLASS_ATTRIBUTE))
+                .thenReturn(SharedTestVariables.CLASS_NAME);
+        assertFalse(elementByClass.isActive());
+    }
+
+    @Test
+    public void testLinkWebElement_byClass_hasClass() {
+        setBaseWhen(elementByClass);
+        when(mockRawWebElement.getAttribute(SharedTestVariables.CLASS_ATTRIBUTE))
+                .thenReturn(SharedTestVariables.CLASS_NAME);
+        assertTrue(elementByClass.hasClass(SharedTestVariables.CLASS_NAME));
+    }
+
+    @Test
+    public void testLinkWebElement_byClass_doesNotHaveClass() {
+        setBaseWhen(elementByClass);
+        var notExpectingText = "NOT HERE <.< >.>";
+        when(mockRawWebElement.getAttribute(SharedTestVariables.CLASS_ATTRIBUTE))
+                .thenReturn(SharedTestVariables.CLASS_NAME);
+        assertFalse(elementByClass.hasClass(notExpectingText));
+    }
+
+    @Test
+    public void testLinkWebElement_byClass_getAttribute() {
+        setBaseWhen(elementByClass);
+        when(mockRawWebElement.getAttribute(SharedTestVariables.CLASS_ATTRIBUTE))
+                .thenReturn(SharedTestVariables.CLASS_NAME);
+        assertEquals(SharedTestVariables.CLASS_NAME,
+                elementByClass.getAttribute(SharedTestVariables.CLASS_ATTRIBUTE));
+    }
+
+    @Test
+    public void testLinkWebElement_byClass_getText() {
+        setBaseWhen(elementByClass);
+        when(mockRawWebElement.getText()).thenReturn(SharedTestVariables.TEXT_1);
+        assertEquals(SharedTestVariables.TEXT_1, elementByClass.getText());
+    }
+
+    @Test
+    public void testLinkWebElement_byClass_getTagName() {
+        setBaseWhen(elementByClass);
+        when(mockRawWebElement.getTagName()).thenReturn(SharedTestVariables.TAG_NAME_1);
+        assertEquals(SharedTestVariables.TAG_NAME_1, elementByClass.getTagName());
+    }
+
+    @Test
+    public void testLinkWebElement_byClass_getLocation() {
+        setBaseWhen(elementByClass);
+        var testPoint = new Point(1, 1);
+        when(mockRawWebElement.getLocation()).thenReturn(testPoint);
+        assertEquals(testPoint, elementByClass.getLocation());
+    }
+
+    @Test
+    public void testLinkWebElement_byClass_getSize() {
+        setBaseWhen(elementByClass);
+        var testDimension = new Dimension(1,1);
+        when(mockRawWebElement.getSize()).thenReturn(testDimension);
+        assertEquals(testDimension, elementByClass.getSize());
+    }
+
+    @Test
+    public void testLinkWebElement_byClass_getRect() {
+        setBaseWhen(elementByClass);
+        var testRectangle = new Rectangle(1, 1, 1, 1);
+        when(mockRawWebElement.getRect()).thenReturn(testRectangle);
+        assertEquals(testRectangle, elementByClass.getRect());
+    }
+
+    @Test
+    public void testLinkWebElement_byClass_getCssValue() {
+        setBaseWhen(elementByClass);
+        var testCssProperty = "testProperty";
+        var expectedTestCssValue = "Dagobah";
+        when(mockRawWebElement.getCssValue(testCssProperty)).thenReturn(expectedTestCssValue);
+        assertEquals(expectedTestCssValue, elementByClass.getCssValue(testCssProperty));
+    }
+
+    @Test
+    public void testLinkWebElement_byClass_getRawWebElement_success() {
+        setBaseWhen(elementByClass);
+        assertEquals(mockRawWebElement, elementByClass.getRawWebElement());
+    }
+
+    @Test
+    public void testLinkWebElement_byClass_getRawWebElement_fail() {
+        setBaseWhen(elementByClass);
+        when(elementByClass.getRawWebElement()).thenThrow(TimeoutException.class);
+        assertThrows(TimeoutException.class, elementByClass::getRawWebElement);
+    }
+
+    @Test
+    public void testLinkWebElement_byClass_getRawParentWebElement_success() {
+        setBaseWhen(elementByClass);
+        setWhenGetRawParentElementSucceed();
+        assertEquals(mockParentRawWebElement, elementByClass.getRawParentWebElement());
+    }
+
+    @Test
+    public void testLinkWebElement_byClass_getRawParentWebElement_fail() {
+        setBaseWhen(elementByClass);
+        setWhenGetRawParentElementFail();
+        assertThrows(TimeoutException.class, elementByClass::getRawParentWebElement);
+    }
+
+    @Test
+    public void testLinkWebElement_byClass_scrollIntoView_success() {
+        setBaseWhen(elementByClass);
+        setWhenScrollIntoViewSucceed();
+        assertEquals(mockRawWebElement, elementByClass.scrollIntoView());
+    }
+
+    @Test
+    public void testLinkWebElement_byClass_scrollIntoView_fail() {
+        setBaseWhen(elementByClass);
+        setWhenScrollIntoViewFail();
+        assertThrows(TimeoutException.class, elementByClass::scrollIntoView);
     }
 }

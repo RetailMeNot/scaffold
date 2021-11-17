@@ -1,21 +1,17 @@
 package io.github.kgress.scaffold.environment.config;
 
-import static io.github.kgress.scaffold.models.enums.desktop.ScreenResolution.SIZE_1024x1080;
-
 import io.github.kgress.scaffold.models.enums.desktop.BrowserType;
 import io.github.kgress.scaffold.models.enums.desktop.Platform;
 import io.github.kgress.scaffold.models.enums.desktop.RunType;
 import io.github.kgress.scaffold.models.enums.desktop.ScreenResolution;
-import io.github.kgress.scaffold.models.enums.mobileemulator.DeviceOrientation;
-import io.github.kgress.scaffold.models.enums.mobileemulator.DeviceType;
-import io.github.kgress.scaffold.models.enums.mobileemulator.MobileBrowserName;
-import io.github.kgress.scaffold.models.enums.mobileemulator.MobilePlatform;
-import io.github.kgress.scaffold.models.enums.mobileemulator.SauceDeviceName;
+import io.github.kgress.scaffold.models.enums.mobileemulator.*;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
+
+import static io.github.kgress.scaffold.models.enums.desktop.ScreenResolution.SIZE_1024x1080;
 
 /**
  * This model depicts the many Desired Capabilities of a Selenium WebDriver browser. This is used as
@@ -90,10 +86,18 @@ public class DesiredCapabilitiesConfigurationProperties {
   private boolean uploadScreenshots = false;
 
   /**
+   * Optional. Sets a custom AutomationWait timeout. If this value is not provided in your configuration, it will
+   * automatically default to five seconds. The timeout can also be changed during your test by accessing the
+   * AutomationWait and setting the timeout to a value of your choosing. However, that should only be used as under
+   * special circumstances. If you need more time for your AutomationWait on your entire project, set that value here
+   * so all tests can benefit.
+   */
+  private Long waitTimeoutInSeconds = 5L;
+
+  /**
    * Not currently in use.
    * <p>
-   * TODO the code base currently is not setting use proxy anywhere. We should look into offering
-   * this functionality
+   * TODO the code base currently is not setting use proxy anywhere. We should look into offering this functionality
    */
   private boolean useProxy = false;
 

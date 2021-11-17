@@ -6,34 +6,34 @@ import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 
 /**
- * Scaffold's strongly typed interpretation of a radio element.
+ * This class represents base level clickable options and actions for elements that can be interacted with through
+ * a click. Clickable elements should also inherit all properties of a {@link BaseWebElement}.
  *
- * A RadioWebElement and a CheckBoxElement can sometimes be interchangeable. In the future, we should distinguish these
- * by adding functionality that is specific to their concept.
+ * TODO add retry logic to click actions https://github.com/kgress/scaffold/issues/90
  */
-public class RadioWebElement extends BaseClickableWebElement {
+public class BaseClickableWebElement extends BaseWebElement {
 
     /**
-     * Creates a new {@link RadioWebElement}. It is highly recommended using {@link By#cssSelector(String)} over
+     * Creates a new {@link ButtonWebElement}. It is highly recommended using {@link By#cssSelector(String)} over
      * another method, such as {@link By#xpath(String)}, in almost all cases as it can be less flaky and less reliant
      * on DOM hierarchy.
      *
      * @see BaseWebElement#BaseWebElement(String)
      * @param cssSelector   the value of the {@link By#cssSelector(String)}
      */
-    public RadioWebElement(String cssSelector) {
+    public BaseClickableWebElement(String cssSelector) {
         super(cssSelector);
     }
 
     /**
      * Use this constructor when you'd like to locate an element with a {@link By} method different from
-     * {@link By#cssSelector(String)}. We strongly recommend using {@link #RadioWebElement(String cssSelector)}
-     * in almost all cases.
+     * {@link By#cssSelector(String)}. We strongly recommend using {@link #BaseClickableWebElement(String)} in almost
+     * all cases.
      *
      * @see BaseWebElement#BaseWebElement(By)
      * @param by    the {@link By} locator
      */
-    public RadioWebElement(By by) {
+    public BaseClickableWebElement(By by) {
         super(by);
     }
 
@@ -45,8 +45,24 @@ public class RadioWebElement extends BaseClickableWebElement {
      * @param by        the {@link By} locator for the child element
      * @param parentBy  the {@link By} locator for the parent element
      */
-    public RadioWebElement(By by, By parentBy) {
+    public BaseClickableWebElement(By by, By parentBy) {
         super(by, parentBy);
+    }
+
+    /**
+     * Creates a new Scaffold element with a raw {@link WebElement}. This is primarily used during construction of
+     * elements in the {@link #findElements(Class, By)} method.
+     *
+     * When instantiating new elements with this constructor, There is a risk of a
+     * {@link StaleElementReferenceException} occurring when interacting with elements since
+     * {@link #getRawWebElement()} will return the raw web element on being present. This means we are not re
+     * finding the element prior to interacting with it. Use this constructor at your own risk.
+     *
+     * @param by            the {@link By} locator to be used by this element
+     * @param webElement    the {@link WebElement} being wrapped
+     */
+    public BaseClickableWebElement(By by, WebElement webElement) {
+        super(by, webElement);
     }
 
     /**
@@ -62,7 +78,7 @@ public class RadioWebElement extends BaseClickableWebElement {
      * @param parentBy      the {@link By} locator to be used by the parent element
      * @param webElement    the {@link WebElement} being wrapped
      */
-    public RadioWebElement(By by, By parentBy, WebElement webElement) {
+    public BaseClickableWebElement(By by, By parentBy, WebElement webElement) {
         super(by, parentBy, webElement);
     }
 
@@ -75,34 +91,24 @@ public class RadioWebElement extends BaseClickableWebElement {
      * {@link #getRawWebElement()} will return the raw web element on being present. This means we are not re
      * finding the element prior to interacting with it. Use this constructor at your own risk.
      *
-     * @param by            the {@link By} locator to be used by this element
      * @param webElement    the {@link WebElement} being wrapped
      */
-    public RadioWebElement(By by, WebElement webElement) {
-        super(by, webElement);
-    }
-
-    /**
-     * Creates a new Scaffold element with a raw {@link WebElement}. This is primarily used during construction of
-     * elements in the {@link #findElements(Class, By)} method.
-     *
-     * When instantiating new elements with this constructor, There is a risk of a
-     * {@link StaleElementReferenceException} occurring when interacting with elements since
-     * {@link #getRawWebElement()} will return the raw web element on being present. This means we are not re
-     * finding the element prior to interacting with it. Use this constructor at your own risk.
-     *
-     * @param webElement    the {@link WebElement} being wrapped
-     */
-    public RadioWebElement(WebElement webElement) {
+    public BaseClickableWebElement(WebElement webElement) {
         super(webElement);
     }
 
     /**
-     * Indicates if an element is selected.
+     * Performs a click on the given element with the following process:
      *
-     @return the result as {@link boolean}
+     * - Scrolling the element into current view
+     * - Performing the click action on the element
+     * - Waits for the page to load prior to proceeding
+     *
+     * @see WebElement#click()
      */
-    public boolean isSelected() {
-        return getRawWebElement().isSelected();
+    public void click() {
+        scrollIntoView();
+        getRawWebElement().click();
+        getWebElementWait().waitUntilPageIsLoaded();
     }
 }
