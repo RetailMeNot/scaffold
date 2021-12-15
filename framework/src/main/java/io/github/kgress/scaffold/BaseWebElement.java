@@ -227,7 +227,12 @@ public abstract class BaseWebElement {
      * @return  the result as {@link boolean}.
      */
     public boolean isEnabled() {
-        return getRawWebElement().isEnabled();
+        try{
+            var element = getRawWebElement();
+            return element != null && element.isEnabled();
+        }catch (WebDriverException e){
+            return false;
+        }
     }
 
     /**
@@ -237,7 +242,12 @@ public abstract class BaseWebElement {
      * @return  the result as {@link boolean}.
      */
     public boolean isDisplayed() {
-        return getRawWebElement().isDisplayed();
+        try{
+            var element = getRawWebElement();
+            return element != null && element.isDisplayed();
+        }catch (WebDriverException e){
+            return false;
+        }
     }
 
     /**
@@ -246,7 +256,12 @@ public abstract class BaseWebElement {
      * @return the response as true or false
      */
     public boolean isActive() {
-        return getRawWebElement().getAttribute("class").contains("active");
+        try{
+            var element = getRawWebElement();
+            return element != null && element.getAttribute("class").contains("active");
+        }catch (WebDriverException e){
+            return false;
+        }
     }
 
     /**
@@ -256,7 +271,12 @@ public abstract class BaseWebElement {
      * @return      as true or false
      */
     public boolean hasClass(String text) {
-        return getRawWebElement().getAttribute("class").contains(text);
+        try{
+            var element = getRawWebElement();
+            return element != null && element.getAttribute("class").contains(text);
+        }catch (WebDriverException e){
+            return false;
+        }
     }
 
     /**
