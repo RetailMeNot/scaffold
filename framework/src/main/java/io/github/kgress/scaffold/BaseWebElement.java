@@ -417,14 +417,16 @@ public abstract class BaseWebElement {
     }
 
     /**
-     * Scrolls an element into view.
+     * Scrolls an element into view. Due to an issue found on https://github.com/kgress/scaffold/issues/115, we updated
+     * the scroll to center align the element instead of top align.
      *
      * @return as {@link WebElement}
      */
     public WebElement scrollIntoView() {
         return (WebElement) getWebDriverWrapper()
                 .getJavascriptExecutor()
-                .executeScript("arguments[0].scrollIntoView(true);", getRawWebElement());
+                .executeScript("arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});",
+                        getRawWebElement());
     }
 
     /**
