@@ -1,24 +1,29 @@
 package io.github.kgress.scaffold;
 
+import static io.github.kgress.scaffold.util.AutomationUtils.sleep;
+
 import io.github.kgress.scaffold.environment.config.DesiredCapabilitiesConfigurationProperties;
 import io.github.kgress.scaffold.exception.WebDriverWrapperException;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
-import org.openqa.selenium.*;
-import org.openqa.selenium.WebDriver.Navigation;
-import org.openqa.selenium.WebDriver.Options;
-import org.openqa.selenium.WebDriver.TargetLocator;
-import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.support.ui.ExpectedCondition;
-
 import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-
-import static io.github.kgress.scaffold.util.AutomationUtils.sleep;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+import org.openqa.selenium.By;
+import org.openqa.selenium.Cookie;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriver.Navigation;
+import org.openqa.selenium.WebDriver.Options;
+import org.openqa.selenium.WebDriver.TargetLocator;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 
 /**
  * This serves as a buffer between us and Selenium to help guard against drastic changes to their API and functionality

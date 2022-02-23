@@ -22,7 +22,8 @@ public class SharedTestVariables {
     public static final String TEXT_1 = "element 1";
     public static final String TEXT_2 = "element 2";
     public static final String PARENT_ELEMENT_SCRIPT = "return arguments[0].parentNode;";
-    public static final String SCROLL_INTO_VIEW_SCRIPT = "arguments[0].scrollIntoView(true);";
+    public static final String SCROLL_INTO_VIEW_SCRIPT =
+        "arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});";
 
     public static final String MOCK_PARENT_ELEMENT_SELECTOR = "#parent";
     public static final String MOCK_CHILD_ELEMENT_SELECTOR = "#child";

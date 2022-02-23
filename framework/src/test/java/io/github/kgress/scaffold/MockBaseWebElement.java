@@ -1,14 +1,13 @@
 package io.github.kgress.scaffold;
 
-import org.mockito.Mockito;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import org.mockito.Mockito;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 /**
  * You might be wondering what this is and why this is here when {@link BaseUnitTest.TestBaseWebElement} already
@@ -40,6 +39,14 @@ public class MockBaseWebElement extends BaseWebElement {
 
     public MockBaseWebElement(WebElement webElement) {
         super(webElement);
+    }
+
+    public MockBaseWebElement(By by, WebElement webElement) {
+        super(by, webElement);
+    }
+
+    public MockBaseWebElement(By by, By parentBy, WebElement webElement) {
+        super(by, parentBy, webElement);
     }
 
     @Override

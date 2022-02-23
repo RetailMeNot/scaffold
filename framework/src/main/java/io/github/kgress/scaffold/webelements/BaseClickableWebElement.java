@@ -50,6 +50,12 @@ public class BaseClickableWebElement extends BaseWebElement {
     }
 
     /**
+     * This constructor is {@link Deprecated}. Please use a constructor that uses a {@link By}
+     * locator. Using a constructor with {@link WebElement} will bypass scaffold's core
+     * functionality. An example of using a {@link By} locator constructor: <pre>{@code
+     * private final DivWebElement header = new DivWebElement(By.cssSelector(".header"));
+     * }</pre>
+     *
      * Creates a new Scaffold element with a raw {@link WebElement}. This is primarily used during construction of
      * elements in the {@link #findElements(Class, By)} method.
      *
@@ -61,11 +67,18 @@ public class BaseClickableWebElement extends BaseWebElement {
      * @param by            the {@link By} locator to be used by this element
      * @param webElement    the {@link WebElement} being wrapped
      */
+    @Deprecated
     public BaseClickableWebElement(By by, WebElement webElement) {
         super(by, webElement);
     }
 
     /**
+     * This constructor is {@link Deprecated}. Please use a constructor that uses a {@link By}
+     * locator. Using a constructor with {@link WebElement} will bypass scaffold's core
+     * functionality. An example of using a {@link By} locator constructor: <pre>{@code
+     * private final DivWebElement header = new DivWebElement(By.cssSelector(".header"));
+     * }</pre>
+     *
      * Creates a new Scaffold element with a raw {@link WebElement}. This is primarily used during construction of
      * elements in the {@link #findElements(Class, By)} method.
      *
@@ -78,11 +91,18 @@ public class BaseClickableWebElement extends BaseWebElement {
      * @param parentBy      the {@link By} locator to be used by the parent element
      * @param webElement    the {@link WebElement} being wrapped
      */
+    @Deprecated
     public BaseClickableWebElement(By by, By parentBy, WebElement webElement) {
         super(by, parentBy, webElement);
     }
 
     /**
+     * This constructor is {@link Deprecated}. Please use a constructor that uses a {@link By}
+     * locator. Using a constructor with {@link WebElement} will bypass scaffold's core
+     * functionality. An example of using a {@link By} locator constructor: <pre>{@code
+     * private final DivWebElement header = new DivWebElement(By.cssSelector(".header"));
+     * }</pre>
+     *
      * Creates a new Scaffold element with a raw {@link WebElement}. This is primarily used during construction of
      * elements in the {@link #findElements(Class, By)} method.
      *
@@ -93,6 +113,7 @@ public class BaseClickableWebElement extends BaseWebElement {
      *
      * @param webElement    the {@link WebElement} being wrapped
      */
+    @Deprecated
     public BaseClickableWebElement(WebElement webElement) {
         super(webElement);
     }

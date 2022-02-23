@@ -1,6 +1,8 @@
 package io.github.kgress.scaffold;
 
 import io.github.kgress.scaffold.environment.config.DesiredCapabilitiesConfigurationProperties;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -10,9 +12,6 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * A class of Wait mechanisms useful for testing web applications. These are meant to supplement those available

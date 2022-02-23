@@ -2,10 +2,9 @@ package io.github.kgress.scaffold;
 
 import io.github.kgress.scaffold.exception.WebDriverContextException;
 import io.github.kgress.scaffold.models.TestInformation;
-import lombok.extern.slf4j.Slf4j;
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * A list of common methods available to the {@link TestContext} singleton - Primarily used for obtaining a WebDriverManager
@@ -15,8 +14,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class BaseTestContext {
 
     // Associates the WebDriver instance to the current thread its operating in
-    private final ThreadLocal<WebDriverContext> driverManager = new ThreadLocal<>();
-    private Map<String, Object> settings = new ConcurrentHashMap<>();
+    private static final ThreadLocal<WebDriverContext> DRIVER_MANAGER = new ThreadLocal<>();
+    private final Map<String, Object> settings = new ConcurrentHashMap<>();
     private final Map<String, TestInformation> testInformationManager = new ConcurrentHashMap<>();
 
     BaseTestContext() {
@@ -94,11 +93,11 @@ public class BaseTestContext {
      * Gets a web driver webdrivercontext from a pair.
      */
     private WebDriverContext getContext() {
-        var webDriverContext = driverManager.get();
+        var webDriverContext = DRIVER_MANAGER.get();
 
         if (webDriverContext == null || webDriverContext.getWebDriverManager() == null) {
             webDriverContext = new WebDriverContext(null, null);
-            driverManager.set(webDriverContext);
+            DRIVER_MANAGER.set(webDriverContext);
         }
         return webDriverContext;
     }
@@ -123,7 +122,7 @@ public class BaseTestContext {
         webDriverContext
                 .webDriverManager(webDriverManager)
                 .setTestName(testName);
-        driverManager.set(webDriverContext);
+        DRIVER_MANAGER.set(webDriverContext);
         log.debug(String.format("Setting webdrivercontext for %s", testName));
     }
 

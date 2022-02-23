@@ -1,24 +1,38 @@
 package io.github.kgress.scaffold;
 
+import static org.mockito.Mockito.when;
+
 import io.github.kgress.scaffold.environment.config.DesiredCapabilitiesConfigurationProperties;
 import io.github.kgress.scaffold.environment.config.ScaffoldConfiguration;
 import io.github.kgress.scaffold.webdrivercontext.WebDriverContextTests;
-import io.github.kgress.scaffold.webelements.*;
+import io.github.kgress.scaffold.webelements.BaseClickableAndTypableWebElement;
+import io.github.kgress.scaffold.webelements.BaseClickableWebElement;
+import io.github.kgress.scaffold.webelements.ButtonWebElement;
+import io.github.kgress.scaffold.webelements.CheckBoxWebElement;
+import io.github.kgress.scaffold.webelements.DivWebElement;
+import io.github.kgress.scaffold.webelements.DropDownWebElement;
+import io.github.kgress.scaffold.webelements.ImageWebElement;
+import io.github.kgress.scaffold.webelements.InputWebElement;
+import io.github.kgress.scaffold.webelements.LinkWebElement;
+import io.github.kgress.scaffold.webelements.RadioWebElement;
+import io.github.kgress.scaffold.webelements.StaticTextWebElement;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.openqa.selenium.*;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.client.RestTemplate;
-
-import static org.mockito.Mockito.when;
 
 @ActiveProfiles("unit_testing")
 @Slf4j

@@ -1,12 +1,12 @@
 package io.github.kgress.scaffold.util;
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
+import lombok.extern.slf4j.Slf4j;
+import org.openqa.selenium.By;
 
 /**
  * A class for shared Automation Utilities.
@@ -112,5 +112,11 @@ public class AutomationUtils {
         } catch (InterruptedException e) {
             log.error(String.format("Thread.sleep() encountered an error: %s", e.getMessage()));
         }
+    }
+
+    public static String getUnderlyingLocatorByString(By by) {
+        var locatorAsString = by.toString();
+        var index = locatorAsString.indexOf(" ");
+        return locatorAsString.substring(index + 1);
     }
 }
