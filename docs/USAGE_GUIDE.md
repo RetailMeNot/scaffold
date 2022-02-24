@@ -358,6 +358,74 @@ public class SearchResultsPage extends BasePage {
 }
 ```
 
+This mapping only works if the list of elements from the parent container, provided as the parameter "listOfElements", match the exact element items from the DOM. I.E, if there
+is a difference between the size of "listOfElements" and the size of the elements contained under the DOM's parent, the nth-child mapping will not function as expected. 
+Take the DOM from the SauceLabs demo site, for example, on the cart page:
+
+```html
+<div class="cart_list">
+  <div class="cart_quantity_label">QTY</div>
+  <div class="cart_desc_label">DESCRIPTION</div>
+  <div class="cart_item">
+    <div class="cart_quantity">1</div>
+    <div class="cart_item_label">
+      <a href="#" id="item_4_title_link">
+        <div class="inventory_item_name">Sauce Labs Backpack</div>
+      </a><div class="inventory_item_desc">some great description.</div>
+      <div class="item_pricebar">
+        <div class="inventory_item_price">$29.99</div>
+        <button class="btn btn_secondary btn_small cart_button" data-test="remove-sauce-labs-backpack" id="remove-sauce-labs-backpack" name="remove-sauce-labs-backpack">Remove</button>
+      </div>
+    </div>
+  </div>
+  <div class="cart_item">....</div>
+</div>
+```
+
+The parent is ".cart list" and the child elements we wish to map as a component list are ".cart_item". In this case, findElements() for ".cart_list .cart_item" will give us a size
+2 list, but the DOM has a size 4 list, counting the ".cart_quantity_label," ".cart_desc_label," and the two elements we care about. The ideal scenario for building
+a list of components is when the sizes of the lists match between the found elements and the DOM, i.e. if all the child elements were ONLY ".cart_item." But, there is a way to
+circumvent THIS specific scenario by specifying an index correction to this method. With this example above, we can pass an index correction of 2, since there are 2 elements above
+the first element we care about, and the css selector nth-child locators will map correctly.
+
+This isn't the most ideal usage, and is meant only for situations where there are nth elements before the first element we care about. This method is not (yet) dynamic enough
+to perform mapping on situations that are more complicated, such as random element locations all throughout the DOM along with the list of elements we care about.
+
+An alternative to building component lists is to find all elements, stream through them to select a specific index, and then perform a findElement() for the specific child locator
+you'd like to interact with. This alternative is useful when you're dealing with singular elements on a page that have a difficult design structure. For example, let's say we're
+interacting with a sidebar that contains filter radio buttons.
+
+With this filter example, let's say we've created an Enum that contains String values for the possible filter title's we'd like to select. On the page object for the search results
+page, we could write the following function:
+
+```java
+public class SomePageObject {
+  
+  public void selectCategoryFilterByEnum(CategoryFilterEnum filterChoice) {
+    var categoryList = new DivWebElement(".sidebar_container").findElements(DivWebElement.class, ".filters_container");
+    var categoryLink = categoryList
+        .stream()
+        .filter(result -> {
+          var resultTitle = result.getText();
+          return resultTitle.contains(filterChoice.getCategory());
+        })
+        .reduce((a,b) -> {
+          throw new ExceptionOfYourChoice(String.format(
+              "Multiple Elements found [%s] and [%s]", a, b));
+        });
+    if (categoryLink.isPresent()) {
+      categoryLink.get().click();
+    } else {
+      throw new ExceptionOfYourChoice(String.format(
+          "Could not find a selection with choice [%s]", filterChoice.getCategoryAsString()));
+    }
+  } 
+}
+```
+
+This above example illustrates that sometimes building a component list of all the things isn't always the best option and is just another tool in the toolbox. With the above example,
+we've limited the interaction to a singular method on a page object and cut down on our overall code.
+
 #### Navigation
 Your project should have a navigation file that extends `WebDriverNavigation`. This file should live within the core module in a navigation package. E.G: `core > src > main > java > your > groupID > page > Navigation.class`
 

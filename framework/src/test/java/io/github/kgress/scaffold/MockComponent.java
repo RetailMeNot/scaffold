@@ -15,15 +15,18 @@ public class MockComponent extends BaseComponent {
   @Mock
   private AutomationWait mockAutomationWait;
 
-  private final MockBaseWebElement testField = new MockBaseWebElement(By.cssSelector("#fake-field"));
-  private final MockBaseWebElement testField2 = new MockBaseWebElement(By.cssSelector("#fake-field-2"));
+  private final MockBaseWebElement testField = new MockBaseWebElement(
+      By.cssSelector("#fake-field"));
+  private final MockBaseWebElement testField2 = new MockBaseWebElement(
+      By.cssSelector("#fake-field-2"));
 
   @Override
   public AutomationWait getAutomationWait() {
     return mockAutomationWait;
   }
 
-  public <T extends BaseComponent, X extends BaseWebElement> List<T> buildComponentList_callProtectedMethod(List<X> listOfElements, Class<T> component) {
-    return buildComponentList(listOfElements, component);
+  public <T extends BaseComponent, X extends BaseWebElement> List<T> buildComponentList_callProtectedMethod(
+      List<X> listOfElements, Class<T> component, Integer indexCorrection) {
+    return buildComponentList(listOfElements, component, indexCorrection);
   }
 }

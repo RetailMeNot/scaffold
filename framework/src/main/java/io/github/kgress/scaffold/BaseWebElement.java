@@ -507,7 +507,7 @@ public abstract class BaseWebElement {
   public WebElement scrollIntoView() {
     return (WebElement) getWebDriverWrapper()
         .getJavascriptExecutor()
-        .executeScript("arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});",
+        .executeScript("arguments[0].scrollIntoView({block: 'nearest', inline: 'nearest'});",
             getRawWebElement());
   }
 

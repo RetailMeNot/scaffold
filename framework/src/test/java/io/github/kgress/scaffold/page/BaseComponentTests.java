@@ -27,7 +27,7 @@ public class BaseComponentTests {
     final var listOfElements = Arrays.asList(xpathElement, xpathElement);
 
     assertThrows(ComponentException.class, () ->
-        MockComponent.buildComponentList_callProtectedMethod(listOfElements, MockComponent.class));
+        MockComponent.buildComponentList_callProtectedMethod(listOfElements, MockComponent.class, 0));
   }
 
   @Test
@@ -36,7 +36,7 @@ public class BaseComponentTests {
         By.xpath("xpath parent"));
     final var listOfElements = Arrays.asList(xpathParentElement, xpathParentElement);
     assertThrows(ComponentException.class, () ->
-        MockComponent.buildComponentList_callProtectedMethod(listOfElements, MockComponent.class));
+        MockComponent.buildComponentList_callProtectedMethod(listOfElements, MockComponent.class, 0));
   }
 
   @Test
@@ -45,7 +45,7 @@ public class BaseComponentTests {
         By.cssSelector("#css-parent"));
     final var listOfElements = Arrays.asList(xpathChildElement, xpathChildElement);
     assertThrows(ComponentException.class, () ->
-        MockComponent.buildComponentList_callProtectedMethod(listOfElements, MockComponent.class));
+        MockComponent.buildComponentList_callProtectedMethod(listOfElements, MockComponent.class, 0));
   }
 
   @Test
@@ -56,7 +56,23 @@ public class BaseComponentTests {
         By.cssSelector("#fake-parent #fake-child"));
     final var listOfElements = Arrays.asList(cssParentAndChild, cssParentAndChild);
     final var output = MockComponent.buildComponentList_callProtectedMethod(listOfElements,
-        MockComponent.class);
+        MockComponent.class, 0);
+    assertEquals(2, output.size());
+    assertEquals(expectedGetByIndex0,
+        AutomationUtils.getUnderlyingLocatorByString(output.get(0).getTestField().getBy()));
+    assertEquals(expectedGetByIndex1,
+        AutomationUtils.getUnderlyingLocatorByString(output.get(1).getTestField().getBy()));
+  }
+
+  @Test
+  public void testBuildComponentList_cssAsBy_withIndexCorrection() {
+    final var expectedGetByIndex0 = "#fake-parent #fake-child:nth-child(3) #fake-field";
+    final var expectedGetByIndex1 = "#fake-parent #fake-child:nth-child(4) #fake-field";
+    final var cssParentAndChild = new MockBaseWebElement(
+        By.cssSelector("#fake-parent #fake-child"));
+    final var listOfElements = Arrays.asList(cssParentAndChild, cssParentAndChild);
+    final var output = MockComponent.buildComponentList_callProtectedMethod(listOfElements,
+        MockComponent.class, 2);
     assertEquals(2, output.size());
     assertEquals(expectedGetByIndex0,
         AutomationUtils.getUnderlyingLocatorByString(output.get(0).getTestField().getBy()));
