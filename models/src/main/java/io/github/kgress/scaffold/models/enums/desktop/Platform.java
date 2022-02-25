@@ -18,6 +18,7 @@ public enum Platform {
   XP("XP"),
   Vista("VISTA"),
   Mac("MAC"),
+  Monterey("macOS 12"),
   Linux("LINUX"),
   Unix("UNIX");
 
