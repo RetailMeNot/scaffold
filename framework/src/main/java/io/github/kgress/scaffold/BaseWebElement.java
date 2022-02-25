@@ -740,10 +740,10 @@ public abstract class BaseWebElement {
       }
     }
 
-        /*
-        Performs a find element first on this By (which waits for the element to be displayed),
-        and then performs findElements() with the caller's by as the child.
-         */
+    /*
+    Performs a find element first on this By (which waits for the element to be displayed),
+    and then performs findElements() with the caller's by as the child.
+     */
     elements = getRawWebElement().findElements(by);
 
     var finalCombinedBy = combinedBy;

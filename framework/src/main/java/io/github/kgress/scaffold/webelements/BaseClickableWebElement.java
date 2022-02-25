@@ -1,6 +1,8 @@
 package io.github.kgress.scaffold.webelements;
 
 import io.github.kgress.scaffold.BaseWebElement;
+import io.github.kgress.scaffold.WebDriverWrapper;
+import io.github.kgress.scaffold.WebElementWait;
 import org.openqa.selenium.By;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
@@ -125,11 +127,34 @@ public class BaseClickableWebElement extends BaseWebElement {
      * - Performing the click action on the element
      * - Waits for the page to load prior to proceeding
      *
+     * Scrolling the element into view will invoke {@link BaseWebElement#getRawWebElement()} and
+     * therefore the element will {@link WebElementWait#waitUntilDisplayed()}. Because the wait
+     * already is occurring during the scroll, we should not invoke another wait call and instead
+     * find the element directly through selenium, using the {@link WebDriverWrapper}. After
+     * the element is found and clicked on, wait until the page is loaded before proceeding.
+     *
      * @see WebElement#click()
      */
     public void click() {
+        /*
+        Scrolls the element into view so selenium can click it. Ideally we always want to scroll
+        with the least amount of effort required to get the element into view. This is why the
+        script should always bring it into the nearest vertical and horizontal alignment.
+         */
         scrollIntoView();
-        getRawWebElement().click();
+
+        /*
+        Find the element through Selenium directly instead of using our custom getRawWebElement.
+        scrollIntoView already waits for the element to be displayed, and we don't want to add
+        more waits.
+         */
+        getWebDriverWrapper().findElement(this.getBy()).click();
+
+        /*
+        This is a nice catch all that should happen after the element is clicked on. Sometimes
+        websites may have additional javascript or ajax calls when clicking on elements. This
+        ensures the state of the page is ready.
+         */
         getWebElementWait().waitUntilPageIsLoaded();
     }
 }
