@@ -167,6 +167,18 @@ public class DesiredCapabilitiesConfigurationProperties {
      * Optional. The custom time zone to use when spinning up the sauce lab VM.
      */
     private String timeZone;
+
+    /**
+     * This enables the extended debugging feature on SauceLabs. The default on SauceLabs is to have this set as false.
+     * Required to be true for capturePerformance to be enabled.
+     */
+    private Boolean extendedDebugging;
+
+    /**
+     * This enables the performance capturing feature on SauceLabs. The default on SauceLabs is to have this set as false.
+     * extendedDebugging must also be true for this to work.
+     */
+    private Boolean capturePerformance;
   }
 
   /**

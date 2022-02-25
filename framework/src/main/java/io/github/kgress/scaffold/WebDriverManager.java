@@ -582,6 +582,8 @@ public class WebDriverManager {
     var sauceConfigUrl = Optional.ofNullable(sauce.getUrl())
         .orElse(URI.create("https://" + username + ":" + accessKey + defaultSauceUrl)
             .toString());
+    var extendedDebugging = Optional.ofNullable(sauce.getExtendedDebugging());
+    var capturePerformance = Optional.ofNullable(sauce.getCapturePerformance());
 
     try {
       // Required
@@ -606,6 +608,8 @@ public class WebDriverManager {
       parentTunnel
           .ifPresent(parentTunnelId -> sauceCaps.setCapability("parentTunnel", parentTunnelId));
       timeZone.ifPresent(tz -> sauceCaps.setCapability("timeZone", tz));
+      extendedDebugging.ifPresent(setting -> sauceCaps.setCapability("extendedDebugging", setting));
+      capturePerformance.ifPresent(setting -> sauceCaps.setCapability("capturePerformance", setting));
 
       browserOptions.setCapability("sauce:options", sauceCaps);
       return startScreenshotRemoteDriver(sauceConfigUrl, browserOptions);
