@@ -64,7 +64,7 @@ public class BasePageTests extends BaseUnitTest {
     @Test
     public void verifyIsOnPage_elementNotDisplayed() {
         when(mockAutomationWait.waitUntilPageIsLoaded()).thenReturn(true);
-        when(mockDivWebElement.isDisplayed()).thenThrow(TimeoutException.class);
+        when(mockDivWebElement.isDisplayed()).thenReturn(false);
         var exception = assertThrows(TimeoutException.class, () ->
                 testBasePage.verifyIsOnPage_callProtectedMethod(mockDivWebElement));
         assertTrue(exception.getMessage().contains(EXPECTED_FAILED_TEXT));
@@ -74,7 +74,7 @@ public class BasePageTests extends BaseUnitTest {
     public void verifyIsOnPage_elementsNotDisplayed() {
         when(mockAutomationWait.waitUntilPageIsLoaded()).thenReturn(true);
         when(mockDivWebElement.isDisplayed()).thenReturn(true);
-        when(mockInputWebElement.isDisplayed()).thenThrow(TimeoutException.class);
+        when(mockInputWebElement.isDisplayed()).thenReturn(false);
         var exception = assertThrows(TimeoutException.class, () ->
                 testBasePage.verifyIsOnPage_callProtectedMethod(mockDivWebElement, mockInputWebElement));
         assertTrue(exception.getMessage().contains(EXPECTED_FAILED_TEXT));

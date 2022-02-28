@@ -66,12 +66,10 @@ public class BasePage extends BaseComponent {
     var isPageLoaded = getAutomationWait().waitUntilPageIsLoaded();
     if (isPageLoaded) {
       listOfElements.forEach(elementOnPage -> {
-        try {
-          elementOnPage.isDisplayed();
-        } catch (TimeoutException e) {
+        if (!elementOnPage.isDisplayed()) {
           throw new TimeoutException(
-              String.format("Page verification failed. Could not find the element " +
-                  "%s for the intended page: %s", elementOnPage, getClass().getSimpleName()));
+                String.format("Page verification failed. Could not find the element " +
+                    "%s for the intended page: %s", elementOnPage, getClass().getSimpleName()));
         }
       });
     } else {
