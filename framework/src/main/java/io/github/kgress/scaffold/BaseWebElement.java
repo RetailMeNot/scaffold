@@ -598,13 +598,37 @@ public abstract class BaseWebElement {
     By combinedBy = null;
     By updatedParentBy = null;
 
+    /*
+    The below if logic only considers a situation where a findElement call is being invoked
+    on another element. In other words, creating a new instance of a strong typed element and
+    performing a findElement from it. That means there are a total of 3 by locators potentially
+    in use:
+      * The parent and child By locators from the "parent element"
+      * The By locator being passed in to the method from the caller, the "child element"
+
+    This logic does not directly take into account a scenario where this method is invoked
+    from a class variable. I believe this scenario only is when users have created a custom web
+    element that extends from a Scaffold strongly typed element, In situations like that, the
+    following can be assumed:
+      * This class's getParentBy() and getBy() likely will be null
+      * This class's getParentBy() likely might not be null, and this class's getBy likely will
+        be null
+
+    With the above assumptions, the logic is that because the combinedBy and the updateParentBy
+    will likely be null, the code logic path will still default to returning a new element that
+    is built with the WebElement.class constructor. We are moving away from creating elements in
+    this way, which is why findElement() is deprecated and eventually will be set private
+    in a future update. https://github.com/kgress/scaffold/issues/132 addresses this band aid
+    to allow existing users the same functionality from before while we move towards the
+    breaking code change.
+    */
     if (getParentBy() != null) {
-      if (!(getParentBy() instanceof By.ByXPath)) {
+      if (!(getParentBy() instanceof By.ByXPath) && !(getBy() instanceof By.ByXPath)) {
         combinedBy = combineByLocators(getParentBy(), by);
       }
     } else {
       updatedParentBy = getBy();
-      if (!(getBy() instanceof By.ByXPath) || !(updatedParentBy instanceof By.ByXPath)) {
+      if (!(by instanceof By.ByXPath) && !(updatedParentBy instanceof By.ByXPath)) {
         combinedBy = combineByLocators(updatedParentBy, by);
       }
     }
@@ -714,28 +738,51 @@ public abstract class BaseWebElement {
     By combinedBy = null;
     By updatedParentBy = null;
 
-        /*
-        The current By of the instance becomes the new parent, and the By passed in by the caller
-        is the new child. This will happen in the event the strongly typed element is not
-        instantiated with a parentBy locator using the (By, By) constructor.
+    /*
+    The current By of the instance becomes the new parent, and the By passed in by the caller
+    is the new child. This will happen in the event the strongly typed element is not
+    instantiated with a parentBy locator using the (By, By) constructor.
 
-        If the parentBy is already set on this class, and it differs from the By
-        passed in, create a new variable that defines this classes By as the parent, and the By
-        from the caller as the child.
+    If the parentBy is already set on this class, and it differs from the By
+    passed in, create a new variable that defines this classes By as the parent, and the By
+    from the caller as the child.
 
-        In either of these two cases, if those By locators are of type CSS, we should go ahead
-        and combine them. Otherwise, if any of these By locators are XPATH, we need to invoke
-        getRawWebElement to perform two find element calls, one for the parent and one for the
-        parent + child.
-        */
+    In either of these two cases, if those By locators are of type CSS, we should go ahead
+    and combine them. Otherwise, if any of these By locators are XPATH, we need to invoke
+    getRawWebElement to perform two find element calls, one for the parent and one for the
+    parent + child.
+
+    The below if logic only considers a situation where a findElements call is being invoked
+    on another element. In other words, creating a new instance of a strong typed element and
+    performing a findElement from it. That means there are a total of 3 by locators potentially
+    in use:
+      * The parent and child By locators from the "parent element"
+      * The By locator being passed in to the method from the caller, the "child element"
+
+    This logic does not directly take into account a scenario where this method is invoked
+    from a class variable. I believe this scenario only is when users have created a custom web
+    element that extends from a Scaffold strongly typed element, In situations like that, the
+    following can be assumed:
+      * This class's getParentBy() and getBy() likely will be null
+      * This class's getParentBy() likely might not be null, and this class's getBy likely will
+        be null
+
+    With the above assumptions, the logic is that because the combinedBy and the updateParentBy
+    will likely be null, the code logic path will still default to returning a new element that
+    is built with the WebElement.class constructor. We are moving away from creating elements in
+    this way, which is why findElement() is deprecated and eventually will be set private
+    in a future update. https://github.com/kgress/scaffold/issues/132 addresses this band aid
+    to allow existing users the same functionality from before while we move towards the
+    breaking code change.
+    */
     if (getParentBy() != null) {
-      if (!(getParentBy() instanceof By.ByXPath)) {
+      if (!(getParentBy() instanceof By.ByXPath) && !(getBy() instanceof By.ByXPath)) {
         var existingParentChildBy = combineByLocators(getParentBy(), getBy());
         combinedBy = combineByLocators(existingParentChildBy, by);
       }
     } else {
       updatedParentBy = getBy();
-      if (!(getBy() instanceof By.ByXPath) || !(updatedParentBy instanceof By.ByXPath)) {
+      if (!(by instanceof By.ByXPath) && !(updatedParentBy instanceof By.ByXPath)) {
         combinedBy = combineByLocators(updatedParentBy, by);
       }
     }
@@ -836,8 +883,8 @@ public abstract class BaseWebElement {
   private By combineByLocators(By parentBy, By childBy) {
     if (parentBy instanceof By.ByXPath || childBy instanceof By.ByXPath) {
       var exceptionMessage = new RuntimeException(String.format(
-          "Both By locators must match XPATH when combining. It is highly recommended to "
-              + "use all CSS selectors. Parent: %s. Child: %s", parentBy, childBy));
+          "Both By locators must be of type CSS when combining. Parent: %s. Child: %s",
+          parentBy, childBy));
       if (!(parentBy instanceof By.ByXPath)) {
         throw exceptionMessage;
       } else if (!(childBy instanceof By.ByXPath)) {
