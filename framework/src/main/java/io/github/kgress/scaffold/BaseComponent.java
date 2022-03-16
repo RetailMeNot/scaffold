@@ -290,6 +290,24 @@ public class BaseComponent {
   }
 
   /**
+   * An overloaded method of {@link #buildComponentList(List, Class, Integer)} to be used when
+   * there is no index correction required. This method sets a default of 0. Reference the method
+   * we're overloading for full documentation on usage.
+   *
+   * @param listOfElements the list of elements to iterate through and convert to components
+   * @param component      the {@link BaseComponent} class of the component we are converting the
+   *                       list of elements to
+   * @param <T>            the type reference for the components must extend {@link BaseComponent}
+   * @param <X>            the type reference for the elements we're iterating through must extend
+   *                       {@link BaseWebElement}
+   * @return as a new list of components that extend {@link BaseComponent}
+   */
+  protected <T extends BaseComponent, X extends BaseWebElement> List<T> buildComponentList(
+      List<X> listOfElements, Class<T> component) {
+    return buildComponentList(listOfElements, component, 0);
+  }
+
+  /**
    * Converts {@link Field}'s from a class that extends off of {@link BaseComponent} from an
    * "inaccessible" state to "accessible." We will only convert Scaffold elements. Access is still
    * technically modified for every field, but always set back to private. Afterwards, combines
