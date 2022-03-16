@@ -19,6 +19,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.IntStream;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -735,89 +736,41 @@ public abstract class BaseWebElement {
   public <T extends BaseWebElement> List<T> findElements(Class<T> elementClass, By by) {
     List<T> newElements = new ArrayList<>();
     List<WebElement> elements;
-    By combinedBy = null;
-    By updatedParentBy = null;
-
-    /*
-    The current By of the instance becomes the new parent, and the By passed in by the caller
-    is the new child. This will happen in the event the strongly typed element is not
-    instantiated with a parentBy locator using the (By, By) constructor.
-
-    If the parentBy is already set on this class, and it differs from the By
-    passed in, create a new variable that defines this classes By as the parent, and the By
-    from the caller as the child.
-
-    In either of these two cases, if those By locators are of type CSS, we should go ahead
-    and combine them. Otherwise, if any of these By locators are XPATH, we need to invoke
-    getRawWebElement to perform two find element calls, one for the parent and one for the
-    parent + child.
-
-    The below if logic only considers a situation where a findElements call is being invoked
-    on another element. In other words, creating a new instance of a strong typed element and
-    performing a findElement from it. That means there are a total of 3 by locators potentially
-    in use:
-      * The parent and child By locators from the "parent element"
-      * The By locator being passed in to the method from the caller, the "child element"
-
-    This logic does not directly take into account a scenario where this method is invoked
-    from a class variable. I believe this scenario only is when users have created a custom web
-    element that extends from a Scaffold strongly typed element, In situations like that, the
-    following can be assumed:
-      * This class's getParentBy() and getBy() likely will be null
-      * This class's getParentBy() likely might not be null, and this class's getBy likely will
-        be null
-
-    With the above assumptions, the logic is that because the combinedBy and the updateParentBy
-    will likely be null, the code logic path will still default to returning a new element that
-    is built with the WebElement.class constructor. We are moving away from creating elements in
-    this way, which is why findElement() is deprecated and eventually will be set private
-    in a future update. https://github.com/kgress/scaffold/issues/132 addresses this band aid
-    to allow existing users the same functionality from before while we move towards the
-    breaking code change.
-    */
-    if (getParentBy() != null) {
-      if (!(getParentBy() instanceof By.ByXPath) && !(getBy() instanceof By.ByXPath)) {
-        var existingParentChildBy = combineByLocators(getParentBy(), getBy());
-        combinedBy = combineByLocators(existingParentChildBy, by);
-      }
-    } else {
-      updatedParentBy = getBy();
-      if (!(by instanceof By.ByXPath) && !(updatedParentBy instanceof By.ByXPath)) {
-        combinedBy = combineByLocators(updatedParentBy, by);
-      }
-    }
 
     /*
     Performs a find element first on this By (which waits for the element to be displayed),
     and then performs findElements() with the caller's by as the child.
      */
     elements = getRawWebElement().findElements(by);
+    final var childElementsByTag = getAllSiblingElementsOfElement(elements.get(0));
 
-    var finalCombinedBy = combinedBy;
-    var finalUpdatedParentBy = updatedParentBy;
-    elements.forEach(element -> {
-      try {
-        if (finalCombinedBy != null) {
-          var constructor = elementClass.getConstructor(By.class);
-          T newElement = constructor.newInstance(finalCombinedBy);
-          newElements.add(newElement);
-        } else if (finalUpdatedParentBy != null) {
-          var constructor = elementClass.getConstructor(By.class, By.class);
-          T newElement = constructor.newInstance(by, finalUpdatedParentBy);
-          newElements.add(newElement);
-        } else {
-                    /*
-                    Worst case scenario here. We don't want a situation where the caller is
-                    interacting with a scaffold element without a By locator.
-                     */
-          var constructor = elementClass.getConstructor(WebElement.class);
-          T newElement = constructor.newInstance(element);
-          newElements.add(newElement);
-        }
-      } catch (Exception e) {
-        throw new RuntimeException("Could not instantiate Element properly: " + e);
-      }
-    });
+    IntStream.range(0, childElementsByTag.size())
+        .forEach(i -> {
+
+          if (elements.contains(childElementsByTag.get(i))) {
+            final By newChildElementSelector = createChildElementSelector(
+                determineCombinedBy(getBy(), getParentBy(), by),
+                i);
+
+            try {
+              if (newChildElementSelector != null) {
+                final var constructor = elementClass.getConstructor(By.class);
+                final T newElement = constructor.newInstance(newChildElementSelector);
+                newElements.add(newElement);
+              } else {
+              /*
+              Worst case scenario here. We don't want a situation where the caller is
+              interacting with a scaffold element without a By locator.
+               */
+                final var constructor = elementClass.getConstructor(WebElement.class);
+                final T newElement = constructor.newInstance(elements.get(i));
+                newElements.add(newElement);
+              }
+            } catch (Exception e) {
+              throw new RuntimeException("Could not instantiate Element properly: " + e);
+            }
+          }
+        });
     return newElements;
   }
 
@@ -899,6 +852,90 @@ public abstract class BaseWebElement {
       var combinedLocator = getCombinedByLocatorAsString(convertedParentBy, convertedChildBy);
       return By.cssSelector(combinedLocator);
     }
+  }
+
+  /**
+   * A pure function that encapsulates the logic to determine what the base {@link By} selector for
+   * the children elements.
+   *
+   * @param childElementRootSelector the child root {@link By} selector as determined by 
+   *    {@link #determineCombinedBy(By, By, By)}
+   * @param childElementIndex the index of the rawElement found with {@link WebElement#findElements(By)} 
+   *
+   * @return a new By selector to create elements that are children under the element that
+   *         performed the findElements query.
+   */
+  private By createChildElementSelector(By childElementRootSelector, int childElementIndex) {
+    if (childElementRootSelector instanceof By.ByXPath) {
+      return By.xpath(String.format("%s[%s]",
+          AutomationUtils.getUnderlyingLocatorByString(childElementRootSelector),
+          childElementIndex + 1));
+    } else {
+      return By.cssSelector(String.format("%s:nth-child(%s)",
+          AutomationUtils.getUnderlyingLocatorByString(childElementRootSelector),
+          childElementIndex + 1));
+    }
+  }
+
+  /**
+   * A pure function that encapsulates the logic to determine parent selector for the children
+   * elements that need to be instantiated.
+   *
+   * @param selfSelector the {@link By} selector referenced by {@link #by}
+   * @param selfParentSelector the {@link By} selector referenced by {@link #parentBy}
+   * @param queriedSelector the {@link By} selector passed in as argument to
+   *    {@link #findElements(Class, By)}
+   *
+   * @return a instance of a {@link By} selector that is the combined selector of {@link #by} and
+   *    {@link #parentBy}
+   */
+  private By determineCombinedBy(By selfSelector, By selfParentSelector, By queriedSelector) {
+    /*
+    The current By of the instance becomes the new parent, and the By passed in by the caller
+    is the new child. This will happen in the event the strongly typed element is not
+    instantiated with a parentBy locator using the (By, By) constructor.
+
+    If the parentBy is already set on this class, and it differs from the By
+    passed in, create a new variable that defines this classes By as the parent, and the By
+    from the caller as the child.
+
+    In either of these two cases, if those By locators are of type CSS, we should go ahead
+    and combine them. Otherwise, if any of these By locators are XPATH, we need to invoke
+    getRawWebElement to perform two find element calls, one for the parent and one for the
+    parent + child.
+    */
+    if (queriedSelector instanceof By.ByXPath) {
+      return queriedSelector;
+    } else if (selfParentSelector != null) {
+      if (!(selfParentSelector instanceof By.ByXPath) && !(selfSelector instanceof By.ByXPath)) {
+        var existingParentChildBy = combineByLocators(selfParentSelector, selfSelector);
+        return combineByLocators(existingParentChildBy, queriedSelector);
+      }
+    } else {
+      if (!(selfSelector instanceof By.ByXPath)) {
+        return combineByLocators(selfSelector, queriedSelector);
+      }
+    }
+    return selfSelector;
+  }
+
+  /**
+   * A pure function that encapsulates the logic to retrieve all possible sibling elements of the
+   * same type as the provided {@link WebElement}.  The purpose is correctly index the pseudo class
+   * nth-child when create the actual requested elements.
+   *
+   * @param webElement  The element to use, to retrieve all possible siblings
+   * @return A list of all possible siblings that match the tag of the provided {@link WebElement}.
+   */
+  private List<WebElement> getAllSiblingElementsOfElement(WebElement webElement) {
+    final String elementTagName = webElement.getTagName();
+
+    /* This gets the parent element (didn't use selector provided because there may be an
+     *  element between that parent selector and the actual child elements wanted.
+     *  Using the parent raw element, find all elements of the same tag that was found
+     *   using the provided by selector. We use this list to provide the real nth-child index.
+     */
+    return webElement.findElement(By.xpath("./..")).findElements(By.tagName(elementTagName));
   }
 
   /**
