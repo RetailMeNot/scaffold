@@ -742,6 +742,11 @@ public abstract class BaseWebElement {
     and then performs findElements() with the caller's by as the child.
      */
     elements = getRawWebElement().findElements(by);
+
+    if (elements.size() == 0) {
+      return List.of();
+    }
+
     final var childElementsByTag = getAllSiblingElementsOfElement(elements.get(0));
 
     IntStream.range(0, childElementsByTag.size())

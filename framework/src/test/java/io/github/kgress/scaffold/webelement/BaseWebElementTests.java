@@ -487,4 +487,24 @@ public class BaseWebElementTests extends BaseUnitTest {
       }
     });
   }
+
+    @Test
+    public void testBaseWebElement_findElements_returnsEmptyList() {
+        final By parentBySelector = By.cssSelector("div.reservation-container");
+        final By rootChildBySelector = By.cssSelector("li");
+        final WebElement webElement = mock(WebElement.class);
+        // order here is important, to validate that rogueDiv causes the index of the desired elements
+        // to be nonsequential
+        when(webElement.findElements(rootChildBySelector)).thenReturn(
+            List.of()
+        );
+        TestBaseWebElement parentElement = new TestBaseWebElement(parentBySelector);
+        when(parentElement.getRawWebElement()).thenReturn(webElement);
+        assertThat(parentElement).isNotNull();
+        // now assert Order of child elements is what we expect...
+        List<MockBaseWebElement> reservationCards =
+            parentElement.findElements(MockBaseWebElement.class, rootChildBySelector);
+        assertThat(reservationCards).isNotNull();
+        assertThat(reservationCards).isEmpty();
+    }
 }
