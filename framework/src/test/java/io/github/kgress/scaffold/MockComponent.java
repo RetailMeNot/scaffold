@@ -25,8 +25,8 @@ public class MockComponent extends BaseComponent {
     return mockAutomationWait;
   }
 
-  public <T extends BaseComponent, X extends BaseWebElement> List<T> buildComponentList_callProtectedMethod(
-      List<X> listOfElements, Class<T> component, Integer indexCorrection) {
-    return buildComponentList(listOfElements, component, indexCorrection);
+  public <T extends BaseComponent, X extends BaseWebElement> List<T>
+  buildComponentList_callProtectedMethod(List<X> listOfElements, Class<T> component) {
+    return buildComponentList(listOfElements, component);
   }
 }

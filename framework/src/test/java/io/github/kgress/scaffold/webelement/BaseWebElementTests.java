@@ -1,21 +1,28 @@
 package io.github.kgress.scaffold.webelement;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import io.github.kgress.scaffold.BaseUnitTest;
 import io.github.kgress.scaffold.MockBaseWebElement;
 import io.github.kgress.scaffold.SharedTestVariables;
+import io.github.kgress.scaffold.util.AutomationUtils;
+import java.util.List;
+import java.util.stream.IntStream;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.Rectangle;
 import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebElement;
 
 public class BaseWebElementTests extends BaseUnitTest {
 
@@ -394,5 +401,122 @@ public class BaseWebElementTests extends BaseUnitTest {
         when(elementByCssSelector.getRawWebElement()).thenThrow(new TimeoutException());
         assertDoesNotThrow(() -> elementByCssSelector.hasClass("class"));
         assertFalse(elementByCssSelector.hasClass("class"));
+    }
+
+  // these tests use both TestBaseWebElement & MockBaseWebElement
+
+    @Test
+    public void testBaseWebElement_findElements_by_xPath() {
+        final By parentBySelector = By.xpath("//div[@class='reservation-container']");
+        final By rootChildBySelector = By.xpath("//div[@class='reservation-card-container']");
+        final WebElement reservationCard_A = mock(WebElement.class);
+        final WebElement webElement = mock(WebElement.class);
+        when(webElement.findElements(rootChildBySelector)).thenReturn(
+            List.of(reservationCard_A, reservationCard_A, reservationCard_A)
+        );
+        TestBaseWebElement parentElement = new TestBaseWebElement(parentBySelector);
+        when(parentElement.getRawWebElement()).thenReturn(webElement);
+        assertThat(parentElement).isNotNull();
+        // now assert Order of child elements is what we expect...
+        List<MockBaseWebElement> reservationCards1 =
+            parentElement.findElements(MockBaseWebElement.class, rootChildBySelector);
+        assertThat(reservationCards1).isNotNull();
+        assertThat(reservationCards1.size()).isEqualTo(3);
+        final var reservationCards = reservationCards1;
+        IntStream.range(0, reservationCards.size()).forEach((i) -> {
+            switch (i) {
+                case 0:
+                    final String aByString = AutomationUtils.getUnderlyingLocatorByString(
+                        reservationCards.get(i).getBy());
+                    assertThat(aByString).isEqualTo(
+                        "//div[@class='reservation-card-container'][1]");
+                    break;
+                case 1:
+                    final String bByString = AutomationUtils.getUnderlyingLocatorByString(
+                        reservationCards.get(i).getBy());
+                    assertThat(bByString).isEqualTo(
+                        "//div[@class='reservation-card-container'][2]");
+                    break;
+                case 2:
+                    final String cByString = AutomationUtils.getUnderlyingLocatorByString(
+                        reservationCards.get(i).getBy());
+                    assertThat(cByString).isEqualTo(
+                        "//div[@class='reservation-card-container'][3]");
+                    break;
+            }
+        });
+    }
+
+    @Test
+    public void testBaseWebElement_findElements_by_css() {
+        final By parentBySelector = By.cssSelector("div.reservation-container");
+        final By rootChildBySelector = By.cssSelector("div.reservation-card-container");
+        final WebElement reservationCard_A = mock(WebElement.class);
+        // this mock webelement instance is necessary to distinguish from reservationCard, since the
+        // findElements method does an Object.equals to see if the instance is in the filtered list
+        // of requested items.
+        final WebElement rogueDiv = mock(WebElement.class);
+        final WebElement webElement = mock(WebElement.class);
+        when(reservationCard_A.getTagName()).thenReturn("div");
+        when(reservationCard_A.findElement(any(By.ByXPath.class))).thenReturn(webElement);
+        // order here is important, to validate that rogueDiv causes the index of the desired elements
+        // to be nonsequential
+        when(webElement.findElements(any(By.ByTagName.class))).thenReturn(
+            List.of(reservationCard_A, rogueDiv, reservationCard_A, reservationCard_A)
+        );
+        when(webElement.findElements(rootChildBySelector)).thenReturn(
+            List.of(reservationCard_A, reservationCard_A, reservationCard_A)
+        );
+        TestBaseWebElement parentElement = new TestBaseWebElement(parentBySelector);
+        when(parentElement.getRawWebElement()).thenReturn(webElement);
+        assertThat(parentElement).isNotNull();
+        // now assert Order of child elements is what we expect...
+        List<MockBaseWebElement> reservationCards1 =
+            parentElement.findElements(MockBaseWebElement.class, rootChildBySelector);
+        assertThat(reservationCards1).isNotNull();
+        assertThat(reservationCards1.size()).isEqualTo(3);
+        final var reservationCards = reservationCards1;
+        IntStream.range(0, reservationCards.size()).forEach((i) -> {
+            switch (i) {
+                case 0:
+                    final String aByString = AutomationUtils.getUnderlyingLocatorByString(
+                        reservationCards.get(i).getBy());
+                    assertThat(aByString).isEqualTo(
+                        "div.reservation-container div.reservation-card-container:nth-child(1)");
+                    break;
+                case 1:
+                    final String bByString = AutomationUtils.getUnderlyingLocatorByString(
+                        reservationCards.get(i).getBy());
+                    assertThat(bByString).isEqualTo(
+                        "div.reservation-container div.reservation-card-container:nth-child(3)");
+                    break;
+                case 2:
+                    final String cByString = AutomationUtils.getUnderlyingLocatorByString(
+                        reservationCards.get(i).getBy());
+                    assertThat(cByString).isEqualTo(
+                        "div.reservation-container div.reservation-card-container:nth-child(4)");
+                    break;
+            }
+        });
+    }
+
+    @Test
+    public void testBaseWebElement_findElements_returnsEmptyList() {
+        final By parentBySelector = By.cssSelector("div.reservation-container");
+        final By rootChildBySelector = By.cssSelector("li");
+        final WebElement webElement = mock(WebElement.class);
+        // order here is important, to validate that rogueDiv causes the index of the desired elements
+        // to be nonsequential
+        when(webElement.findElements(rootChildBySelector)).thenReturn(
+            List.of()
+        );
+        TestBaseWebElement parentElement = new TestBaseWebElement(parentBySelector);
+        when(parentElement.getRawWebElement()).thenReturn(webElement);
+        assertThat(parentElement).isNotNull();
+        // now assert Order of child elements is what we expect...
+        List<MockBaseWebElement> reservationCards =
+            parentElement.findElements(MockBaseWebElement.class, rootChildBySelector);
+        assertThat(reservationCards).isNotNull();
+        assertThat(reservationCards).isEmpty();
     }
 }

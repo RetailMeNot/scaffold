@@ -209,18 +209,11 @@ public class BaseComponent {
    *                       {@link BaseWebElement}
    * @return as a new list of components that extend {@link BaseComponent}
    */
+
   protected <T extends BaseComponent, X extends BaseWebElement> List<T> buildComponentList(
-      List<X> listOfElements, Class<T> component, Integer indexCorrection) {
+      List<X> listOfElements, Class<T> component) {
     // Create a new list of an object that extends BaseComponent
     var listOfComponents = new ArrayList<T>();
-
-    /*
-     Default an added index correction to 0. Index correction is helpful where there are
-     elements in the list container that exist prior to the components starting. This value
-     corrects the nth-child value later on.
-     */
-    var possibleIndexCorrection = Optional.ofNullable(indexCorrection)
-            .orElse(0);
 
     /*
      Iterate through the listOfElements and create a new instance of the component, type T, to
@@ -253,15 +246,6 @@ public class BaseComponent {
             var underlyingSelector = AutomationUtils.getUnderlyingLocatorByString(elementBy);
 
             /*
-             Create a new locator that combines the parent (the underlyingLocator) and
-             an :nth-child using the index. Because the element list starts at 0, we
-             need to add 1 in order to adhere to correct CSS usage.
-             */
-            final var finalAdjustedCorrection = 1 + possibleIndexCorrection;
-            var fullNewSelector = String.format("%s:nth-child(%s)", underlyingSelector,
-                index + finalAdjustedCorrection);
-
-            /*
              Create a new instance of the component passed in by the caller. The class
              extending off of BaseComponent should not have a non-empty constructor, otherwise
              this new instance will fail to init.
@@ -274,7 +258,7 @@ public class BaseComponent {
              additional fields, such as Strings (e.g. if Strings are being used as
              locators).
              */
-            convertFieldsWithNewLocator(componentInstance, fullNewSelector);
+            convertFieldsWithNewLocator(componentInstance, underlyingSelector);
 
             /*
              After the fields have been converted on the new instance of the component,
@@ -287,24 +271,6 @@ public class BaseComponent {
           }
         });
     return listOfComponents;
-  }
-
-  /**
-   * An overloaded method of {@link #buildComponentList(List, Class, Integer)} to be used when
-   * there is no index correction required. This method sets a default of 0. Reference the method
-   * we're overloading for full documentation on usage.
-   *
-   * @param listOfElements the list of elements to iterate through and convert to components
-   * @param component      the {@link BaseComponent} class of the component we are converting the
-   *                       list of elements to
-   * @param <T>            the type reference for the components must extend {@link BaseComponent}
-   * @param <X>            the type reference for the elements we're iterating through must extend
-   *                       {@link BaseWebElement}
-   * @return as a new list of components that extend {@link BaseComponent}
-   */
-  protected <T extends BaseComponent, X extends BaseWebElement> List<T> buildComponentList(
-      List<X> listOfElements, Class<T> component) {
-    return buildComponentList(listOfElements, component, 0);
   }
 
   /**
