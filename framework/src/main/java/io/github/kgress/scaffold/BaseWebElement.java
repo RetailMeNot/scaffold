@@ -16,9 +16,10 @@ import io.github.kgress.scaffold.webelements.InputWebElement;
 import io.github.kgress.scaffold.webelements.LinkWebElement;
 import io.github.kgress.scaffold.webelements.StaticTextWebElement;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -734,49 +735,27 @@ public abstract class BaseWebElement {
    * @return the element as the specified Type Reference {@link BaseWebElement}
    */
   public <T extends BaseWebElement> List<T> findElements(Class<T> elementClass, By by) {
-    List<T> newElements = new ArrayList<>();
-    List<WebElement> elements;
-
     /*
     Performs a find element first on this By (which waits for the element to be displayed),
     and then performs findElements() with the caller's by as the child.
      */
-    elements = getRawWebElement().findElements(by);
-
+    List<WebElement> elements = getRawWebElement().findElements(by);
     if (elements.size() == 0) {
       return List.of();
     }
 
-    final var childElementsByTag = getAllSiblingElementsOfElement(elements.get(0));
-
-    IntStream.range(0, childElementsByTag.size())
-        .forEach(i -> {
-
-          if (elements.contains(childElementsByTag.get(i))) {
-            final By newChildElementSelector = createChildElementSelector(
-                determineCombinedBy(getBy(), getParentBy(), by),
-                i);
-
-            try {
-              if (newChildElementSelector != null) {
-                final var constructor = elementClass.getConstructor(By.class);
-                final T newElement = constructor.newInstance(newChildElementSelector);
-                newElements.add(newElement);
-              } else {
-              /*
-              Worst case scenario here. We don't want a situation where the caller is
-              interacting with a scaffold element without a By locator.
-               */
-                final var constructor = elementClass.getConstructor(WebElement.class);
-                final T newElement = constructor.newInstance(elements.get(i));
-                newElements.add(newElement);
-              }
-            } catch (Exception e) {
-              throw new RuntimeException("Could not instantiate Element properly: " + e);
-            }
-          }
-        });
-    return newElements;
+    if (by instanceof By.ByXPath) {
+      return IntStream.range(0, elements.size())
+          .mapToObj(i -> createXPathChild(elementClass, by, i))
+          .collect(Collectors.toList());
+    } else {
+      final var siblingElementsOfElement = getAllSiblingElementsOfElement(elements.get(0));
+      return IntStream.range(0, siblingElementsOfElement.size())
+          .mapToObj(i -> createCssSelectorChild(elementClass, by, elements,
+              siblingElementsOfElement, i))
+          .filter(Objects::nonNull)
+          .collect(Collectors.toList());
+    }
   }
 
   public String toString() {
@@ -860,25 +839,87 @@ public abstract class BaseWebElement {
   }
 
   /**
+   * Creates a new element using {@link By.ByCssSelector}
+   *
+   * @param elementClass         The element type to be created
+   * @param by                   The {@link By} selector to be used to create the element.
+   * @param elements             The list of elements found using the Selenium
+   *                             {@link WebElement#findElements} method.
+   * @param siblingElementsByTag The list of elements that are siblings and are the same tag as the
+   *                             elements found by {@link WebElement#findElements}
+   * @param i                    The index used to find the correct element among siblings that are
+   *                             the same.
+   * @param <T>The               Type of element being created.
+   * @return a new instance of type T
+   */
+  private <T extends BaseWebElement> T createCssSelectorChild(Class<T> elementClass, By by,
+      List<WebElement> elements, List<WebElement> siblingElementsByTag, int i) {
+    if (elements.contains(siblingElementsByTag.get(i))) {
+      final By newElementSelector = createElementSelector(
+          determineCombinedBy(getBy(), getParentBy(), by),
+          i);
+
+      try {
+        if (newElementSelector != null) {
+          final var constructor = elementClass.getConstructor(By.class);
+          return constructor.newInstance(newElementSelector);
+        } else {
+          /*
+          Worst case scenario here. We don't want a situation where the caller is
+          interacting with a scaffold element without a By locator.
+           */
+          final var constructor = elementClass.getConstructor(WebElement.class);
+          return constructor.newInstance(elements.get(i));
+        }
+      } catch (Exception e) {
+        throw new RuntimeException("Could not instantiate Element properly: " + e);
+      }
+    }
+    return null;
+  }
+
+  /**
    * A pure function that encapsulates the logic to determine what the base {@link By} selector for
    * the children elements.
    *
-   * @param childElementRootSelector the child root {@link By} selector as determined by 
+   * @param elementRootSelector the child root {@link By} selector as determined by
    *    {@link #determineCombinedBy(By, By, By)}
-   * @param childElementIndex the index of the rawElement found with {@link WebElement#findElements(By)} 
+   * @param elementIndex the index of the rawElement found with {@link WebElement#findElements(By)}
    *
    * @return a new By selector to create elements that are children under the element that
    *         performed the findElements query.
    */
-  private By createChildElementSelector(By childElementRootSelector, int childElementIndex) {
-    if (childElementRootSelector instanceof By.ByXPath) {
+  private By createElementSelector(By elementRootSelector, int elementIndex) {
+    if (elementRootSelector instanceof By.ByXPath) {
       return By.xpath(String.format("%s[%s]",
-          AutomationUtils.getUnderlyingLocatorByString(childElementRootSelector),
-          childElementIndex + 1));
+          AutomationUtils.getUnderlyingLocatorByString(elementRootSelector),
+          elementIndex + 1));
     } else {
       return By.cssSelector(String.format("%s:nth-child(%s)",
-          AutomationUtils.getUnderlyingLocatorByString(childElementRootSelector),
-          childElementIndex + 1));
+          AutomationUtils.getUnderlyingLocatorByString(elementRootSelector),
+          elementIndex + 1));
+    }
+  }
+
+  /**
+   * Creates a new element using {@link By.ByXPath}
+   *
+   * @param elementClass The element type to be created
+   * @param by           The {@link By} selector to be used to create the element.
+   * @param i            The index used to find the correct element among siblings that are the
+   *                     same.
+   * @param <T>          The Type of element being created.
+   * @return a new instance of type T
+   */
+  private <T extends BaseWebElement> T createXPathChild(Class<T> elementClass, By by,
+      int i) {
+    try {
+      final By newElementSelector = createElementSelector(by, i);
+      final var constructor = elementClass.getConstructor(By.class, By.class);
+      return constructor.newInstance(newElementSelector,
+          getParentBy() == null ? getBy() : getParentBy());
+    } catch (Exception e) {
+      throw new RuntimeException("Could not instantiate Element properly: " + e);
     }
   }
 
