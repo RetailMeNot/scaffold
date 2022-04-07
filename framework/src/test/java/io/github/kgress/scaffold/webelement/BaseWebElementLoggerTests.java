@@ -38,27 +38,10 @@ public class BaseWebElementLoggerTests {
     final var exceptionMessage = testLogger.getLoggingEvents().get(0).getMessage();
     final var logLevel = testLogger.getLoggingEvents().get(0).getLevel();
     assertEquals(Level.WARN, logLevel);
-    assertEquals(String.format("It is strongly recommended to use a CSS selector for element "
-        + "[%s] instead of XPATH when instantiating new Scaffold elements. Failure in "
+    assertEquals("It is strongly recommended to use a CSS selector for elements "
+        + "instead of XPATH when instantiating new Scaffold elements. Failure in "
         + "using a CSS selector may hinder the availability of functionality on the "
-        + "element.", mockBaseWebElement.getBy()), exceptionMessage);
-  }
-
-  @Test
-  public void testXpathConstructorAddsLog_parentAndChildBy() {
-    var mockBaseWebElement = new MockBaseWebElement(
-        By.xpath("fake-child-xpath"), By.cssSelector("fake-parent-css"));
-    assertNotNull(testLogger.getLoggingEvents());
-    assertEquals(1, testLogger.getLoggingEvents().size());
-
-    final var exceptionMessage = testLogger.getLoggingEvents().get(0).getMessage();
-    final var logLevel = testLogger.getLoggingEvents().get(0).getLevel();
-    assertEquals(Level.WARN, logLevel);
-    assertEquals(String.format("It is strongly recommended to use a CSS selector for element "
-            + "parent [%s] and element child [%s] instead of XPATH when instantiating new "
-            + "Scaffold elements. Failure in using a CSS selector may hinder the availability "
-            + "of functionality on the element.", mockBaseWebElement.getParentBy(),
-        mockBaseWebElement.getBy()), exceptionMessage);
+        + "element.", exceptionMessage);
   }
 
   @Test

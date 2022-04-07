@@ -23,6 +23,19 @@ public class CheckBoxWebElement extends BaseClickableWebElement {
     }
 
     /**
+     * Creates a new {@link CheckBoxWebElement} and marks whether the element is hidden. It is highly recommended using
+     * {@link By#cssSelector(String)} over another method, such as {@link By#xpath(String)}, in almost all cases as it
+     * can be less flaky and less reliant on DOM hierarchy.
+     *
+     * @see BaseWebElement#BaseWebElement(String)
+     * @param cssSelector   the value of the {@link By#cssSelector(String)}
+     * @param isHidden      a {@link boolean} to specify if this element could be hidden
+     */
+    public CheckBoxWebElement(String cssSelector, boolean isHidden) {
+        super(cssSelector, isHidden);
+    }
+
+    /**
      * Use this constructor when you'd like to locate an element with a {@link By} method different from
      * {@link By#cssSelector(String)}. We strongly recommend using {@link #CheckBoxWebElement(String cssSelector)}
      * in almost all cases.
@@ -35,6 +48,19 @@ public class CheckBoxWebElement extends BaseClickableWebElement {
     }
 
     /**
+     * Use this constructor when you'd like to locate an element with a {@link By} method different from
+     * {@link By#cssSelector(String)} and mark whether the element is hidden. We strongly recommend using
+     * {@link #CheckBoxWebElement(String cssSelector)} in almost all cases.
+     *
+     * @see BaseWebElement#BaseWebElement(By)
+     * @param by        the {@link By} locator
+     * @param isHidden  a {@link boolean} to specify if this element could be hidden
+     */
+    public CheckBoxWebElement(By by, boolean isHidden) {
+        super(by, isHidden);
+    }
+
+    /**
      * Use this constructor when you'd like to locate an element with a child and parent {@link By} together. Useful
      * when you want a more verbose element definition in context of your websites' DOM.
      *
@@ -44,6 +70,19 @@ public class CheckBoxWebElement extends BaseClickableWebElement {
      */
     public CheckBoxWebElement(By by, By parentBy) {
         super(by, parentBy);
+    }
+
+    /**
+     * Use this constructor when you'd like to locate an element with a child and parent {@link By} together and mark
+     * whether the element is hidden. Useful when you want a more verbose element definition in context of your
+     * websites' DOM.
+     *
+     * @param by       the {@link By} locator to be used by this element
+     * @param parentBy the {@link By} locator for the parent element
+     * @param isHidden a {@link boolean} to specify if this element could be hidden
+     */
+    public CheckBoxWebElement(By by, By parentBy, boolean isHidden) {
+        super(by, parentBy, isHidden);
     }
 
     /**

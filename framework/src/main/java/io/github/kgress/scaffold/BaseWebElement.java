@@ -100,6 +100,9 @@ import org.openqa.selenium.logging.LogEntry;
 @Slf4j
 public abstract class BaseWebElement {
 
+  @Getter
+  private boolean isHidden = false;
+
   @Getter(AccessLevel.PUBLIC)
   @Setter(AccessLevel.PRIVATE)
   protected By parentBy;
@@ -143,8 +146,25 @@ public abstract class BaseWebElement {
    * @param cssSelector the string value of the {@link By#cssSelector(String)}
    */
   public BaseWebElement(String cssSelector) {
-    this.setBy(By.cssSelector(cssSelector));
-    setWebElementWait();
+    this(By.cssSelector(cssSelector));
+  }
+
+  /**
+   * Create a new element using the supplied {@link By#cssSelector(String)} and mark whether it is hidden.
+   * This does not call or invoke WebDriver in any way, nor does it try to find the element on a page.
+   * The element is used as a reference for use later. Once the element is set, we create a new
+   * {@link WebElementWait} for it.
+   * <p>
+   * The advantage of using this constructor is to reduce code count when using {@link
+   * By#cssSelector(String)} to instantiate your elements. It is highly recommended using {@link
+   * By#cssSelector(String)} over {@link By#xpath(String)} in almost all cases as it can be less
+   * flaky and less reliant on DOM hierarchy.
+   *
+   * @param cssSelector the string value of the {@link By#cssSelector(String)}
+   * @param isHidden a {@link boolean} to specify if this element could be hidden
+   */
+  public BaseWebElement(String cssSelector, boolean isHidden) {
+    this(By.cssSelector(cssSelector), isHidden);
   }
 
   /**
@@ -160,14 +180,24 @@ public abstract class BaseWebElement {
    * @param by the {@link By} locator to be used by this element
    */
   public BaseWebElement(By by) {
-    if (by instanceof By.ByXPath) {
-      log.warn(String.format("It is strongly recommended to use a CSS selector for element "
-          + "[%s] instead of XPATH when instantiating new Scaffold elements. Failure in "
-          + "using a CSS selector may hinder the availability of functionality on the "
-          + "element.", by));
-    }
-    this.setBy(by);
-    setWebElementWait();
+    this(by, null, false);
+  }
+
+  /**
+   * Create a new element using the supplied {@link By} locator and mark whether it is hidden. This
+   * does not call or invoke WebDriver in any way, nor does it try to find the element on a page. The
+   * element is used as a reference for use later. Once the element is set, we create a new
+   * {@link WebElementWait} for it.
+   * <p>
+   * Use this constructor when you'd like to locate an element with a {@link By} method different
+   * from {@link By#cssSelector(String)}. We strongly recommend using {@link
+   * #BaseWebElement(String)} in almost all cases.
+   *
+   * @param by the {@link By} locator to be used by this element
+   * @param isHidden a {@link boolean} to specify if this element could be hidden
+   */
+  public BaseWebElement(By by, boolean isHidden) {
+    this(by, null, isHidden);
   }
 
   /**
@@ -198,14 +228,29 @@ public abstract class BaseWebElement {
    * @param parentBy the {@link By} locator for the parent element
    */
   public BaseWebElement(By by, By parentBy) {
+    this(by, parentBy, false);
+  }
+
+  /**
+   * Creates a new element with a parent element using the supplied {@link By} locators for both
+   * elements. Useful when you want a more verbose element definition in context of your websites'
+   * DOM. The element is used as a reference for use later. Once the element is set, we create a new
+   * {@link WebElementWait} for it.
+   *
+   * @param by       the {@link By} locator to be used by this element
+   * @param parentBy the {@link By} locator for the parent element
+   * @param isHidden a {@link boolean} to specify if this element could be hidden
+   */
+  public BaseWebElement(By by, By parentBy, boolean isHidden) {
     if (by instanceof By.ByXPath || parentBy instanceof By.ByXPath) {
-      log.warn(String.format("It is strongly recommended to use a CSS selector for element "
-          + "parent [%s] and element child [%s] instead of XPATH when instantiating new "
-          + "Scaffold elements. Failure in using a CSS selector may hinder the availability "
-          + "of functionality on the element.", parentBy, by));
+      log.warn("It is strongly recommended to use a CSS selector for elements "
+              + "instead of XPATH when instantiating new Scaffold elements. Failure in using "
+              + "a CSS selector may hinder the availability "
+              + "of functionality on the element.");
     }
-    this.setBy(by);
-    this.setParentBy(parentBy);
+    this.by = by;
+    this.parentBy = parentBy;
+    this.isHidden = isHidden;
     setWebElementWait();
   }
 
@@ -468,7 +513,9 @@ public abstract class BaseWebElement {
             a decent amount of time to make sure the element is completely displayed prior to
             interacting with it.
              */
-      getWebElementWait().waitUntilDisplayed();
+      if (!isHidden) {
+        getWebElementWait().waitUntilDisplayed();
+      }
 
             /*
             If the parent by is not null, we should do two separate find element calls to respect

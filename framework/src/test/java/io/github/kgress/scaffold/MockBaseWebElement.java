@@ -45,6 +45,10 @@ public class MockBaseWebElement extends BaseWebElement {
         super(by, webElement);
     }
 
+    public MockBaseWebElement(By by, By parentBy, boolean isHidden) {
+        super(by, parentBy, isHidden);
+    }
+
     public MockBaseWebElement(By by, By parentBy, WebElement webElement) {
         super(by, parentBy, webElement);
     }

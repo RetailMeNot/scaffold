@@ -1,6 +1,7 @@
 package io.github.kgress.scaffold.webelements;
 
 import io.github.kgress.scaffold.BaseWebElement;
+import io.github.kgress.scaffold.WebElementWait;
 import io.github.kgress.scaffold.util.AutomationUtils;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -38,6 +39,18 @@ public class DateWebElement extends BaseWebElement {
     }
 
     /**
+     * Creates a new {@link DateWebElement} and mark whether the element is hidden. It is highly recommended using
+     * {@link By#cssSelector(String)} over another method, such as {@link By#xpath(String)}, in almost all cases as
+     * it can be less flaky and less reliant on DOM hierarchy.
+     *
+     * @param cssSelector the string value of the {@link By#cssSelector(String)}
+     * @param isHidden    a {@link boolean} to specify if this element could be hidden
+     */
+    public DateWebElement(String cssSelector, boolean isHidden) {
+        super(cssSelector, isHidden);
+    }
+
+    /**
      * Use this constructor when you'd like to locate an element with a {@link By} method different from
      * {@link By#cssSelector(String)}. We strongly recommend using {@link #DateWebElement(String cssSelector)}
      * in almost all cases.
@@ -50,6 +63,18 @@ public class DateWebElement extends BaseWebElement {
     }
 
     /**
+     * Use this constructor when you'd like to locate an element with a {@link By} method different from
+     * {@link By#cssSelector(String)} and mark whether the element is hidden. We strongly recommend using
+     * {@link #DateWebElement(String cssSelector)} in almost all cases.
+     *
+     * @param by       the {@link By} locator to be used by this element
+     * @param isHidden a {@link boolean} to specify if this element could be hidden
+     */
+    public DateWebElement(By by, boolean isHidden) {
+        super(by, isHidden);
+    }
+
+    /**
      * Use this constructor when you'd like to locate an element with a child and parent {@link By} together. Useful
      * when you want a more verbose element definition in context of your websites' DOM.
      *
@@ -59,6 +84,19 @@ public class DateWebElement extends BaseWebElement {
      */
     public DateWebElement(By by, By parentBy) {
         super(by, parentBy);
+    }
+
+    /**
+     * Use this constructor when you'd like to locate an element with a child and parent {@link By} together, and mark
+     * whether the element is hidden. Useful when you want a more verbose element definition in context of your
+     * websites' DOM.
+     *
+     * @param by       the {@link By} locator to be used by this element
+     * @param parentBy the {@link By} locator for the parent element
+     * @param isHidden a {@link boolean} to specify if this element could be hidden
+     */
+    public DateWebElement(By by, By parentBy, boolean isHidden) {
+        super(by, parentBy, isHidden);
     }
 
     /**

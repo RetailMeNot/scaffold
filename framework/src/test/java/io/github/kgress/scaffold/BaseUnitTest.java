@@ -177,6 +177,10 @@ public abstract class BaseUnitTest {
             super(by);
         }
 
+        public TestBaseWebElement(By by, By parentBy, boolean isHidden) {
+            super(by, parentBy, isHidden);
+        }
+
         public TestBaseWebElement(By by, By parentBy) {
             super(by, parentBy);
         }
