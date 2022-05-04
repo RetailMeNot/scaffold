@@ -3,11 +3,14 @@ package io.github.kgress.scaffold;
 import io.github.kgress.scaffold.environment.config.DesiredCapabilitiesConfigurationProperties;
 import java.util.HashMap;
 import java.util.Map;
+
+import io.github.kgress.scaffold.util.AutomationUtils;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -233,12 +236,37 @@ public class AutomationWait {
      * @return                      as {@link Boolean}
      */
     public Boolean waitUntilPageIsLoaded(Long setTempTimeout) {
+        return waitUntilPageIsLoaded(setTempTimeout, 0);
+    }
+
+    /**
+     * Recursive self terminating loop to catch "target frame detached" WebDriverExceptions.
+     *
+     * This exception gets thrown when trying to use the javascript executor between page loads and primarily affects
+     * the Chrome browser. After 5 attempts, it will rethrow the exception, in case it is an actual exception, ie.
+     * trying to interact with an object in an iframe after the iframe focus has been released.
+     *
+     * @param setTempTimeout        an option to temporarily set the timeout to a value other than what's set
+     *                              in the spring profile
+     * @param retryCount            counter for attempts
+     * @return                      as {@link Boolean}
+     */
+    Boolean waitUntilPageIsLoaded(Long setTempTimeout, int retryCount) {
         var domReadyStateScript = "return document.readyState";
-        return waitForCustomCondition(page -> getWebDriverWrapper()
-                .getJavascriptExecutor()
-                .executeScript(domReadyStateScript)
-                .equals("complete"),
-                setTempTimeout);
+        try {
+            return waitForCustomCondition(page -> getWebDriverWrapper()
+                            .getJavascriptExecutor()
+                            .executeScript(domReadyStateScript)
+                            .equals("complete"),
+                    setTempTimeout);
+        } catch (WebDriverException e) {
+            if (e.getMessage().contains("target frame detached") && retryCount < 5) {
+                AutomationUtils.sleep(200);
+                return waitUntilPageIsLoaded(setTempTimeout, ++retryCount);
+            } else {
+                throw(e);
+            }
+        }
     }
 
     /**

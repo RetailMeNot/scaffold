@@ -10,10 +10,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebDriverException;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 public class BasePageTests extends BaseUnitTest {
 
@@ -86,6 +88,28 @@ public class BasePageTests extends BaseUnitTest {
         var exception = assertThrows(TimeoutException.class, () ->
                 testBasePage.verifyIsOnPage_callProtectedMethod(mockDivWebElement));
         assertTrue(exception.getMessage().contains("The intended page failed to load"));
+    }
+
+    @Test
+    public void waitUntilPageIsLoaded_targetFrameDetachedThrowsAfterFiveTries() {
+        var spyAutomationWait = spy(new AutomationWait(mockWebDriverWrapper, 1L));
+        doThrow(new WebDriverException("target frame detached"))
+                .when(spyAutomationWait)
+                .waitForCustomCondition(any(), any());
+        assertThrows(WebDriverException.class, spyAutomationWait::waitUntilPageIsLoaded);
+    }
+
+    @Test
+    public void waitUntilPageIsLoaded_targetFrameDetachedDoesNotThrowUnderFiveTries() {
+        var spyAutomationWait = spy(new AutomationWait(mockWebDriverWrapper, 1L));
+        doThrow(new WebDriverException("target frame detached"))
+                .doThrow(new WebDriverException("target frame detached"))
+                .doThrow(new WebDriverException("target frame detached"))
+                .doThrow(new WebDriverException("target frame detached"))
+                .doReturn(true)
+                .when(spyAutomationWait)
+                .waitForCustomCondition(any(), any());
+        assertTrue(spyAutomationWait.waitUntilPageIsLoaded());
     }
 
     /**
