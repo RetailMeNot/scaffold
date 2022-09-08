@@ -19,7 +19,7 @@
         <java.version>11</java.version>
 
         <!--Spring-->
-        <org.springframework.boot.version>2.6.3</org.springframework.boot.version>
+        <org.springframework.boot.version>2.6.6</org.springframework.boot.version>
 
         <!--Core-->
         <com.jackson.version>2.13.0</com.jackson.version>
