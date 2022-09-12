@@ -1,5 +1,6 @@
 package io.github.kgress.scaffold;
 
+import static io.github.kgress.scaffold.util.AutomationUtils.getUnderlyingLocatorByString;
 import static java.util.logging.Level.SEVERE;
 import static java.util.logging.Level.WARNING;
 
@@ -15,16 +16,20 @@ import io.github.kgress.scaffold.webelements.ImageWebElement;
 import io.github.kgress.scaffold.webelements.InputWebElement;
 import io.github.kgress.scaffold.webelements.LinkWebElement;
 import io.github.kgress.scaffold.webelements.StaticTextWebElement;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.NoSuchElementException;
@@ -44,14 +49,14 @@ import org.openqa.selenium.logging.LogEntry;
  * this class and expand on functionality, such as {@link BaseClickableWebElement}. Mimics the same
  * functionality provided by {@link WebElement} but includes scaffold specific strong type support.
  * <p>
- * - {@link ButtonWebElement} - {@link CheckBoxWebElement} - {@link DateWebElement} - {@link
- * DivWebElement} - {@link DropDownWebElement} - {@link ImageWebElement} - {@link InputWebElement} -
- * {@link LinkWebElement} - {@link StaticTextWebElement}
+ * - {@link ButtonWebElement} - {@link CheckBoxWebElement} - {@link DateWebElement} -
+ * {@link DivWebElement} - {@link DropDownWebElement} - {@link ImageWebElement} -
+ * {@link InputWebElement} - {@link LinkWebElement} - {@link StaticTextWebElement}
  * <p>
- * Creating a new strong typed element with the provided constructors will never invoke a {@link
- * #getRawWebElement()} call. {@link #getRawWebElement()} is only ever invoked when a strong typed
- * element is interacted with. This means it's ideal for use as class variables in a page object to
- * increase the performance of page object instantiation.
+ * Creating a new strong typed element with the provided constructors will never invoke a
+ * {@link #getRawWebElement()} call. {@link #getRawWebElement()} is only ever invoked when a strong
+ * typed element is interacted with. This means it's ideal for use as class variables in a page
+ * object to increase the performance of page object instantiation.
  * <p>
  * Example scenario:
  * <pre>{@code
@@ -72,9 +77,9 @@ import org.openqa.selenium.logging.LogEntry;
  * them in methods instead of class variables. The key takeaway here is that you want to preserve
  * your page object instantiation to only memory references. Invoking the web driver will only slow
  * down your page instantiation if the element(s) you're trying to find in your variable don't
- * exist. When invoking it, your page will explicitly wait based on the {@link
- * DesiredCapabilitiesConfigurationProperties#setWaitTimeoutInSeconds(Long)} defined in your spring
- * profile.
+ * exist. When invoking it, your page will explicitly wait based on the
+ * {@link DesiredCapabilitiesConfigurationProperties#setWaitTimeoutInSeconds(Long)} defined in your
+ * spring profile.
  * <p>
  * Example scenario:
  * <pre>{@code
@@ -112,12 +117,12 @@ public abstract class BaseWebElement {
   protected By by;
 
   /**
-   * This is set during {@link #BaseWebElement(WebElement)}, {@link #BaseWebElement(By,
-   * WebElement)}, and {@link #BaseWebElement(By, By, WebElement)} and represents the raw selenium
-   * web element. When this is set, it completely bypasses {@link #getRawWebElement()}'s re-find
-   * logic. Therefore, it's possible when interacting with this element, you will encounter a {@link
-   * StaleElementReferenceException} since this is only a "last known found location" reference of
-   * the element in the DOM.
+   * This is set during {@link #BaseWebElement(WebElement)},
+   * {@link #BaseWebElement(By, WebElement)}, and {@link #BaseWebElement(By, By, WebElement)} and
+   * represents the raw selenium web element. When this is set, it completely bypasses
+   * {@link #getRawWebElement()}'s re-find logic. Therefore, it's possible when interacting with
+   * this element, you will encounter a {@link StaleElementReferenceException} since this is only a
+   * "last known found location" reference of the element in the DOM.
    * <p>
    * Usage of this variable and {@link #getRawWebElement()} are fundamentally the same.
    */
@@ -138,10 +143,10 @@ public abstract class BaseWebElement {
    * as a reference for use later. Once the element is set, we create a new {@link WebElementWait}
    * for it.
    * <p>
-   * The advantage of using this constructor is to reduce code count when using {@link
-   * By#cssSelector(String)} to instantiate your elements. It is highly recommended using {@link
-   * By#cssSelector(String)} over {@link By#xpath(String)} in almost all cases as it can be less
-   * flaky and less reliant on DOM hierarchy.
+   * The advantage of using this constructor is to reduce code count when using
+   * {@link By#cssSelector(String)} to instantiate your elements. It is highly recommended using
+   * {@link By#cssSelector(String)} over {@link By#xpath(String)} in almost all cases as it can be
+   * less flaky and less reliant on DOM hierarchy.
    *
    * @param cssSelector the string value of the {@link By#cssSelector(String)}
    */
@@ -150,18 +155,18 @@ public abstract class BaseWebElement {
   }
 
   /**
-   * Create a new element using the supplied {@link By#cssSelector(String)} and mark whether it is hidden.
-   * This does not call or invoke WebDriver in any way, nor does it try to find the element on a page.
-   * The element is used as a reference for use later. Once the element is set, we create a new
-   * {@link WebElementWait} for it.
+   * Create a new element using the supplied {@link By#cssSelector(String)} and mark whether it is
+   * hidden. This does not call or invoke WebDriver in any way, nor does it try to find the element
+   * on a page. The element is used as a reference for use later. Once the element is set, we create
+   * a new {@link WebElementWait} for it.
    * <p>
-   * The advantage of using this constructor is to reduce code count when using {@link
-   * By#cssSelector(String)} to instantiate your elements. It is highly recommended using {@link
-   * By#cssSelector(String)} over {@link By#xpath(String)} in almost all cases as it can be less
-   * flaky and less reliant on DOM hierarchy.
+   * The advantage of using this constructor is to reduce code count when using
+   * {@link By#cssSelector(String)} to instantiate your elements. It is highly recommended using
+   * {@link By#cssSelector(String)} over {@link By#xpath(String)} in almost all cases as it can be
+   * less flaky and less reliant on DOM hierarchy.
    *
    * @param cssSelector the string value of the {@link By#cssSelector(String)}
-   * @param isHidden a {@link boolean} to specify if this element could be hidden
+   * @param isHidden    a {@link boolean} to specify if this element could be hidden
    */
   public BaseWebElement(String cssSelector, boolean isHidden) {
     this(By.cssSelector(cssSelector), isHidden);
@@ -174,8 +179,8 @@ public abstract class BaseWebElement {
    * it.
    * <p>
    * Use this constructor when you'd like to locate an element with a {@link By} method different
-   * from {@link By#cssSelector(String)}. We strongly recommend using {@link
-   * #BaseWebElement(String)} in almost all cases.
+   * from {@link By#cssSelector(String)}. We strongly recommend using
+   * {@link #BaseWebElement(String)} in almost all cases.
    *
    * @param by the {@link By} locator to be used by this element
    */
@@ -185,15 +190,15 @@ public abstract class BaseWebElement {
 
   /**
    * Create a new element using the supplied {@link By} locator and mark whether it is hidden. This
-   * does not call or invoke WebDriver in any way, nor does it try to find the element on a page. The
-   * element is used as a reference for use later. Once the element is set, we create a new
+   * does not call or invoke WebDriver in any way, nor does it try to find the element on a page.
+   * The element is used as a reference for use later. Once the element is set, we create a new
    * {@link WebElementWait} for it.
    * <p>
    * Use this constructor when you'd like to locate an element with a {@link By} method different
-   * from {@link By#cssSelector(String)}. We strongly recommend using {@link
-   * #BaseWebElement(String)} in almost all cases.
+   * from {@link By#cssSelector(String)}. We strongly recommend using
+   * {@link #BaseWebElement(String)} in almost all cases.
    *
-   * @param by the {@link By} locator to be used by this element
+   * @param by       the {@link By} locator to be used by this element
    * @param isHidden a {@link boolean} to specify if this element could be hidden
    */
   public BaseWebElement(By by, boolean isHidden) {
@@ -244,9 +249,9 @@ public abstract class BaseWebElement {
   public BaseWebElement(By by, By parentBy, boolean isHidden) {
     if (by instanceof By.ByXPath || parentBy instanceof By.ByXPath) {
       log.warn("It is strongly recommended to use a CSS selector for elements "
-              + "instead of XPATH when instantiating new Scaffold elements. Failure in using "
-              + "a CSS selector may hinder the availability "
-              + "of functionality on the element.");
+          + "instead of XPATH when instantiating new Scaffold elements. Failure in using "
+          + "a CSS selector may hinder the availability "
+          + "of functionality on the element.");
     }
     this.by = by;
     this.parentBy = parentBy;
@@ -264,11 +269,11 @@ public abstract class BaseWebElement {
    * Creates a new Scaffold element with a raw {@link WebElement}. This is primarily used during
    * construction of elements in the {@link #findElements(Class, By)} method.
    * <p>
-   * When instantiating new elements with this constructor, There is a risk of a {@link
-   * StaleElementReferenceException} occurring when interacting with elements since {@link
-   * #getRawWebElement()} will return the {@link #baseElement} on being present. This means we are
-   * not re finding the element prior to interacting with it. Use this constructor at your own
-   * risk.
+   * When instantiating new elements with this constructor, There is a risk of a
+   * {@link StaleElementReferenceException} occurring when interacting with elements since
+   * {@link #getRawWebElement()} will return the {@link #baseElement} on being present. This means
+   * we are not re finding the element prior to interacting with it. Use this constructor at your
+   * own risk.
    *
    * @param webElement the {@link WebElement} being wrapped
    */
@@ -293,11 +298,11 @@ public abstract class BaseWebElement {
    * Creates a new Scaffold element with a raw {@link WebElement}. This is primarily used during
    * construction of elements in the {@link #findElements(Class, By)} method.
    * <p>
-   * When instantiating new elements with this constructor, There is a risk of a {@link
-   * StaleElementReferenceException} occurring when interacting with elements since {@link
-   * #getRawWebElement()} will return the {@link #baseElement} on being present. This means we are
-   * not re finding the element prior to interacting with it. Use this constructor at your own
-   * risk.
+   * When instantiating new elements with this constructor, There is a risk of a
+   * {@link StaleElementReferenceException} occurring when interacting with elements since
+   * {@link #getRawWebElement()} will return the {@link #baseElement} on being present. This means
+   * we are not re finding the element prior to interacting with it. Use this constructor at your
+   * own risk.
    *
    * @param by         the {@link By} locator to be used by this element
    * @param webElement the {@link WebElement} being wrapped
@@ -324,11 +329,11 @@ public abstract class BaseWebElement {
    * Creates a new Scaffold element with a raw {@link WebElement}. This is primarily used during
    * construction of elements in the {@link #findElements(Class, By)} method.
    * <p>
-   * When instantiating new elements with this constructor, There is a risk of a {@link
-   * StaleElementReferenceException} occurring when interacting with elements since {@link
-   * #getRawWebElement()} will return the {@link #baseElement} on being present. This means we are
-   * not re finding the element prior to interacting with it. Use this constructor at your own
-   * risk.
+   * When instantiating new elements with this constructor, There is a risk of a
+   * {@link StaleElementReferenceException} occurring when interacting with elements since
+   * {@link #getRawWebElement()} will return the {@link #baseElement} on being present. This means
+   * we are not re finding the element prior to interacting with it. Use this constructor at your
+   * own risk.
    *
    * @param by         the {@link By} locator to be used by this element
    * @param parentBy   the {@link By} locator to be used by the parent element
@@ -481,11 +486,14 @@ public abstract class BaseWebElement {
    * Gets the raw {@link WebElement}. This is invoked anytime a user interacts with a strongly typed
    * scaffold element. We will always explicitly wait for the element to be displayed prior to
    * returning. The timeout is defined by the {@link AutomationWait}, which the user sets in their
-   * spring profile with {@link DesiredCapabilitiesConfigurationProperties#setWaitTimeoutInSeconds(Long)}.
+   * spring profile with
+   * {@link DesiredCapabilitiesConfigurationProperties#setWaitTimeoutInSeconds(Long)}.
    * <p>
    * It's strongly recommend to always use Scaffold's strongly typed elements at all times. However,
    * there may be a situation where finding the raw {@link WebElement} is necessary. Use sparingly
-   * and efficiently!
+   * and efficiently! WebElement constructors have become deprecated, though, and we should warn the
+   * user to not use these anymore. They bypass core Scaffold functionality such as waiting for
+   * elements to be displayed, handling stale elements, etc.
    * <p>
    * In addition to finding the raw element, if an exception is encountered, we log errors from the
    * console. Useful for debugging.
@@ -494,11 +502,6 @@ public abstract class BaseWebElement {
    */
   public WebElement getRawWebElement() {
     try {
-            /*
-            WebElement constructors are deprecated, and we should warn the user to not use these
-            anymore. They bypass core Scaffold functionality such as waiting for elements to be
-            displayed, handling state elements, etc.
-             */
       if (getBaseElement() != null) {
         log.error(String.format("Usage of element [%s] with a WebElement constructor "
                 + "bypasses core Scaffold functionality and will result in unpredictable "
@@ -508,19 +511,10 @@ public abstract class BaseWebElement {
         return getBaseElement();
       }
 
-            /*
-            Always wait for the element to be displayed prior to finding it. This gives the caller
-            a decent amount of time to make sure the element is completely displayed prior to
-            interacting with it.
-             */
       if (!isHidden) {
         getWebElementWait().waitUntilDisplayed();
       }
 
-            /*
-            If the parent by is not null, we should do two separate find element calls to respect
-            the fact these two By locators might be of completely different types.
-             */
       if (getParentBy() != null) {
         log.debug(String.format("Locating element [%s] relative to parent element [%s]",
             getBy(), getParentBy()));
@@ -548,8 +542,9 @@ public abstract class BaseWebElement {
   }
 
   /**
-   * Scrolls an element into view. Due to an issue found on https://github.com/kgress/scaffold/issues/115,
-   * we updated the scroll to center align the element instead of top align.
+   * Scrolls an element into view. Due to an issue found on
+   * https://github.com/kgress/scaffold/issues/115, we updated the scroll to center align the
+   * element instead of top align.
    *
    * @return as {@link WebElement}
    */
@@ -566,10 +561,11 @@ public abstract class BaseWebElement {
    * constructor that sets the parent, like {@link BaseWebElement#BaseWebElement(By)}.
    * <p>
    * Fundamentally, this functionality convolutes the intended design of instantiating new elements
-   * on a page by introducing another failure point on the usage of an element that uses a {@link
-   * WebElement} in the constructor, such as {@link BaseWebElement#BaseWebElement(WebElement)}.
-   * Constructors that use {@link WebElement} completely bypass Scaffold provided magic and
-   * introduce unpredictable behavior, such as {@link StaleElementReferenceException}'s.
+   * on a page by introducing another failure point on the usage of an element that uses a
+   * {@link WebElement} in the constructor, such as
+   * {@link BaseWebElement#BaseWebElement(WebElement)}. Constructors that use {@link WebElement}
+   * completely bypass Scaffold provided magic and introduce unpredictable behavior, such as
+   * {@link StaleElementReferenceException}'s.
    * <p>
    * When instantiating new elements, use a {@link By} constructor on a Page Object. For example:
    * <pre>{@code
@@ -601,10 +597,30 @@ public abstract class BaseWebElement {
    * constructor that sets the parent, like {@link BaseWebElement#BaseWebElement(By)}.
    * <p>
    * Fundamentally, this functionality convolutes the intended design of instantiating new elements
-   * on a page by introducing another failure point on the usage of an element that uses a {@link
-   * WebElement} in the constructor, such as {@link BaseWebElement#BaseWebElement(WebElement)}.
-   * Constructors that use {@link WebElement} completely bypass Scaffold provided magic and
-   * introduce unpredictable behavior, such as {@link StaleElementReferenceException}'s.
+   * on a page by introducing another failure point on the usage of an element that uses a
+   * {@link WebElement} in the constructor, such as
+   * {@link BaseWebElement#BaseWebElement(WebElement)}. Constructors that use {@link WebElement}
+   * completely bypass Scaffold provided magic and introduce unpredictable behavior, such as
+   * {@link StaleElementReferenceException}'s.
+   * <p>
+   * Important: The if logic only considers a situation where a findElement call is being invoked on
+   * another element. In other words, creating a new instance of a strong typed element and
+   * performing a findElement from it. That means there are a total of 3 by locators potentially in
+   * use: - The parent and child By locators from the "parent element" - The By locator being passed
+   * in to the method from the caller, the "child element"
+   * <p>
+   * This logic does not directly take into account a scenario where this method is invoked from a
+   * class variable. I believe this scenario only is when users have created a custom web element
+   * that extends from a Scaffold strongly typed element, In situations like that, the following can
+   * be assumed: - This class's getParentBy() and getBy() likely will be null - This class's
+   * getParentBy() likely might not be null, and this class's getBy likely will be null
+   * <p>
+   * With the above assumptions, the logic is that because the combinedBy and the updateParentBy
+   * will likely be null, the code logic path will still default to returning a new element that is
+   * built with the WebElement.class constructor. We are moving away from creating elements in this
+   * way, which is why findElement() is deprecated and eventually will be set private in a future
+   * update. https://github.com/kgress/scaffold/issues/132 addresses this band aid to allow existing
+   * users the same functionality from before while we move towards the breaking code change.
    * <p>
    * When instantiating new elements, use a {@link By} constructor. For example: <pre>{@code
    * private final DivWebElement header = new DivWebElement(By.cssSelector(".header"));
@@ -647,30 +663,6 @@ public abstract class BaseWebElement {
     By combinedBy = null;
     By updatedParentBy = null;
 
-    /*
-    The below if logic only considers a situation where a findElement call is being invoked
-    on another element. In other words, creating a new instance of a strong typed element and
-    performing a findElement from it. That means there are a total of 3 by locators potentially
-    in use:
-      * The parent and child By locators from the "parent element"
-      * The By locator being passed in to the method from the caller, the "child element"
-
-    This logic does not directly take into account a scenario where this method is invoked
-    from a class variable. I believe this scenario only is when users have created a custom web
-    element that extends from a Scaffold strongly typed element, In situations like that, the
-    following can be assumed:
-      * This class's getParentBy() and getBy() likely will be null
-      * This class's getParentBy() likely might not be null, and this class's getBy likely will
-        be null
-
-    With the above assumptions, the logic is that because the combinedBy and the updateParentBy
-    will likely be null, the code logic path will still default to returning a new element that
-    is built with the WebElement.class constructor. We are moving away from creating elements in
-    this way, which is why findElement() is deprecated and eventually will be set private
-    in a future update. https://github.com/kgress/scaffold/issues/132 addresses this band aid
-    to allow existing users the same functionality from before while we move towards the
-    breaking code change.
-    */
     if (getParentBy() != null) {
       if (!(getParentBy() instanceof By.ByXPath) && !(getBy() instanceof By.ByXPath)) {
         combinedBy = combineByLocators(getParentBy(), by);
@@ -690,30 +682,31 @@ public abstract class BaseWebElement {
         var constructor = elementClass.getConstructor(By.class, By.class);
         returnElement = constructor.newInstance(by, updatedParentBy);
       } else {
-                /*
-                Worst case scenario here. We don't want a situation where the caller is
-                interacting with a scaffold element without a By locator.
-                */
         var constructor = elementClass.getConstructor(WebElement.class);
         var element = getRawWebElement().findElement(by);
         returnElement = constructor.newInstance(element);
       }
     } catch (NoSuchMethodException | InvocationTargetException | InstantiationException |
-        IllegalAccessException e) {
+             IllegalAccessException e) {
       throw new RuntimeException("Could not instantiate Element properly: " + e);
     }
     return returnElement;
   }
 
   /**
-   * Finds all elements on the current page and wraps it in a strongly typed scaffold element list.
+   * Finds a collection of child elements based on a parent element from the current page and wraps
+   * it up in a list of strongly typed Scaffold elements. To find the elements from the parent,
+   * invoke {@link #getRawWebElement()}'s {@link WebElement#findElements(By)} method. This will wait
+   * for the parent to first become visible prior to finding the elements. From there, we can
+   * deterministically return a list of appended {@link By} locators based on a xpath or CSS
+   * format.
    * <p>
-   * The advantage of using this method vs {@link #findElements(Class, By)} is to reduce code count
-   * when using {@link By#cssSelector(String)} to find your elements. It is advised to not invoke
-   * this method on the declaration of a class variable. When doing so, it will invoke {@link
-   * WebDriver#findElements(By)} which will reduce your Page Object instantiation. We also run the
-   * risk of encountering a {@link StaleElementReferenceException} since the {@link #baseElement} is
-   * being stored in the constructor.
+   * It is advised to not invoke this method on the declaration of a class variable. When doing so,
+   * it will invoke {@link WebDriver#findElements(By)} which may increase your Page Object
+   * instantiation time or cause a {@link TimeoutException}. Instead, invoke this inside a method on
+   * the page object. Additionally, you can wrap these found elements with
+   * {@link BaseComponent#buildComponentList(List, Class)}.
+   *
    * <p>
    * Example scenario:
    * <pre>{@code
@@ -728,18 +721,63 @@ public abstract class BaseWebElement {
    *              verifyIsOnPage(getUsernameInput(), getPasswordInput(), getSubmitButton());
    *          }
    *
+   *          // finds all immediate children from a parent
    *          public List&#60;LinkWebElement&#62; getLegaleseLinks() {
-   *              var legaleseLinks = "a";
-   *              return getLegaleseContainer().findElements(LinkWebElement.class, legaleseLinks");
+   *              var legaleseLinksSelector = #legaliseLink";
+   *              return getLegaleseContainer().findElements(LinkWebElement.class, legaleseLinksSelector, true");
    *          }
    *      }
    *  }
    *  </pre>
    *
-   * @param elementClass the class of the element that is being found
-   * @param cssSelector  the css selector of the element
-   * @param <T>          the type reference that extends {@link BaseWebElement}
-   * @return the list of elements as the specified Type Reference {@link BaseWebElement}
+   * @param elementClass the strong typed class of the element being found
+   * @param childBy      the mechanism of searching for the element
+   * @param <T>          The type reference that extends off of {@link BaseWebElement}
+   * @return the element as the specified Type Reference {@link BaseWebElement}
+   */
+  public <T extends BaseWebElement> List<T> findElements(Class<T> elementClass, By childBy,
+      boolean immediateRelationship) {
+    var elements = getRawWebElement().findElements(childBy);
+    if (elements.size() == 0) {
+      return List.of();
+    }
+
+    if (childBy instanceof By.ByXPath) {
+      return IntStream.range(0, elements.size())
+          .mapToObj(i -> createXPathChild(elementClass, childBy, i))
+          .collect(Collectors.toList());
+    } else {
+      if (immediateRelationship) {
+        final var immediateChildrenOfParent = getImmediateChildElements(this.getRawWebElement());
+        if (immediateChildrenOfParent.size() != elements.size()) {
+          return constructImmediateChildrenElements(elementClass, immediateChildrenOfParent,
+              childBy);
+        } else {
+          return IntStream.range(0, elements.size())
+              .mapToObj(i -> createCssSelectorChild(elementClass, childBy, elements,
+                  elements, i))
+              .filter(Objects::nonNull)
+              .collect(Collectors.toList());
+        }
+      } else {
+        final var siblingElementsOfElement = getAllSiblingElementsOfElement(elements.get(0));
+        return IntStream.range(0, siblingElementsOfElement.size())
+            .mapToObj(i -> createCssSelectorChild(elementClass, childBy, elements,
+                siblingElementsOfElement, i))
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
+      }
+    }
+  }
+
+  /**
+   * An overloaded method that will always find elements under the context of a deep dom search
+   * using a CSS selector.
+   *
+   * @param elementClass the scaffold strongly typed element class that must extend T
+   * @param cssSelector  the css selector that is being searched for
+   * @param <T>          the type reference of {@link BaseWebElement}
+   * @return as an element of {@link BaseWebElement}
    * @see #findElements(Class, By)
    */
   public <T extends BaseWebElement> List<T> findElements(Class<T> elementClass,
@@ -748,63 +786,23 @@ public abstract class BaseWebElement {
   }
 
   /**
-   * Finds a collection of child elements based on a parent element from the current page and wraps
-   * it up in a list of strongly typed Scaffold elements. It is advised to not invoke this method on
-   * the declaration of a class variable. When doing so, it will invoke {@link
-   * WebDriver#findElements(By)} which will reduce your Page Object instantiation. We also run the
-   * risk of encountering a {@link StaleElementReferenceException} since the {@link #baseElement} is
-   * being stored in the constructor.
-   * <p>
-   * Example scenario:
-   * <pre>{@code
-   *      &#64;Getter
-   *      public class LoginPage extends BasePage {
-   *          private final InputWebElement usernameInput = new InputWebElement("#username");
-   *          private final InputWebElement passwordInput = new InputWebElement("#password");
-   *          private final ButtonWebElement submitButton = new ButtonWebElement("#submit");
-   *          private final DivWebElement legaleseContainer = new DivWebElement("#legalese");
+   * An overloaded method that will always find elements under the context of a deep dom search.
    *
-   *          public LoginPage() {
-   *              verifyIsOnPage(getUsernameInput(), getPasswordInput(), getSubmitButton());
-   *          }
-   *
-   *          public List&#60;LinkWebElement&#62; getLegaleseLinks() {
-   *              var legaleseLinks = "a";
-   *              return getLegaleseContainer().findElements(LinkWebElement.class, legaleseLinks");
-   *          }
-   *      }
-   *  }
-   *  </pre>
-   *
-   * @param elementClass the strong typed class of the element being found
-   * @param by           the mechanism of searching for the element
-   * @param <T>          The type reference that extends off of {@link BaseWebElement}
-   * @return the element as the specified Type Reference {@link BaseWebElement}
+   * @param elementClass the scaffold strongly typed element class that must extend T
+   * @param by           the {@link By} locator for the element
+   * @param <T>          the type reference of {@link BaseWebElement}
+   * @return as an element of {@link BaseWebElement}
+   * @see #findElements(Class, By, boolean)
    */
   public <T extends BaseWebElement> List<T> findElements(Class<T> elementClass, By by) {
-    /*
-    Performs a find element first on this By (which waits for the element to be displayed),
-    and then performs findElements() with the caller's by as the child.
-     */
-    List<WebElement> elements = getRawWebElement().findElements(by);
-    if (elements.size() == 0) {
-      return List.of();
-    }
-
-    if (by instanceof By.ByXPath) {
-      return IntStream.range(0, elements.size())
-          .mapToObj(i -> createXPathChild(elementClass, by, i))
-          .collect(Collectors.toList());
-    } else {
-      final var siblingElementsOfElement = getAllSiblingElementsOfElement(elements.get(0));
-      return IntStream.range(0, siblingElementsOfElement.size())
-          .mapToObj(i -> createCssSelectorChild(elementClass, by, elements,
-              siblingElementsOfElement, i))
-          .filter(Objects::nonNull)
-          .collect(Collectors.toList());
-    }
+    return findElements(elementClass, by, false);
   }
 
+  /**
+   * A custom implementation of toString() that overrides the objects default.
+   *
+   * @return as {@link String}
+   */
   public String toString() {
     /*
     This will be built according to what we have available to us--there's a small chance it
@@ -855,6 +853,44 @@ public abstract class BaseWebElement {
   }
 
   /**
+   * Checks an underlying {@link By} locator to determine its attribute type. Currently, only
+   * supports checking for class, id, or a custom attribute such as a data-qe attribute. We can
+   * expand upon this at a later time, but for now is crucial for an immediate fix on
+   * {@link #findElements(Class, By, boolean)}, https://github.com/kgress/scaffold/issues/147.
+   * <p>
+   * The check for class and ID is pretty straight forward. We can substring out just the first
+   * character from the locator, check if it's a period or pound sign, and then return either class
+   * or id, respectively. Custom attributes are also straight forward, but require an additional
+   * substring. We first use {@link StringUtils#substringBefore(String, String)} to remove every
+   * character after the equals sign. Then, we remove the opening brackets from the first character,
+   * and return the final result.
+   * <p>
+   * // TODO we need to expand on this feature by also including other attribute types
+   *
+   * @param by the {@link By} locator of the element we are checking
+   * @return the attribute type as a {@link String} value
+   */
+  private String determineAttributeTypeAsString(By by) {
+    final var byLocatorAsString = AutomationUtils.getUnderlyingLocatorByString(by);
+    final var firstCharacter = byLocatorAsString.substring(0, 1);
+    String attributeTypeAsString = "";
+
+    if (firstCharacter.contains(".")) {
+      attributeTypeAsString = "class";
+    } else if (firstCharacter.contains("#")) {
+      attributeTypeAsString = "id";
+    } else if (firstCharacter.contains("[")) {
+      var locatorBeforeEqualsSign = StringUtils.substringBefore(byLocatorAsString, "=");
+      return locatorBeforeEqualsSign.substring(1);
+    } else {
+      throw new RuntimeException(String.format(
+          "Could not determine the attribute type of the element: [%s]", by));
+    }
+
+    return attributeTypeAsString;
+  }
+
+  /**
    * Combines the {@link By} locators of a parent and a child into a single locator. When combining,
    * we need to make sure the combined locator is of the same type, where type = ofCSS or XPATH.
    * ofCSS is a type that can be converted into a CSS selector, like tag, id, name, etc. XPATH only
@@ -900,7 +936,9 @@ public abstract class BaseWebElement {
    * @return a new instance of type T
    */
   private <T extends BaseWebElement> T createCssSelectorChild(Class<T> elementClass, By by,
-      List<WebElement> elements, List<WebElement> siblingElementsByTag, int i) {
+      List<WebElement> elements,
+      List<WebElement> siblingElementsByTag,
+      int i) {
     if (elements.contains(siblingElementsByTag.get(i))) {
       final By newElementSelector = createElementSelector(
           determineCombinedBy(getBy(), getParentBy(), by),
@@ -911,10 +949,6 @@ public abstract class BaseWebElement {
           final var constructor = elementClass.getConstructor(By.class);
           return constructor.newInstance(newElementSelector);
         } else {
-          /*
-          Worst case scenario here. We don't want a situation where the caller is
-          interacting with a scaffold element without a By locator.
-           */
           final var constructor = elementClass.getConstructor(WebElement.class);
           return constructor.newInstance(elements.get(i));
         }
@@ -926,24 +960,102 @@ public abstract class BaseWebElement {
   }
 
   /**
+   * A helper method that will construct a list of elements with a {@link By} locator that are
+   * immediate children of a parent. This method will only be invoked if the size of elements found
+   * from a parent source differs from the size of all immediate children from a parent source.
+   * <p>
+   * To properly construct the elements with the correct nth:child tags in this situation, we need
+   * to iterate through each of the immediate children and check if their {@link By} locator matches
+   * the {@link By} locator we are looking for. First, determine the attribute type of the
+   * underlying locator by parsing it's first character. I.E, if it's a class, the underlying
+   * locator would lead with a period. If it's an ID, the underlying locator would lead with a pound
+   * sign. Once the attribute type is established, we can then pull the value from the attribute and
+   * check each element from the list of immediate children elements to ensure their attribute
+   * contains the locator we care about. If it does, add it to the list with the correct index
+   * appended for the nth-child. If not, skip and do not include in the list.
+   *
+   * @param elementClass              the class of the element, extended off of the type reference
+   * @param immediateChildrenOfParent the list of elements that have an immediate child relationship
+   *                                  to the parent
+   * @param <T>                       the type reference of {@link BaseWebElement}
+   * @return as a list of elements that extend from {@link BaseWebElement}
+   */
+  private <T extends BaseWebElement> List<T> constructImmediateChildrenElements(
+      Class<T> elementClass,
+      List<WebElement> immediateChildrenOfParent,
+      By childBy) {
+    var finalElementList = new ArrayList<T>();
+    var index = new AtomicInteger();
+    immediateChildrenOfParent.forEach(element -> {
+      final var attributeType = determineAttributeTypeAsString(by);
+      final var elementAttributeValue = element.getAttribute(attributeType);
+
+      Constructor<T> constructor;
+      T returnElement;
+
+      try {
+        By finalByLocator;
+        var formattedLocator = getFormattedUnderlyingCssLocatorByString(childBy);
+        if (elementAttributeValue.contains(formattedLocator)) {
+          finalByLocator = createElementSelector(childBy, index.get());
+          constructor = elementClass.getConstructor(By.class);
+          returnElement = constructor.newInstance(finalByLocator);
+          finalElementList.add(returnElement);
+        }
+      } catch (NoSuchMethodException | InvocationTargetException |
+               InstantiationException | IllegalAccessException e) {
+        throw new RuntimeException(e);
+      }
+      index.getAndIncrement();
+    });
+    return finalElementList;
+  }
+
+  /**
+   * Helper method that will get an underlying locator and format it for comparing against an
+   * element attribute from {@link #constructImmediateChildrenElements(Class, List, By)}. In the
+   * future, we should update this method to encompass other types of css selectors.
+   * <p>
+   * // todo we need to update this later to account for situations we're not using class, id, or
+   * custom data attributes
+   *
+   * @param by the {@link By} locator's underlying locator we're formatting
+   * @return as {@link String}
+   */
+  private String getFormattedUnderlyingCssLocatorByString(By by) {
+    var underlyingLocator = getUnderlyingLocatorByString(by);
+    var firstCharacter = underlyingLocator.substring(0, 1);
+
+    if (firstCharacter.contains(".") || firstCharacter.contains("#")) {
+      return underlyingLocator.substring(1);
+    } else if (firstCharacter.contains("[")) {
+      var substrBetween = StringUtils.substringBetween(underlyingLocator, "=", "]");
+      return StringUtils.replace(substrBetween, "'", "");
+    } else {
+      throw new RuntimeException(String.format(
+          "Could not determine the attribute type of the underlying locator to format: [%s]", by));
+    }
+  }
+
+  /**
    * A pure function that encapsulates the logic to determine what the base {@link By} selector for
    * the children elements.
    *
    * @param elementRootSelector the child root {@link By} selector as determined by
-   *    {@link #determineCombinedBy(By, By, By)}
-   * @param elementIndex the index of the rawElement found with {@link WebElement#findElements(By)}
-   *
-   * @return a new By selector to create elements that are children under the element that
-   *         performed the findElements query.
+   *                            {@link #determineCombinedBy(By, By, By)}
+   * @param elementIndex        the index of the rawElement found with
+   *                            {@link WebElement#findElements(By)}
+   * @return a new By selector to create elements that are children under the element that performed
+   * the findElements query.
    */
   private By createElementSelector(By elementRootSelector, int elementIndex) {
     if (elementRootSelector instanceof By.ByXPath) {
       return By.xpath(String.format("%s[%s]",
-          AutomationUtils.getUnderlyingLocatorByString(elementRootSelector),
+          getUnderlyingLocatorByString(elementRootSelector),
           elementIndex + 1));
     } else {
       return By.cssSelector(String.format("%s:nth-child(%s)",
-          AutomationUtils.getUnderlyingLocatorByString(elementRootSelector),
+          getUnderlyingLocatorByString(elementRootSelector),
           elementIndex + 1));
     }
   }
@@ -973,30 +1085,28 @@ public abstract class BaseWebElement {
   /**
    * A pure function that encapsulates the logic to determine parent selector for the children
    * elements that need to be instantiated.
+   * <p>
+   * The current By of the instance becomes the new parent, and the By passed in by the caller is
+   * the new child. This will happen in the event the strongly typed element is not instantiated
+   * with a parentBy locator using the (By, By) constructor.
+   * <p>
+   * If the parentBy is already set on this class, and it differs from the By passed in, create a
+   * new variable that defines this classes By as the parent, and the By from the caller as the
+   * child.
+   * <p>
+   * In either of these two cases, if those By locators are of type CSS, we should go ahead and
+   * combine them. Otherwise, if any of these By locators are XPATH, we need to invoke
+   * getRawWebElement to perform two find element calls, one for the parent and one for the parent +
+   * child.
    *
-   * @param selfSelector the {@link By} selector referenced by {@link #by}
+   * @param selfSelector       the {@link By} selector referenced by {@link #by}
    * @param selfParentSelector the {@link By} selector referenced by {@link #parentBy}
-   * @param queriedSelector the {@link By} selector passed in as argument to
-   *    {@link #findElements(Class, By)}
-   *
+   * @param queriedSelector    the {@link By} selector passed in as argument to
+   *                           {@link #findElements(Class, By)}
    * @return a instance of a {@link By} selector that is the combined selector of {@link #by} and
-   *    {@link #parentBy}
+   * {@link #parentBy}
    */
   private By determineCombinedBy(By selfSelector, By selfParentSelector, By queriedSelector) {
-    /*
-    The current By of the instance becomes the new parent, and the By passed in by the caller
-    is the new child. This will happen in the event the strongly typed element is not
-    instantiated with a parentBy locator using the (By, By) constructor.
-
-    If the parentBy is already set on this class, and it differs from the By
-    passed in, create a new variable that defines this classes By as the parent, and the By
-    from the caller as the child.
-
-    In either of these two cases, if those By locators are of type CSS, we should go ahead
-    and combine them. Otherwise, if any of these By locators are XPATH, we need to invoke
-    getRawWebElement to perform two find element calls, one for the parent and one for the
-    parent + child.
-    */
     if (queriedSelector instanceof By.ByXPath) {
       return queriedSelector;
     } else if (selfParentSelector != null) {
@@ -1017,7 +1127,7 @@ public abstract class BaseWebElement {
    * same type as the provided {@link WebElement}.  The purpose is correctly index the pseudo class
    * nth-child when create the actual requested elements.
    *
-   * @param webElement  The element to use, to retrieve all possible siblings
+   * @param webElement The element to use, to retrieve all possible siblings
    * @return A list of all possible siblings that match the tag of the provided {@link WebElement}.
    */
   private List<WebElement> getAllSiblingElementsOfElement(WebElement webElement) {
@@ -1032,6 +1142,18 @@ public abstract class BaseWebElement {
   }
 
   /**
+   * Finds all immediate child elements from a provided parent element. Useful when determining
+   * nth-child appending on {@link #findElements(Class, By, boolean)} for immediate parent/child
+   * relationship elements.
+   *
+   * @param parent the parent {@link WebElement} being used to check for immediate children
+   * @return as a list of {@link WebElement}s immediately under the parent
+   */
+  private List<WebElement> getImmediateChildElements(WebElement parent) {
+    return parent.findElements(By.xpath("./*"));
+  }
+
+  /**
    * Returns the "full" By locator used for this element. If the element has a "parent" defined, it
    * will return the locator used
    *
@@ -1040,8 +1162,8 @@ public abstract class BaseWebElement {
    * @return the locator as a {@link By}
    */
   private String getCombinedByLocatorAsString(By parentBy, By childBy) {
-    return String.format("%s %s", AutomationUtils.getUnderlyingLocatorByString(parentBy),
-        AutomationUtils.getUnderlyingLocatorByString(childBy));
+    return String.format("%s %s", getUnderlyingLocatorByString(parentBy),
+        getUnderlyingLocatorByString(childBy));
   }
 
   /**
@@ -1051,7 +1173,7 @@ public abstract class BaseWebElement {
    * @return as {@link By}
    */
   private By convertIsOfCssByToCssSelector(By by) {
-    var locator = AutomationUtils.getUnderlyingLocatorByString(by);
+    var locator = getUnderlyingLocatorByString(by);
 
     if (by instanceof By.ByCssSelector) {
       return by;

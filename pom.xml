@@ -19,10 +19,10 @@
         <java.version>11</java.version>
 
         <!--Spring-->
-        <org.springframework.boot.version>2.6.6</org.springframework.boot.version>
+        <org.springframework.boot.version>2.7.3</org.springframework.boot.version>
 
         <!--Core-->
-        <com.jackson.version>2.13.0</com.jackson.version>
+        <com.jackson.version>2.13.4</com.jackson.version>
         <org.apache.commons.lang3.version>3.12.0</org.apache.commons.lang3.version>
         <org.apache.httpclient.version>4.5.13</org.apache.httpclient.version>
         <org.hamcrest.hamcrest-library.version>2.2</org.hamcrest.hamcrest-library.version>
