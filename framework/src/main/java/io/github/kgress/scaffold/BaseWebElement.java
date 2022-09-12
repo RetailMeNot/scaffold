@@ -730,8 +730,11 @@ public abstract class BaseWebElement {
    *  }
    *  </pre>
    *
-   * @param elementClass the strong typed class of the element being found
-   * @param childBy      the mechanism of searching for the element
+   * @param elementClass          the strong typed class of the element being found
+   * @param childBy               the mechanism of searching for the element
+   * @param immediateRelationship controls whether we search for elements that have an
+   *                              immediate parent/child relationship (structured in the dom) or
+   *                              if doing a deep dom search
    * @param <T>          The type reference that extends off of {@link BaseWebElement}
    * @return the element as the specified Type Reference {@link BaseWebElement}
    */
