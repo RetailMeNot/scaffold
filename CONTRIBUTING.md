@@ -79,14 +79,14 @@ h1. A/C
 ## Submitting Work
 Interested in fixing a bug or adding/updating a feature? Thank you! Your contributions are incredibly valuable to our community. Please follow the below development process for submitting your PR to our repo.
 
-1. Fork the repository and create your branch from master.
+1. Fork the repository and create your branch from main.
 2. Do the work! 
 3. *Add Tests!* It's imperative we maintain a high confidence in the code we're outputting. If there are no tests included in the PR, there won't be a merge. The only exception to this is if the work done was not code related.
 4. Run a `mvn clean install` to ensure everything compiles and the tests pass.
 5. Squash your commits to a single commit and make the commit message the title of the ticket.
-6. Create a Pull Request with your forked repo against the core repo's `master` branch.
+6. Create a Pull Request with your forked repo against the core repo's `main` branch.
 7. Review process 
-8. Code merged into master
+8. Code merged into main
 9. +100 points to awesomeness for contributing!
 
 ## License

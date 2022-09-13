@@ -525,7 +525,7 @@ The spring profiles should live under the resources package in the environment m
 
 ##### Desired Capabilities
 Desired Capabilities are browser options that you can set for your instance of WebDriver. Scaffold uses this concept for settings on the browser
-and other options, like Sauce a sauce or mobile emulator configuration. To set the `DesiredCapabilites`, include pre configured properties from the `DesiredCapabilitiesConfigurationProperties` file. A full list of these properties [can be found at the following link](https://github.com/kgress/scaffold/blob/master/environment/src/main/java/com/kgress/scaffold/environment/config/DesiredCapabilitiesConfigurationProperties.java).
+and other options, like Sauce a sauce or mobile emulator configuration. To set the `DesiredCapabilites`, include pre configured properties from the `DesiredCapabilitiesConfigurationProperties` file. A full list of these properties [can be found at the following link](https://github.com/kgress/scaffold/blob/main/environment/src/main/java/com/kgress/scaffold/environment/config/DesiredCapabilitiesConfigurationProperties.java).
 All of these properties are preceded by the prefix of `desired-capabilities`. So, for example, if you wish to define the run type of sauce, you'd enter `desired-capabilities.run-type=sauce`. Because Scaffold includes an
 auto configuration for these properties, you gain the benefit of auto complete, as well. Simply type the first few letters of the word `desired` will show you a list of capabilities that can be set.
 

@@ -1,9 +1,9 @@
-# Main deployment workflow for github actions. Only initiate a deployment after a merge commit against master is detected.
+# Main deployment workflow for github actions. Only initiate a deployment after a merge commit against main is detected.
 name: Deploy
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   build-and-test:
