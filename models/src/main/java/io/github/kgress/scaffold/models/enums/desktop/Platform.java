@@ -15,10 +15,12 @@ public enum Platform {
   WINDOWS_8("Windows 8"),
   WINDOWS_8_1("Windows 8.1"),
   WINDOWS_10("Windows 10"),
+  WINDOWS_11("Windows 11"),
   XP("XP"),
   Vista("VISTA"),
   Mac("MAC"),
   Monterey("macOS 12"),
+  Ventura("macOS 13"),
   Linux("LINUX"),
   Unix("UNIX");
 
