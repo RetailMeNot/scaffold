@@ -29,4 +29,4 @@ CI jobs can be viewed on [github actions](https://github.com/kgress/scaffold/act
 
 # Getting Started
 * For manual setup, view the [Usage Guide](docs/USAGE_GUIDE.md) for a complete explanation on how to get started.
-* For an automated setup, our Scaffold Archetype is the best approach. However, it is under an update process and is not considered a "stable" state. Once this has been updated, we will update this doc with the instructions! 
+* For an automated setup, our Scaffold Archetype is the best approach. Check out that repo for more information, [here](https://github.com/kgress/scaffold-archetype). 
