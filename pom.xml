@@ -18,6 +18,9 @@
         <!--Java Related-->
         <java.version>11</java.version>
 
+        <!--Misc Variables-->
+        <sonatype.base-uri>https://s01.oss.sonatype.org</sonatype.base-uri>
+
         <!--Spring-->
         <org.springframework.boot.version>2.7.3</org.springframework.boot.version>
 
@@ -84,11 +87,11 @@
     <distributionManagement>
         <snapshotRepository>
             <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <url>${sonatype.base-uri}/content/repositories/snapshots</url>
         </snapshotRepository>
         <repository>
             <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+            <url>${sonatype.base-uri}/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
 
@@ -520,7 +523,7 @@
                         <extensions>true</extensions>
                         <configuration>
                             <serverId>ossrh</serverId>
-                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                            <nexusUrl>${sonatype.base-uri}/</nexusUrl>
                             <detectBuildFailures>true</detectBuildFailures>
                             <autoReleaseAfterClose>true</autoReleaseAfterClose>
                         </configuration>
